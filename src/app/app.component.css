@@ -1,0 +1,292 @@
+/* Fond et styles généraux */
+:host {
+  background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)),
+              url('https://images.unsplash.com/photo-1556056504-5c7696c4c28d?ixlib=rb-1.2.1&auto=format&fit=crop&w=1920&q=80') no-repeat center center fixed;
+  min-height: 100vh;
+  display: block;
+}
+
+.container {
+  max-width: 1000px;
+  background-color: rgba(255, 255, 255, 0.95);
+  border-radius: 15px;
+  padding: 2rem;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+  margin-top: 2rem !important;
+}
+
+h1 {
+  color: #2c3e50;
+  text-align: center;
+  font-weight: bold;
+  margin-bottom: 2rem;
+  text-transform: uppercase;
+  border-bottom: 3px solid #3498db;
+  padding-bottom: 1rem;
+}
+
+/* Style des boutons */
+.btn-primary {
+  background-color: #3498db;
+  border: none;
+  text-transform: uppercase;
+  font-weight: bold;
+  transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+  background-color: #2980b9;
+  transform: translateY(-2px);
+}
+
+/* Style des matchs */
+.match-details {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-radius: 10px;
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+  transition: all 0.3s ease;
+}
+
+.match-details:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.match-score {
+  font-size: 1.5em;
+  margin-bottom: 1rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+}
+
+.team-name {
+  font-weight: 600;
+  color: #2c3e50;
+  text-transform: uppercase;
+}
+
+.score {
+  background-color: #3498db;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 5px;
+  font-weight: bold;
+}
+
+/* Style de la modal */
+.score-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.score-modal-content {
+  width: 95%;
+  max-width: 1200px;
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  border-radius: 15px;
+  padding: 2rem;
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.2);
+  margin: auto;
+  overflow-y: auto;
+  max-height: 90vh;
+}
+
+/* Style des formulaires */
+.form-control, .form-select {
+  border-radius: 8px;
+  border: 2px solid #e9ecef;
+  transition: all 0.3s ease;
+}
+
+.form-control:focus, .form-select:focus {
+  border-color: #3498db;
+  box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+}
+
+/* Style des buteurs */
+.buteurs-list {
+  background-color: #f8f9fa;
+  border-radius: 10px;
+  padding: 1rem;
+}
+
+.list-group-item {
+  border-left: 4px solid #3498db;
+  margin-bottom: 0.5rem;
+  border-radius: 5px;
+  transition: all 0.3s ease;
+}
+
+.list-group-item:hover {
+  background-color: #f8f9fa;
+  transform: translateX(5px);
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.match-details {
+  animation: fadeIn 0.5s ease-out;
+}
+
+/* Style responsive */
+@media (max-width: 768px) {
+  .container {
+    margin: 1rem;
+    padding: 1rem;
+  }
+
+  .match-score {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+}
+
+/* Ajouter ces styles */
+.player-badges {
+  padding: 10px;
+  background-color: rgba(248, 249, 250, 0.5);
+  border-radius: 8px;
+  margin-bottom: 1rem;
+}
+
+.player-badges button {
+  border-radius: 20px;
+  font-size: 0.9em;
+  padding: 4px 12px;
+  transition: all 0.2s ease;
+}
+
+.player-badges button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+/* Style pour l'affichage du score dans la modal */
+.match-score-display {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-radius: 10px;
+  padding: 1rem;
+  text-align: center;
+  border: 2px solid #3498db;
+}
+
+.match-score-display .match-score {
+  font-size: 1.8em;
+  margin: 0;
+}
+
+.match-score-display .score {
+  font-size: 1.2em;
+  margin: 0 2rem;
+}
+
+/* Style pour les équipes dans la liste des buteurs */
+.buteur-equipe1 {
+  color: #3498db;  /* Bleu pour l'équipe 1 */
+  font-weight: bold;
+}
+
+.buteur-equipe2 {
+  color: #27ae60;  /* Vert pour l'équipe 2 */
+  font-weight: bold;
+}
+
+/* Style pour les badges des joueurs */
+.player-badges-team1 button {
+  border-color: #3498db;
+  color: #3498db;
+}
+
+.player-badges-team1 button:hover {
+  background-color: #3498db;
+  color: white;
+}
+
+.player-badges-team2 button {
+  border-color: #27ae60;
+  color: #27ae60;
+}
+
+.player-badges-team2 button:hover {
+  background-color: #27ae60;
+  color: white;
+}
+
+/* Style pour les titres des équipes */
+.team-title-1 {
+  color: #3498db;
+  border-bottom: 2px solid #3498db;
+  padding-bottom: 0.5rem;
+}
+
+.team-title-2 {
+  color: #27ae60;
+  border-bottom: 2px solid #27ae60;
+  padding-bottom: 0.5rem;
+}
+
+/* Style pour la liste des buteurs dans les matchs */
+.match-scorers {
+  margin: 1rem auto;
+  padding: 0.5rem;
+  background-color: rgba(248, 249, 250, 0.5);
+  border-radius: 8px;
+  width: 90%;
+  max-width: 900px;
+}
+
+.team-scorers {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  position: relative;
+}
+
+/* Ligne verticale de séparation */
+.team-scorers::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+.scorers-column {
+  padding: 0 1rem;
+}
+
+.scorers-column.left {
+  text-align: right;
+}
+
+.scorers-column.right {
+  text-align: left;
+}
+
+.scorers-column div {
+  margin: 0.2rem 0;
+  font-size: 0.9em;
+  white-space: nowrap;
+}
+
+.text-end {
+  text-align: right;
+}
