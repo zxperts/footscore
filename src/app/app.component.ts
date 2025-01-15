@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, FormArray } from '@angular/forms';
 import { Match, Buteur } from './models/match.model';
 import { ReactiveFormsModule } from '@angular/forms';
@@ -13,7 +13,7 @@ import { FormsModule } from '@angular/forms';
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
-export class AppComponent {
+export class AppComponent implements OnInit {
   matchForm: FormGroup;
   scoreForm: FormGroup;
   buteurForm: FormGroup;
@@ -47,6 +47,11 @@ export class AppComponent {
     });
   }
 
+  ngOnInit() {
+    this.loadSavedData();
+    this.startAutoSave();
+  }
+
   getCurrentDateTime(): string {
     const now = new Date();
     // Ajuster pour le fuseau horaire local
@@ -69,6 +74,7 @@ export class AppComponent {
         buteurs: []
       };
       this.matches.push(newMatch);
+      this.saveData();
       this.matchForm.reset({
         heureDebut: this.getCurrentDateTime()
       });
@@ -196,6 +202,7 @@ export class AppComponent {
         this.buteurForm.reset();
         this.editingButeur = null;
         this.showButeurForm = false;
+        this.saveData();
       }
     }
   }
@@ -230,6 +237,7 @@ export class AppComponent {
     
     // Supprimer le buteur
     match.buteurs.splice(buteurIndex, 1);
+    this.saveData();
   }
 
   getPlayersList(): string[] {
@@ -307,7 +315,58 @@ export class AppComponent {
         } else {
           this.matches[index].score2++;
         }
+        this.saveData();
       }
     }
+  }
+
+  supprimerMatch(match: Match) {
+    if (confirm('Êtes-vous sûr de vouloir supprimer ce match ?')) {
+      const index = this.matches.findIndex(m => m.id === match.id);
+      if (index !== -1) {
+        this.matches.splice(index, 1);
+        this.saveData();
+      }
+    }
+  }
+
+  // Charger les données sauvegardées
+  private loadSavedData() {
+    const savedData = localStorage.getItem('footballMatches');
+    if (savedData) {
+      const data = JSON.parse(savedData);
+      const expirationDate = new Date(data.expirationDate);
+      
+      // Vérifier si les données n'ont pas expiré (3 mois)
+      if (expirationDate > new Date()) {
+        this.matches = data.matches.map((match: any) => ({
+          ...match,
+          heureDebut: new Date(match.heureDebut)
+        }));
+      } else {
+        // Supprimer les données expirées
+        localStorage.removeItem('footballMatches');
+      }
+    }
+  }
+
+  // Sauvegarder les données
+  private saveData() {
+    // Calculer la date d'expiration (3 mois à partir de maintenant)
+    const expirationDate = new Date();
+    expirationDate.setMonth(expirationDate.getMonth() + 3);
+
+    const dataToSave = {
+      matches: this.matches,
+      expirationDate: expirationDate.toISOString()
+    };
+
+    localStorage.setItem('footballMatches', JSON.stringify(dataToSave));
+  }
+
+  // Configurer la sauvegarde automatique
+  private startAutoSave() {
+    // Sauvegarder toutes les 30 secondes
+    setInterval(() => this.saveData(), 30000);
   }
 }

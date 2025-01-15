@@ -110,9 +110,14 @@
             <span *ngIf="match.lieu">{{ match.lieu }}</span>
           </div>
           
-          <button class="btn btn-sm btn-outline-primary mt-2" (click)="selectMatch(match)">
-            Modifier le score
-          </button>
+          <div class="match-actions mt-2">
+            <button class="btn btn-sm btn-outline-primary me-2" (click)="selectMatch(match)">
+              Modifier le score
+            </button>
+            <button class="btn btn-sm btn-outline-danger" (click)="supprimerMatch(match)">
+              Supprimer le match
+            </button>
+          </div>
         </div>
       </div>
     </div>
