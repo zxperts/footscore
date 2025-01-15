@@ -147,13 +147,123 @@ h1 {
 /* Style responsive */
 @media (max-width: 768px) {
   .container {
-    margin: 1rem;
+    margin: 0.5rem;
     padding: 1rem;
+    width: 95%;
+  }
+
+  h1 {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
   }
 
   .match-score {
     flex-direction: column;
     gap: 0.5rem;
+    font-size: 1.2em;
+  }
+
+  .score-modal-content {
+    width: 98%;
+    padding: 1rem;
+    margin: 0.5rem;
+  }
+
+  .team-scorers {
+    gap: 1rem;
+  }
+
+  .scorers-column {
+    padding: 0 0.5rem;
+    font-size: 0.85em;
+  }
+
+  .player-badges button {
+    font-size: 0.8em;
+    padding: 3px 8px;
+    margin: 0.2rem;
+  }
+
+  .list-group-item {
+    padding: 0.5rem;
+  }
+
+  .list-group-item .btn {
+    padding: 0.2rem 0.5rem;
+    font-size: 0.8rem;
+  }
+
+  /* Ajuster la disposition des boutons dans la liste des buteurs */
+  .list-group-item .d-flex {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .list-group-item .d-flex > div {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  /* Ajuster le formulaire sur mobile */
+  .row.g-3 {
+    gap: 0.5rem !important;
+  }
+
+  .col-md-5, .col-md-3, .col-md-4 {
+    width: 100%;
+    padding: 0;
+  }
+
+  /* Ajuster l'affichage des scores dans la modal */
+  .match-score-display .match-score {
+    font-size: 1.4em;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .match-score-display .score {
+    margin: 0.5rem 0;
+  }
+
+  /* Ajuster les titres dans la modal */
+  .team-title-1, .team-title-2 {
+    font-size: 1.2em;
+    text-align: center;
+  }
+
+  /* Ajuster l'espacement des badges de joueurs */
+  .player-badges {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.3rem;
+  }
+}
+
+/* Ajouter des styles pour les très petits écrans */
+@media (max-width: 480px) {
+  h1 {
+    font-size: 1.2rem;
+  }
+
+  .container {
+    padding: 0.5rem;
+  }
+
+  .match-details {
+    padding: 1rem;
+  }
+
+  .team-name {
+    font-size: 0.9em;
+  }
+
+  .score {
+    padding: 0.3rem 0.8rem;
+  }
+
+  .match-info {
+    font-size: 0.75em;
   }
 }
 
