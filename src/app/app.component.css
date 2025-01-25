@@ -667,17 +667,17 @@ h1 {
   margin: 0 2px;
 }
 
-/* Positions pour l'équipe 1 */
-.equipe1 .attaquant { top: 10%; left: 50%; transform: translateX(-50%); }
-.equipe1 .milieu-offensif { top: 30%; left: 50%; transform: translateX(-50%); }
-.equipe1 .milieu-gauche { top: 40%; left: 25%; }
-.equipe1 .milieu-droit { top: 40%; right: 25%; }
-.equipe1 .defenseur-central { top: 60%; left: 50%; transform: translateX(-50%); }
-.equipe1 .defenseur-gauche { top: 70%; left: 25%; }
-.equipe1 .defenseur-droit { top: 70%; right: 25%; }
-.equipe1 .gardien { bottom: 10%; left: 50%; transform: translateX(-50%); }
+/* Modifier les positions pour l'équipe 1 (inversées verticalement) */
+.equipe1 .attaquant { bottom: 10%; left: 50%; transform: translateX(-50%); }
+.equipe1 .milieu-offensif { bottom: 30%; left: 50%; transform: translateX(-50%); }
+.equipe1 .milieu-gauche { bottom: 40%; left: 25%; }
+.equipe1 .milieu-droit { bottom: 40%; right: 25%; }
+.equipe1 .defenseur-central { bottom: 60%; left: 50%; transform: translateX(-50%); }
+.equipe1 .defenseur-gauche { bottom: 70%; left: 25%; }
+.equipe1 .defenseur-droit { bottom: 70%; right: 25%; }
+.equipe1 .gardien { top: 10%; left: 50%; transform: translateX(-50%); }
 
-/* Positions pour l'équipe 2 (inversées) */
+/* Positions pour l'équipe 2 (restent identiques) */
 .equipe2 .attaquant { bottom: 10%; left: 50%; transform: translateX(-50%); }
 .equipe2 .milieu-offensif { bottom: 30%; left: 50%; transform: translateX(-50%); }
 .equipe2 .milieu-gauche { bottom: 40%; right: 25%; }
@@ -734,6 +734,11 @@ h1 {
   margin-bottom: 1rem;
 }
 
+/* Ajouter cette règle pour garder les lettres dans le bon sens */
+.equipe2 .player-dot {
+  transform: rotate(180deg);  /* Rotation inverse pour le contenu des cercles */
+}
+
 /* Ajouter ces styles */
 .player-selector {
   position: fixed;
@@ -768,5 +773,52 @@ h1 {
   .player-name {
     font-size: 0.6em;
     bottom: -15px;
+  }
+}
+
+/* Ajouter les styles pour la nouvelle modale */
+.disposition-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.disposition-modal-content {
+  width: 95%;
+  max-width: 1200px;
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  border-radius: 15px;
+  padding: 2rem;
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.2);
+  margin: auto;
+  overflow-y: auto;
+  max-height: 90vh;
+  position: relative;
+}
+
+/* Ajuster les styles des boutons d'action */
+.match-actions {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+/* Ajuster pour mobile */
+@media (max-width: 768px) {
+  .match-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .match-actions .btn {
+    margin: 0.2rem 0;
   }
 }

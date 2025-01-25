@@ -38,6 +38,7 @@ export class AppComponent implements OnInit {
   showButeursList: boolean = false;  // Replié par défaut
   showDisposition: boolean = false;
   selectedPosition: { team: number, position: string } | null = null;
+  showDispositionModal: boolean = false;  // Ajouter cette propriété
 
   constructor(private fb: FormBuilder) {
     this.matchForm = this.fb.group({
@@ -450,5 +451,15 @@ export class AppComponent implements OnInit {
       return this.selectedMatch.positions[key] || '';
     }
     return '';
+  }
+
+  openDispositionModal(match: Match) {
+    this.selectedMatch = match;
+    this.showDispositionModal = true;
+  }
+
+  closeDispositionModal() {
+    this.showDispositionModal = false;
+    this.selectedMatch = null;
   }
 }

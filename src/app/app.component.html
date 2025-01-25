@@ -117,8 +117,11 @@
           </div>
           
           <div class="match-actions mt-2">
-            <button class="btn btn-sm btn-outline-primary me-2" (click)="selectMatch(match)">
+            <button class="btn btn-sm btn-outline-primary" (click)="selectMatch(match)">
               Modifier le score
+            </button>
+            <button class="btn btn-sm btn-outline-primary" (click)="openDispositionModal(match)">
+              Disposition tactique
             </button>
             <button class="btn btn-sm btn-outline-danger" (click)="supprimerMatch(match)">
               Supprimer le match
@@ -433,6 +436,160 @@
         {{ lastGoalTeam }}
       </div>
       <div class="emoji">⚽🎉</div>
+    </div>
+  </div>
+
+  <!-- Remplacer le contenu de la modale de disposition tactique -->
+  <div *ngIf="showDispositionModal && selectedMatch" class="disposition-modal">
+    <div class="disposition-modal-content">
+      <button class="close-button" (click)="closeDispositionModal()">×</button>
+      <h3>Disposition tactique</h3>
+      
+      <div class="disposition-content">
+        <div class="terrain">
+          <div class="equipe equipe1">
+            <h5 class="team-title-1">{{ selectedMatch.equipe1 }}</h5>
+            <div class="formation">
+              <!-- Attaquant -->
+              <div class="player-position attaquant" (click)="selectPosition(1, 'attaquant')">
+                <div class="player-dot" [class.selected]="selectedPosition?.team === 1 && selectedPosition?.position === 'attaquant'">
+                  <span class="position-name">AT</span>
+                  <span class="separator" *ngIf="getPlayerForPosition(1, 'attaquant')">-</span>
+                  <span class="player-name">{{ getPlayerForPosition(1, 'attaquant') }}</span>
+                </div>
+              </div>
+              <!-- Milieux -->
+              <div class="player-position milieu-offensif" (click)="selectPosition(1, 'milieu-offensif')">
+                <div class="player-dot" [class.selected]="selectedPosition?.team === 1 && selectedPosition?.position === 'milieu-offensif'">
+                  <span class="position-name">MO</span>
+                  <span class="separator" *ngIf="getPlayerForPosition(1, 'milieu-offensif')">-</span>
+                  <span class="player-name">{{ getPlayerForPosition(1, 'milieu-offensif') }}</span>
+                </div>
+              </div>
+              <div class="player-position milieu-gauche" (click)="selectPosition(1, 'milieu-gauche')">
+                <div class="player-dot" [class.selected]="selectedPosition?.team === 1 && selectedPosition?.position === 'milieu-gauche'">
+                  <span class="position-name">MG</span>
+                  <span class="player-name">{{ getPlayerForPosition(1, 'milieu-gauche') }}</span>
+                </div>
+              </div>
+              <div class="player-position milieu-droit" (click)="selectPosition(1, 'milieu-droit')">
+                <div class="player-dot" [class.selected]="selectedPosition?.team === 1 && selectedPosition?.position === 'milieu-droit'">
+                  <span class="position-name">MD</span>
+                  <span class="player-name">{{ getPlayerForPosition(1, 'milieu-droit') }}</span>
+                </div>
+              </div>
+              <!-- Défenseurs -->
+              <div class="player-position defenseur-central" (click)="selectPosition(1, 'defenseur-central')">
+                <div class="player-dot" [class.selected]="selectedPosition?.team === 1 && selectedPosition?.position === 'defenseur-central'">
+                  <span class="position-name">DC</span>
+                  <span class="player-name">{{ getPlayerForPosition(1, 'defenseur-central') }}</span>
+                </div>
+              </div>
+              <div class="player-position defenseur-gauche" (click)="selectPosition(1, 'defenseur-gauche')">
+                <div class="player-dot" [class.selected]="selectedPosition?.team === 1 && selectedPosition?.position === 'defenseur-gauche'">
+                  <span class="position-name">DG</span>
+                  <span class="player-name">{{ getPlayerForPosition(1, 'defenseur-gauche') }}</span>
+                </div>
+              </div>
+              <div class="player-position defenseur-droit" (click)="selectPosition(1, 'defenseur-droit')">
+                <div class="player-dot" [class.selected]="selectedPosition?.team === 1 && selectedPosition?.position === 'defenseur-droit'">
+                  <span class="position-name">DD</span>
+                  <span class="player-name">{{ getPlayerForPosition(1, 'defenseur-droit') }}</span>
+                </div>
+              </div>
+              <!-- Gardien -->
+              <div class="player-position gardien" (click)="selectPosition(1, 'gardien')">
+                <div class="player-dot" [class.selected]="selectedPosition?.team === 1 && selectedPosition?.position === 'gardien'">
+                  <span class="position-name">G</span>
+                  <span class="player-name">{{ getPlayerForPosition(1, 'gardien') }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="equipe equipe2">
+            <h5 class="team-title-2">{{ selectedMatch.equipe2 }}</h5>
+            <div class="formation">
+              <!-- Attaquant -->
+              <div class="player-position attaquant" (click)="selectPosition(2, 'attaquant')">
+                <div class="player-dot" [class.selected]="selectedPosition?.team === 2 && selectedPosition?.position === 'attaquant'">
+                  <span class="position-name">AT</span>
+                  <span class="separator" *ngIf="getPlayerForPosition(2, 'attaquant')">-</span>
+                  <span class="player-name">{{ getPlayerForPosition(2, 'attaquant') }}</span>
+                </div>
+              </div>
+              <!-- Milieux -->
+              <div class="player-position milieu-offensif" (click)="selectPosition(2, 'milieu-offensif')">
+                <div class="player-dot" [class.selected]="selectedPosition?.team === 2 && selectedPosition?.position === 'milieu-offensif'">
+                  <span class="position-name">MO</span>
+                  <span class="player-name">{{ getPlayerForPosition(2, 'milieu-offensif') }}</span>
+                </div>
+              </div>
+              <div class="player-position milieu-gauche" (click)="selectPosition(2, 'milieu-gauche')">
+                <div class="player-dot" [class.selected]="selectedPosition?.team === 2 && selectedPosition?.position === 'milieu-gauche'">
+                  <span class="position-name">MG</span>
+                  <span class="player-name">{{ getPlayerForPosition(2, 'milieu-gauche') }}</span>
+                </div>
+              </div>
+              <div class="player-position milieu-droit" (click)="selectPosition(2, 'milieu-droit')">
+                <div class="player-dot" [class.selected]="selectedPosition?.team === 2 && selectedPosition?.position === 'milieu-droit'">
+                  <span class="position-name">MD</span>
+                  <span class="player-name">{{ getPlayerForPosition(2, 'milieu-droit') }}</span>
+                </div>
+              </div>
+              <!-- Défenseurs -->
+              <div class="player-position defenseur-central" (click)="selectPosition(2, 'defenseur-central')">
+                <div class="player-dot" [class.selected]="selectedPosition?.team === 2 && selectedPosition?.position === 'defenseur-central'">
+                  <span class="position-name">DC</span>
+                  <span class="player-name">{{ getPlayerForPosition(2, 'defenseur-central') }}</span>
+                </div>
+              </div>
+              <div class="player-position defenseur-gauche" (click)="selectPosition(2, 'defenseur-gauche')">
+                <div class="player-dot" [class.selected]="selectedPosition?.team === 2 && selectedPosition?.position === 'defenseur-gauche'">
+                  <span class="position-name">DG</span>
+                  <span class="player-name">{{ getPlayerForPosition(2, 'defenseur-gauche') }}</span>
+                </div>
+              </div>
+              <div class="player-position defenseur-droit" (click)="selectPosition(2, 'defenseur-droit')">
+                <div class="player-dot" [class.selected]="selectedPosition?.team === 2 && selectedPosition?.position === 'defenseur-droit'">
+                  <span class="position-name">DD</span>
+                  <span class="player-name">{{ getPlayerForPosition(2, 'defenseur-droit') }}</span>
+                </div>
+              </div>
+              <!-- Gardien -->
+              <div class="player-position gardien" (click)="selectPosition(2, 'gardien')">
+                <div class="player-dot" [class.selected]="selectedPosition?.team === 2 && selectedPosition?.position === 'gardien'">
+                  <span class="position-name">G</span>
+                  <span class="player-name">{{ getPlayerForPosition(2, 'gardien') }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="disposition-info">
+          <p class="text-muted">
+            Dispositif double losange (1-3-3-1) préconisé pour le jeu à 8.
+          </p>
+        </div>
+      </div>
+
+      <!-- Sélecteur de joueur -->
+      <div class="player-selector" *ngIf="selectedPosition && selectedMatch">
+        <div class="player-selector-content">
+          <h6>Sélectionner un joueur pour {{ selectedPosition.position }}</h6>
+          <div class="player-list">
+            <button *ngFor="let player of getTeamPlayers(selectedPosition.team)"
+                    class="btn btn-sm btn-outline-primary mb-1 me-1"
+                    (click)="assignPlayerToPosition(player)">
+              {{ player }}
+            </button>
+          </div>
+          <button class="btn btn-sm btn-secondary mt-2" (click)="selectedPosition = null">
+            Annuler
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 </div>
