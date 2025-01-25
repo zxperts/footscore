@@ -13,4 +13,5 @@ export interface Match {
   buteurs: Buteur[];
   heureDebut: Date;
   lieu?: string;
+  positions?: { [key: string]: string };
 } 

@@ -6,6 +6,12 @@ import { CommonModule } from '@angular/common';
 import { Team, TEAMS, ensureDefaultPlayer } from './models/team.model';
 import { FormsModule } from '@angular/forms';
 
+// Déplacer l'interface en dehors de la classe, au début du fichier
+interface GroupedScorer {
+  nom: string;
+  minutes: number[];
+}
+
 @Component({
   selector: 'app-root',
   standalone: true,
@@ -26,6 +32,12 @@ export class AppComponent implements OnInit {
   selectedTeam: Team | null = null;
   newTeamName: string = '';
   newPlayerName: string = '';
+  showGoalCelebration: boolean = false;
+  lastGoalScorer: string = '';
+  lastGoalTeam: string = '';
+  showButeursList: boolean = false;  // Replié par défaut
+  showDisposition: boolean = false;
+  selectedPosition: { team: number, position: string } | null = null;
 
   constructor(private fb: FormBuilder) {
     this.matchForm = this.fb.group({
@@ -195,9 +207,18 @@ export class AppComponent implements OnInit {
         // Mettre à jour le score
         if (buteur.equipe === 1) {
           this.matches[index].score1++;  // But pour l'équipe 1
+          this.lastGoalTeam = this.selectedMatch.equipe1;
         } else {
           this.matches[index].score2++;  // But pour l'équipe 2
+          this.lastGoalTeam = this.selectedMatch.equipe2;
         }
+        
+        // Déclencher la célébration
+        this.lastGoalScorer = buteur.nom;
+        this.showGoalCelebration = true;
+        setTimeout(() => {
+          this.showGoalCelebration = false;
+        }, 3000);
         
         this.buteurForm.reset();
         this.editingButeur = null;
@@ -286,13 +307,12 @@ export class AppComponent implements OnInit {
     }
   }
 
-  getTeamPlayers(teamNumber: 1 | 2): string[] {
-    if (this.selectedMatch) {
-      const teamName = teamNumber === 1 ? this.selectedMatch.equipe1 : this.selectedMatch.equipe2;
-      const team = this.teams.find(t => t.name === teamName);
-      return team?.players || [];
-    }
-    return [];
+  getTeamPlayers(teamNumber: number): string[] {
+    if (!this.selectedMatch) return [];
+    
+    const teamName = teamNumber === 1 ? this.selectedMatch.equipe1 : this.selectedMatch.equipe2;
+    const team = this.teams.find(t => t.name === teamName);
+    return team?.players || [];
   }
 
   quickAddGoal(playerName: string, teamNumber: 1 | 2) {
@@ -312,10 +332,19 @@ export class AppComponent implements OnInit {
         // Mettre à jour le score
         if (teamNumber === 1) {
           this.matches[index].score1++;
+          this.lastGoalTeam = this.selectedMatch.equipe1;
         } else {
           this.matches[index].score2++;
+          this.lastGoalTeam = this.selectedMatch.equipe2;
         }
         this.saveData();
+        
+        // Déclencher la célébration
+        this.lastGoalScorer = playerName;
+        this.showGoalCelebration = true;
+        setTimeout(() => {
+          this.showGoalCelebration = false;
+        }, 3000); // Disparaît après 3 secondes
       }
     }
   }
@@ -368,5 +397,58 @@ export class AppComponent implements OnInit {
   private startAutoSave() {
     // Sauvegarder toutes les 30 secondes
     setInterval(() => this.saveData(), 30000);
+  }
+
+  // Garder la méthode getGroupedScorers dans la classe
+  getGroupedScorers(match: Match, equipe: 1 | 2): GroupedScorer[] {
+    // Regrouper les buteurs par nom
+    const groupedScorers = match.buteurs
+      .filter(b => b.equipe === equipe)
+      .reduce((acc, buteur) => {
+        const existingScorer = acc.find(s => s.nom === buteur.nom);
+        if (existingScorer) {
+          existingScorer.minutes.push(buteur.minute);
+          // Trier les minutes dans l'ordre croissant
+          existingScorer.minutes.sort((a, b) => a - b);
+        } else {
+          acc.push({ nom: buteur.nom, minutes: [buteur.minute] });
+        }
+        return acc;
+      }, [] as GroupedScorer[]);
+
+    // Trier les buteurs par leur premier but
+    return groupedScorers.sort((a, b) => a.minutes[0] - b.minutes[0]);
+  }
+
+  toggleButeursList() {
+    this.showButeursList = !this.showButeursList;
+  }
+
+  toggleDispositionView() {
+    this.showDisposition = !this.showDisposition;
+  }
+
+  selectPosition(team: number, position: string) {
+    this.selectedPosition = { team, position };
+  }
+
+  assignPlayerToPosition(playerName: string) {
+    if (this.selectedPosition && this.selectedMatch) {
+      if (!this.selectedMatch.positions) {
+        this.selectedMatch.positions = {};
+      }
+      const key = `${this.selectedPosition.team}_${this.selectedPosition.position}`;
+      this.selectedMatch.positions[key] = playerName;
+      this.selectedPosition = null;
+      this.saveData();
+    }
+  }
+
+  getPlayerForPosition(team: number, position: string): string {
+    if (this.selectedMatch?.positions) {
+      const key = `${team}_${position}`;
+      return this.selectedMatch.positions[key] || '';
+    }
+    return '';
   }
 }

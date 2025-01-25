@@ -101,6 +101,7 @@ h1 {
   margin: auto;
   overflow-y: auto;
   max-height: 90vh;
+  position: relative;
 }
 
 /* Style des formulaires */
@@ -427,5 +428,345 @@ h1 {
   
   .match-actions .btn {
     margin: 0.2rem 0;
+  }
+}
+
+/* Ajouter les styles pour la célébration */
+.goal-celebration {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(0, 0, 0, 0.9);
+  padding: 2rem;
+  border-radius: 15px;
+  text-align: center;
+  color: white;
+  z-index: 2000;
+  animation: celebrationPop 0.5s ease-out;
+}
+
+.celebration-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.goal-text {
+  font-size: 3em;
+  font-weight: bold;
+  color: #ffd700;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  animation: pulse 0.5s infinite;
+}
+
+.scorer-text {
+  font-size: 2em;
+  color: #fff;
+}
+
+.team-text {
+  font-size: 1.5em;
+  color: #3498db;
+}
+
+.emoji {
+  font-size: 2em;
+  animation: spin 1s infinite;
+}
+
+@keyframes celebrationPop {
+  0% { transform: translate(-50%, -50%) scale(0); }
+  50% { transform: translate(-50%, -50%) scale(1.2); }
+  100% { transform: translate(-50%, -50%) scale(1); }
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Ajuster pour mobile */
+@media (max-width: 768px) {
+  .goal-celebration {
+    width: 90%;
+    padding: 1rem;
+  }
+
+  .goal-text {
+    font-size: 2em;
+  }
+
+  .scorer-text {
+    font-size: 1.5em;
+  }
+
+  .team-text {
+    font-size: 1.2em;
+  }
+}
+
+/* Ajouter ces styles */
+.minutes-list {
+  display: inline-block;
+  font-size: 0.9em;
+  color: #666;
+}
+
+.scorers-column div {
+  margin: 0.4rem 0;
+  white-space: normal;  /* Permettre le retour à la ligne si nécessaire */
+}
+
+/* Ajuster pour mobile */
+@media (max-width: 768px) {
+  .minutes-list {
+    font-size: 0.8em;
+  }
+}
+
+/* Ajouter les styles pour le bouton de fermeture */
+.close-button {
+  position: absolute;
+  right: 1rem;
+  top: 1rem;
+  background: none;
+  border: none;
+  font-size: 2em;
+  color: #666;
+  cursor: pointer;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.close-button:hover {
+  background-color: rgba(0, 0, 0, 0.1);
+  color: #333;
+}
+
+/* Ajouter ces styles */
+.section-header {
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 8px;
+  transition: background-color 0.3s ease;
+  user-select: none;
+}
+
+.section-header:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.section-header h4 {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.toggle-icon {
+  display: inline-block;
+  transition: transform 0.3s ease;
+  font-size: 0.8em;
+  width: 20px;
+}
+
+/* Ajuster pour mobile */
+@media (max-width: 768px) {
+  .section-header {
+    padding: 0.8rem 0.5rem;
+  }
+}
+
+/* Styles pour la disposition tactique */
+.disposition-content {
+  background-color: #f8f9fa;
+  border-radius: 10px;
+  padding: 1rem;
+  margin-top: 1rem;
+}
+
+.terrain {
+  background: linear-gradient(to bottom, #4CAF50, #388E3C);
+  border-radius: 10px;
+  padding: 2rem;
+  margin: 1rem 0;
+  position: relative;
+  min-height: 800px;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.formation {
+  position: relative;
+  height: 300px;
+}
+
+.player-position {
+  position: absolute;
+  min-width: 40px;  /* Largeur minimum */
+  height: 40px;
+  width: auto;      /* Permettre l'expansion */
+}
+
+.player-dot {
+  background: white;
+  border-radius: 20px;
+  width: 100%;
+  min-width: 40px;
+  height: 100%;
+  padding: 0 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  font-size: 0.8em;
+  font-weight: bold;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.player-dot:hover {
+  transform: scale(1.1);
+  box-shadow: 0 0 10px rgba(255,255,255,0.5);
+}
+
+.player-dot.selected {
+  background-color: #ffd700;
+  color: #000;
+}
+
+.position-name {
+  font-weight: bold;
+  color: #666;
+}
+
+.player-name {
+  font-size: 0.8em;
+  color: #333;
+  text-align: center;
+}
+
+.separator {
+  color: #666;
+  margin: 0 2px;
+}
+
+/* Positions pour l'équipe 1 */
+.equipe1 .attaquant { top: 10%; left: 50%; transform: translateX(-50%); }
+.equipe1 .milieu-offensif { top: 30%; left: 50%; transform: translateX(-50%); }
+.equipe1 .milieu-gauche { top: 40%; left: 25%; }
+.equipe1 .milieu-droit { top: 40%; right: 25%; }
+.equipe1 .defenseur-central { top: 60%; left: 50%; transform: translateX(-50%); }
+.equipe1 .defenseur-gauche { top: 70%; left: 25%; }
+.equipe1 .defenseur-droit { top: 70%; right: 25%; }
+.equipe1 .gardien { bottom: 10%; left: 50%; transform: translateX(-50%); }
+
+/* Positions pour l'équipe 2 (inversées) */
+.equipe2 .attaquant { bottom: 10%; left: 50%; transform: translateX(-50%); }
+.equipe2 .milieu-offensif { bottom: 30%; left: 50%; transform: translateX(-50%); }
+.equipe2 .milieu-gauche { bottom: 40%; right: 25%; }
+.equipe2 .milieu-droit { bottom: 40%; left: 25%; }
+.equipe2 .defenseur-central { bottom: 60%; left: 50%; transform: translateX(-50%); }
+.equipe2 .defenseur-gauche { bottom: 70%; right: 25%; }
+.equipe2 .defenseur-droit { bottom: 70%; left: 25%; }
+.equipe2 .gardien { top: 10%; left: 50%; transform: translateX(-50%); }
+
+.disposition-info {
+  text-align: center;
+  margin-top: 1rem;
+  font-style: italic;
+}
+
+/* Ajuster pour mobile */
+@media (max-width: 768px) {
+  .terrain {
+    min-height: 600px;
+  }
+
+  .formation {
+    height: 200px;
+  }
+
+  .player-position {
+    min-width: 30px;
+    height: 30px;
+  }
+
+  .player-dot {
+    min-width: 30px;
+    font-size: 0.7em;
+    padding: 0 8px;
+  }
+}
+
+/* Ajuster les styles des équipes */
+.equipe {
+  flex: 1;
+  position: relative;
+}
+
+.equipe1 {
+  border-bottom: 2px dashed rgba(255, 255, 255, 0.3);
+}
+
+.equipe2 {
+  transform: rotate(180deg); /* Rotation pour l'équipe 2 */
+}
+
+.equipe2 h5 {
+  transform: rotate(180deg); /* Rotation inverse pour le titre */
+  margin-bottom: 1rem;
+}
+
+/* Ajouter ces styles */
+.player-selector {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+}
+
+.player-selector-content {
+  background: white;
+  padding: 1rem;
+  border-radius: 10px;
+  max-width: 90%;
+  width: 400px;
+  text-align: center;
+}
+
+.player-list {
+  max-height: 200px;
+  overflow-y: auto;
+  padding: 1rem;
+}
+
+/* Ajuster pour mobile */
+@media (max-width: 768px) {
+  .player-name {
+    font-size: 0.6em;
+    bottom: -15px;
   }
 }
