@@ -39,6 +39,7 @@ export class AppComponent implements OnInit {
   showDisposition: boolean = false;
   selectedPosition: { team: number, position: string } | null = null;
   showDispositionModal: boolean = false;  // Ajouter cette propriété
+  showElements: boolean = true; // Par défaut, afficher les éléments
 
   constructor(private fb: FormBuilder) {
     this.matchForm = this.fb.group({
@@ -461,5 +462,9 @@ export class AppComponent implements OnInit {
   closeDispositionModal() {
     this.showDispositionModal = false;
     this.selectedMatch = null;
+  }
+
+  toggleVisibility() {
+    this.showElements = !this.showElements; // Inverser la visibilité
   }
 }

@@ -84,10 +84,15 @@
             <span class="team-name">{{ match.equipe1 }}</span>
             <span class="score">{{ match.score1 }} - {{ match.score2 }}</span>
             <span class="team-name">{{ match.equipe2 }}</span>
+            
+            <!-- Ajouter le bouton de toggle ici -->
+            <button class="btn btn-link p-0" (click)="toggleVisibility()" style="font-size: 1.2em; cursor: pointer;">
+              <i class="fas" [ngClass]="showElements ? 'fa-chevron-up' : 'fa-chevron-right'"></i>
+            </button>
           </div>
 
-          <!-- Ajout de la liste des buteurs -->
-          <div class="match-scorers" *ngIf="match.buteurs.length > 0">
+          <!-- Section pour afficher les buteurs -->
+          <div class="match-scorers" *ngIf="showElements && match.buteurs.length > 0">
             <div class="team-scorers">
               <!-- Buteurs équipe 1 -->
               <div class="scorers-column left">
@@ -114,15 +119,16 @@
             </div>
           </div>
           
-          <div class="match-actions mt-2">
-            <button class="btn btn-sm btn-outline-primary" (click)="selectMatch(match)">
-              Modifier le score
+          <!-- Boutons d'action -->
+          <div class="match-actions" *ngIf="showElements">
+            <button class="btn btn-sm btn-outline-danger" (click)="supprimerMatch(match)">
+              Supprimer le match
             </button>
             <button class="btn btn-sm btn-outline-primary" (click)="openDispositionModal(match)">
               Disposition tactique
             </button>
-            <button class="btn btn-sm btn-outline-danger" (click)="supprimerMatch(match)">
-              Supprimer le match
+            <button class="btn btn-sm btn-outline-primary" (click)="selectMatch(match)">
+              Modifier le score
             </button>
           </div>
         </div>

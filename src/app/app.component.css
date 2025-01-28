@@ -60,6 +60,8 @@ h1 {
   justify-content: center;
   align-items: center;
   gap: 0.5rem;
+  white-space: nowrap;
+  overflow-x: auto;
 }
 
 .team-name {
@@ -67,7 +69,11 @@ h1 {
   color: #2c3e50;
   text-transform: uppercase;
   font-size: 1em;
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
 }
+
 
 .score {
   background-color: #3498db;
@@ -316,14 +322,16 @@ h1 {
 }
 
 /* Style pour les équipes dans la liste des buteurs */
-.buteur-equipe1 {
-  color: #3498db;  /* Bleu pour l'équipe 1 */
-  font-weight: bold;
+.buteur-equipe1, .buteur-equipe2 {
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+  margin: 0.2rem 0;
 }
 
-.buteur-equipe2 {
-  color: #27ae60;  /* Vert pour l'équipe 2 */
-  font-weight: bold;
+.minutes-list {
+  margin-left: 0.5rem;
+  font-size: 0.9em;
 }
 
 /* Style pour les badges des joueurs */
@@ -438,6 +446,10 @@ h1 {
   
   .match-actions .btn {
     margin: 0.2rem; /* Ajouter un peu d'espace autour des boutons */
+  }
+
+  .buteur-equipe1, .buteur-equipe2 {
+    font-size: 0.8em;
   }
 }
 
@@ -821,4 +833,18 @@ h1 {
   margin-top: 0.2rem; /* Réduire l'espace au-dessus de la date */
   font-size: 0.8em; /* Réduire la taille de la police */
   color: #666; /* Optionnel : changer la couleur pour un aspect plus léger */
+}
+
+/* Style pour le bouton de toggle */
+.toggle-section {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  margin-bottom: 1rem;
+  font-weight: bold;
+}
+
+.toggle-icon {
+  margin-right: 0.5rem; /* Espace entre l'icône et le texte */
+  font-size: 1.2em; /* Taille de l'icône */
 }
