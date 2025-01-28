@@ -677,25 +677,25 @@ h1 {
   margin: 0 2px;
 }
 
-/* Modifier les positions pour l'équipe 1 (inversées verticalement) */
+/* Modifier les positions pour l'équipe 1 */
 .equipe1 .attaquant { bottom: 10%; left: 50%; transform: translateX(-50%); }
 .equipe1 .milieu-offensif { bottom: 30%; left: 50%; transform: translateX(-50%); }
-.equipe1 .milieu-gauche { bottom: 40%; left: 25%; }
-.equipe1 .milieu-droit { bottom: 40%; right: 25%; }
+.equipe1 .milieu-gauche { bottom: 40%; left: 10%; }
+.equipe1 .milieu-droit { bottom: 40%; right: 10%; }
 .equipe1 .defenseur-central { bottom: 60%; left: 50%; transform: translateX(-50%); }
-.equipe1 .defenseur-gauche { bottom: 70%; left: 25%; }
-.equipe1 .defenseur-droit { bottom: 70%; right: 25%; }
-.equipe1 .gardien { top: 10%; left: 50%; transform: translateX(-50%); }
+.equipe1 .defenseur-gauche { bottom: 70%; left: 10%; }
+.equipe1 .defenseur-droit { bottom: 70%; right: 10%; }
+.equipe1 .gardien { top: 1%; left: 50%; transform: translateX(-50%); }
 
-/* Positions pour l'équipe 2 (restent identiques) */
+/* Positions pour l'équipe 2 */
 .equipe2 .attaquant { bottom: 10%; left: 50%; transform: translateX(-50%); }
 .equipe2 .milieu-offensif { bottom: 30%; left: 50%; transform: translateX(-50%); }
-.equipe2 .milieu-gauche { bottom: 40%; right: 25%; }
-.equipe2 .milieu-droit { bottom: 40%; left: 25%; }
+.equipe2 .milieu-gauche { bottom: 40%; right: 10%; }
+.equipe2 .milieu-droit { bottom: 40%; left: 10%; }
 .equipe2 .defenseur-central { bottom: 60%; left: 50%; transform: translateX(-50%); }
-.equipe2 .defenseur-gauche { bottom: 70%; right: 25%; }
-.equipe2 .defenseur-droit { bottom: 70%; left: 25%; }
-.equipe2 .gardien { top: 10%; left: 50%; transform: translateX(-50%); }
+.equipe2 .defenseur-gauche { bottom: 70%; right: 10%; }
+.equipe2 .defenseur-droit { bottom: 70%; left: 10%; }
+.equipe2 .gardien { top: 1%; left: 50%; transform: translateX(-50%); }
 
 .disposition-info {
   text-align: center;
