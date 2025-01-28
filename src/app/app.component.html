@@ -74,7 +74,12 @@
     <div class="list-group">
       <div *ngFor="let match of matches.slice().reverse()" class="list-group-item">
         <div class="match-details">
-          <!-- Informations principales -->
+          <div class="match-info text-muted small text-center">
+            <span>{{ match.heureDebut | date:'dd/MM/yyyy HH:mm' }}</span>
+            <span class="mx-2" *ngIf="match.lieu">•</span>
+            <span *ngIf="match.lieu">{{ match.lieu }}</span>
+          </div>
+          
           <div class="match-score">
             <span class="team-name">{{ match.equipe1 }}</span>
             <span class="score">{{ match.score1 }} - {{ match.score2 }}</span>
@@ -107,13 +112,6 @@
                 </div>
               </div>
             </div>
-          </div>
-          
-          <!-- Informations secondaires -->
-          <div class="match-info text-muted small">
-            <span>{{ match.heureDebut | date:'dd/MM/yyyy HH:mm' }}</span>
-            <span class="mx-2" *ngIf="match.lieu">•</span>
-            <span *ngIf="match.lieu">{{ match.lieu }}</span>
           </div>
           
           <div class="match-actions mt-2">
