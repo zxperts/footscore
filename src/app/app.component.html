@@ -78,21 +78,21 @@
             <span>{{ match.heureDebut | date:'dd/MM/yyyy HH:mm' }}</span>
             <span class="mx-2" *ngIf="match.lieu">•</span>
             <span *ngIf="match.lieu">{{ match.lieu }}</span>
+            
+            <!-- Ajouter le bouton de toggle ici -->
+            <button class="btn btn-link p-0" (click)="toggleVisibility(match)" style="font-size: 1.2em; cursor: pointer;">
+              <i class="fas" [ngClass]="match.showElements ? 'fa-chevron-up' : 'fa-chevron-right'"></i>
+            </button>
           </div>
           
           <div class="match-score">
             <span class="team-name">{{ match.equipe1 }}</span>
             <span class="score">{{ match.score1 }} - {{ match.score2 }}</span>
             <span class="team-name">{{ match.equipe2 }}</span>
-            
-            <!-- Ajouter le bouton de toggle ici -->
-            <button class="btn btn-link p-0" (click)="toggleVisibility()" style="font-size: 1.2em; cursor: pointer;">
-              <i class="fas" [ngClass]="showElements ? 'fa-chevron-up' : 'fa-chevron-right'"></i>
-            </button>
           </div>
 
           <!-- Section pour afficher les buteurs -->
-          <div class="match-scorers" *ngIf="showElements && match.buteurs.length > 0">
+          <div class="match-scorers" *ngIf="match.showElements && match.buteurs.length > 0">
             <div class="team-scorers">
               <!-- Buteurs équipe 1 -->
               <div class="scorers-column left">
@@ -120,7 +120,7 @@
           </div>
           
           <!-- Boutons d'action -->
-          <div class="match-actions" *ngIf="showElements">
+          <div class="match-actions" *ngIf="match.showElements">
             <button class="btn btn-sm btn-outline-danger" (click)="supprimerMatch(match)">
               Supprimer le match
             </button>
@@ -234,7 +234,7 @@
         </div>
       </div>
 
-      <!-- Liste des buteurs -->
+      <!-- Remplacer la liste par des divs simples -->
       <div class="buteurs-list mb-3">
         <div class="section-header" (click)="toggleButeursList()">
           <h4>
@@ -243,8 +243,8 @@
           </h4>
         </div>
         
-        <ul class="list-group" *ngIf="showButeursList">
-          <li *ngFor="let buteur of selectedMatch.buteurs; let i = index" class="list-group-item">
+        <div *ngIf="showButeursList">
+          <div *ngFor="let buteur of selectedMatch.buteurs; let i = index" class="buteur-item">
             <div class="d-flex justify-content-between align-items-center">
               <span>
                 ⚽ {{ buteur.nom }} ({{ buteur.minute }}') - 
@@ -263,8 +263,8 @@
                 </button>
               </div>
             </div>
-          </li>
-        </ul>
+          </div>
+        </div>
       </div>
 
       <!-- Dans la modal, après la liste des buteurs -->

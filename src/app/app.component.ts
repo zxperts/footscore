@@ -85,7 +85,8 @@ export class AppComponent implements OnInit {
         heureDebut: new Date(matchStartTime.getTime() - timezoneOffset), // Ajuster pour le fuseau horaire
         score1: 0,
         score2: 0,
-        buteurs: []
+        buteurs: [],
+        showElements: true // Initialiser la visibilité
       };
       this.matches.push(newMatch);
       this.saveData();
@@ -464,7 +465,7 @@ export class AppComponent implements OnInit {
     this.selectedMatch = null;
   }
 
-  toggleVisibility() {
-    this.showElements = !this.showElements; // Inverser la visibilité
+  toggleVisibility(match: Match) {
+    match.showElements = !match.showElements; // Inverser la visibilité pour le match concerné
   }
 }

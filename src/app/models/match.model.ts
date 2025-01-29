@@ -14,4 +14,5 @@ export interface Match {
   heureDebut: Date;
   lieu?: string;
   positions?: { [key: string]: string };
+  showElements?: boolean;
 } 

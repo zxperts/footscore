@@ -1,6 +1,6 @@
 /* Fond et styles généraux */
 :host {
-  background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)),
+  background: linear-gradient(rgb(255, 255, 255), rgba(0, 0, 0, 0.108)),
               url('https://images.unsplash.com/photo-1556056504-5c7696c4c28d?ixlib=rb-1.2.1&auto=format&fit=crop&w=1920&q=80') no-repeat center center fixed;
   min-height: 100vh;
   display: block;
@@ -12,7 +12,7 @@
   border-radius: 15px;
   padding: 2rem;
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
-  margin-top: 2rem !important;
+  margin-top: 0;
 }
 
 h1 {
@@ -43,7 +43,7 @@ h1 {
 .match-details {
   background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
   border-radius: 10px;
-  padding: 1rem;
+  /*padding: 1rem;*/
   margin-bottom: 1rem;
   transition: all 0.3s ease;
 }
@@ -130,16 +130,20 @@ h1 {
   padding: 1rem;
 }
 
+.list-group {
+  padding: 0;
+  margin: 0;
+}
+
 .list-group-item {
-  border-left: 4px solid #3498db;
+  border: none;
   margin-bottom: 0.5rem;
-  border-radius: 5px;
+  padding: 0.5rem 0;
   transition: all 0.3s ease;
 }
 
 .list-group-item:hover {
-  background-color: #f8f9fa;
-  transform: translateX(5px);
+  background-color: rgba(0, 0, 0, 0.05);
 }
 
 /* Animations */
@@ -167,7 +171,8 @@ h1 {
 
   .match-score {
     font-size: 1em;
-    gap: 0.3rem;
+    flex-direction: column;
+    align-items: center;
   }
 
   .team-name {
@@ -200,7 +205,7 @@ h1 {
   }
 
   .list-group-item {
-    padding: 0.5rem;
+    padding: 0.3rem;
   }
 
   .list-group-item .btn {
@@ -266,7 +271,7 @@ h1 {
   }
 
   .match-details {
-    padding: 1rem;
+    padding: 0;
   }
 
   .team-name {
@@ -616,14 +621,14 @@ h1 {
 .disposition-content {
   background-color: #f8f9fa;
   border-radius: 10px;
-  padding: 1rem;
+  padding: 0;
   margin-top: 1rem;
 }
 
 .terrain {
   background: linear-gradient(to bottom, #4CAF50, #388E3C);
   border-radius: 10px;
-  padding: 2rem;
+  padding: 0;
   margin: 1rem 0;
   position: relative;
   min-height: 800px;
@@ -810,7 +815,7 @@ h1 {
   justify-content: center;
   align-items: center;
   z-index: 1000;
-  padding: 20px;
+  padding: 0;
 }
 
 .disposition-modal-content {
@@ -818,7 +823,7 @@ h1 {
   max-width: 1200px;
   background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
   border-radius: 15px;
-  padding: 2rem;
+  padding: 0.2rem;
   box-shadow: 0 0 30px rgba(0, 0, 0, 0.2);
   margin: auto;
   overflow-y: auto;
@@ -828,11 +833,11 @@ h1 {
 
 /* Style pour la date du match */
 .match-info {
-  text-align: center; /* Centrer le texte */
-  margin-bottom: 0.5rem; /* Réduire l'espace en bas */
-  margin-top: 0.2rem; /* Réduire l'espace au-dessus de la date */
-  font-size: 0.8em; /* Réduire la taille de la police */
-  color: #666; /* Optionnel : changer la couleur pour un aspect plus léger */
+  display: flex; /* Utiliser flexbox pour aligner les éléments */
+  justify-content: center; /* Centrer les éléments */
+  align-items: center; /* Centrer verticalement */
+  gap: 0.5rem; /* Espace entre les éléments */
+  margin-bottom: 1rem; /* Espace en bas */
 }
 
 /* Style pour le bouton de toggle */
@@ -847,4 +852,10 @@ h1 {
 .toggle-icon {
   margin-right: 0.5rem; /* Espace entre l'icône et le texte */
   font-size: 1.2em; /* Taille de l'icône */
+}
+
+/* Ajoutez ces styles pour supprimer l'espace blanc en haut */
+body {
+  margin: 0; /* Supprimer la marge par défaut du body */
+  padding: 0; /* Supprimer le padding par défaut du body */
 }
