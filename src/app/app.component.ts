@@ -147,6 +147,32 @@ export class AppComponent implements OnInit {
       equipe: 1
     });
 
+    // Assurer qu'il y a au moins un joueur dans chaque équipe
+    const team1 = this.teams.find(team => team.name === match.equipe1);
+    const team2 = this.teams.find(team => team.name === match.equipe2);
+    
+    if (team1) {
+      ensureDefaultPlayer(team1); // S'assurer qu'il y a au moins un joueur dans l'équipe 1
+    } else {
+      // Si team1 n'existe pas, créer une équipe avec "Joueur non listé"
+      this.teams.push({
+        id: this.teams.length + 1,
+        name: match.equipe1,
+        players: ['Joueur non listé']
+      });
+    }
+    
+    if (team2) {
+      ensureDefaultPlayer(team2); // S'assurer qu'il y a au moins un joueur dans l'équipe 2
+    } else {
+      // Si team2 n'existe pas, créer une équipe avec "Joueur non listé"
+      this.teams.push({
+        id: this.teams.length + 1,
+        name: match.equipe2,
+        players: ['Joueur non listé']
+      });
+    }
+
     // Mettre à jour la liste des joueurs si l'équipe 1 est U10
     if (match.equipe1 === 'U10 Stand. Flawinne FC') {
       const u10Team = this.teams.find(team => team.name === 'U10 Stand. Flawinne FC');
