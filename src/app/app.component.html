@@ -121,14 +121,14 @@
           
           <!-- Boutons d'action -->
           <div class="match-actions" *ngIf="match.showElements">
-            <button class="btn btn-sm btn-outline-danger" (click)="supprimerMatch(match)">
-              Supprimer le match
+            <button class="btn btn-sm btn-outline-primary" (click)="selectMatch(match)">
+              🖍️
             </button>
             <button class="btn btn-sm btn-outline-primary" (click)="openDispositionModal(match)">
               Disposition tactique
             </button>
-            <button class="btn btn-sm btn-outline-primary" (click)="selectMatch(match)">
-              Modifier le score
+            <button class="btn btn-sm btn-outline-danger" (click)="supprimerMatch(match)">
+              🗑️
             </button>
           </div>
         </div>
@@ -147,9 +147,9 @@
       <!-- Ajout du score en haut -->
       <div class="match-score-display mb-4">
         <div class="match-score">
-          <div class="team-name common-score-style">{{ selectedMatch.equipe1 }}</div>
-          <div class="score common-score-style">{{ selectedMatch.score1 }} - {{ selectedMatch.score2 }}</div>
-          <div class="team-name common-score-style">{{ selectedMatch.equipe2 }}</div>
+          <div class="team-name" style="flex: 1; text-align: center;">{{ selectedMatch.equipe1 }}</div>
+          <div class="score" style="text-align: center;">{{ selectedMatch.score1 }} - {{ selectedMatch.score2 }}</div>
+          <div class="team-name" style="flex: 1; text-align: center;">{{ selectedMatch.equipe2 }}</div>
         </div>
       </div>
 

@@ -126,7 +126,7 @@ h1 {
 .buteurs-list {
   background-color: #f8f9fa;
   border-radius: 10px;
-  padding: 1rem;
+  padding: 0.1rem;
 }
 
 .list-group {
@@ -318,13 +318,13 @@ h1 {
 }
 
 .match-score-display .match-score {
-  font-size: 1.8em;
+  font-size: 1.2em;
   margin: 0;
 }
 
 .match-score-display .score {
   font-size: 1.2em;
-  margin: 0 2rem;
+  margin: 0 0rem;
 }
 
 /* Style pour les équipes dans la liste des buteurs */
@@ -861,14 +861,4 @@ h1 {
 body {
   margin: 0; /* Supprimer la marge par défaut du body */
   padding: 0; /* Supprimer le padding par défaut du body */
-}
-
-/* Common styles for team names and scores */
-.common-score-style {
-  font-size: 0.4em; /* Adjust this size to match the main page */
-  font-weight: bold;
-  color: #2c3e50; /* Match the color */
-  text-align: center; /* Center the text */
-  padding: 0.1rem 0.1rem;
-  border-radius: 1px;
 }
