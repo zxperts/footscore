@@ -87,7 +87,11 @@
           
           <div class="match-score">
             <div class="team-name" style="flex: 1; text-align: center;">{{ match.equipe1 }}</div>
-            <div class="score" style="text-align: center;">{{ match.score1 }} - {{ match.score2 }}</div>
+
+            <button class="btn btn-primary" (click)="selectMatch(match)" >
+              {{ match.score1 }} - {{ match.score2 }}
+            </button>
+            
             <div class="team-name" style="flex: 1; text-align: center;">{{ match.equipe2 }}</div>
           </div>
 
@@ -247,10 +251,7 @@
           <div *ngFor="let buteur of selectedMatch.buteurs; let i = index" class="buteur-item">
             <div class="d-flex justify-content-between align-items-center">
               <span>
-                ⚽ {{ buteur.nom }} ({{ buteur.minute }}') - 
-                <span [class]="buteur.equipe === 1 ? 'buteur-equipe1' : 'buteur-equipe2'">
-                  {{ buteur.equipe === 1 ? selectedMatch.equipe1 : selectedMatch.equipe2 }}
-                </span>
+                ⚽ {{ buteur.nom }} ({{ buteur.minute }}') - {{ buteur.equipe === 1 ? selectedMatch.equipe1 : selectedMatch.equipe2 }}
               </span>
               <div>
                 <button class="btn btn-sm btn-outline-primary me-2" 
