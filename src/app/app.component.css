@@ -158,7 +158,7 @@ h1 {
 }
 
 /* Style responsive */
-@media (max-width: 400px) {
+@media (max-width: 300px) {
   .container {
     margin: 0.5rem;
     padding: 1rem;
@@ -262,7 +262,7 @@ h1 {
 }
 
 /* Ajouter des styles pour les très petits écrans */
-@media (max-width: 400px) {
+@media (max-width: 300px) {
   h1 {
     font-size: 1.2rem;
   }
@@ -444,7 +444,7 @@ h1 {
 }
 
 /* Ajuster pour mobile */
-@media (max-width: 400px) {
+@media (max-width: 300px) {
   .match-actions {
     flex-direction: row; /* S'assurer que les boutons sont en ligne */
     align-items: center; /* Centrer verticalement les boutons */
@@ -524,7 +524,7 @@ h1 {
 }
 
 /* Ajuster pour mobile */
-@media (max-width: 400px) {
+@media (max-width: 300px) {
   .goal-celebration {
     width: 90%;
     padding: 1rem;
@@ -556,7 +556,7 @@ h1 {
 }
 
 /* Ajuster pour mobile */
-@media (max-width: 400px) {
+@media (max-width: 300px) {
   .minutes-list {
     font-size: 0.8em;
   }
@@ -614,7 +614,7 @@ h1 {
 }
 
 /* Ajuster pour mobile */
-@media (max-width: 400px) {
+@media (max-width: 300px) {
   .section-header {
     padding: 0.8rem 0.5rem;
   }
@@ -724,7 +724,7 @@ h1 {
 }
 
 /* Ajuster pour mobile */
-@media (max-width: 400px) {
+@media (max-width: 300px) {
   .terrain {
     min-height: 600px;
   }
@@ -788,7 +788,7 @@ h1 {
   padding: 1rem;
   border-radius: 10px;
   max-width: 90%;
-  width: 400px;
+  width: 300px;
   text-align: center;
 }
 
@@ -799,7 +799,7 @@ h1 {
 }
 
 /* Ajuster pour mobile */
-@media (max-width: 400px) {
+@media (max-width: 300px) {
   .player-name {
     font-size: 0.6em;
     bottom: -15px;
