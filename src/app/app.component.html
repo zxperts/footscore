@@ -75,7 +75,7 @@
       <div *ngFor="let match of matches.slice().reverse()" class="list-group-item">
         <div class="match-details">
           <div class="match-info text-muted small text-center">
-            <span>{{ match.heureDebut | date:'dd/MM/yyyy HH:mm' }}</span>
+            <span>{{ match.heureDebut | date:'EEEE d MMMM yyyy HH:mm' }}</span>
             <span class="mx-2" *ngIf="match.lieu">•</span>
             <span *ngIf="match.lieu">{{ match.lieu }}</span>
             
