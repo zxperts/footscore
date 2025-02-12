@@ -86,9 +86,9 @@
           </div>
           
           <div class="match-score">
-            <span class="team-name">{{ match.equipe1 }}</span>
-            <span class="score">{{ match.score1 }} - {{ match.score2 }}</span>
-            <span class="team-name">{{ match.equipe2 }}</span>
+            <div class="team-name" style="flex: 1; text-align: center;">{{ match.equipe1 }}</div>
+            <div class="score" style="text-align: center;">{{ match.score1 }} - {{ match.score2 }}</div>
+            <div class="team-name" style="flex: 1; text-align: center;">{{ match.equipe2 }}</div>
           </div>
 
           <!-- Section pour afficher les buteurs -->
@@ -147,9 +147,9 @@
       <!-- Ajout du score en haut -->
       <div class="match-score-display mb-4">
         <div class="match-score">
-          <span class="team-name">{{ selectedMatch.equipe1 }}</span>
-          <span class="score">{{ selectedMatch.score1 }} - {{ selectedMatch.score2 }}</span>
-          <span class="team-name">{{ selectedMatch.equipe2 }}</span>
+          <div class="team-name" style="flex: 1; text-align: center;">{{ selectedMatch.equipe1 }}</div>
+          <div class="score" style="text-align: center;">{{ selectedMatch.score1 }} - {{ selectedMatch.score2 }}</div>
+          <div class="team-name" style="flex: 1; text-align: center;">{{ selectedMatch.equipe2 }}</div>
         </div>
       </div>
 

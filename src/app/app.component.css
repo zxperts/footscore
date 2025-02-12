@@ -65,15 +65,16 @@ h1 {
 }
 
 .team-name {
+  flex: 1;
+  text-align: center;
   font-weight: 600;
   color: #2c3e50;
   text-transform: uppercase;
-  font-size: 1em;
+  font-size: 0.8em;
   white-space: normal;
   overflow: visible;
   text-overflow: clip;
 }
-
 
 .score {
   background-color: #3498db;
@@ -157,7 +158,7 @@ h1 {
 }
 
 /* Style responsive */
-@media (max-width: 768px) {
+@media (max-width: 400px) {
   .container {
     margin: 0.5rem;
     padding: 1rem;
@@ -261,7 +262,7 @@ h1 {
 }
 
 /* Ajouter des styles pour les très petits écrans */
-@media (max-width: 480px) {
+@media (max-width: 400px) {
   h1 {
     font-size: 1.2rem;
   }
@@ -443,7 +444,7 @@ h1 {
 }
 
 /* Ajuster pour mobile */
-@media (max-width: 768px) {
+@media (max-width: 400px) {
   .match-actions {
     flex-direction: row; /* S'assurer que les boutons sont en ligne */
     align-items: center; /* Centrer verticalement les boutons */
@@ -456,6 +457,8 @@ h1 {
   .buteur-equipe1, .buteur-equipe2 {
     font-size: 0.8em;
   }
+
+  /* Ajustements supplémentaires pour d'autres éléments si nécessaire */
 }
 
 /* Ajouter les styles pour la célébration */
@@ -521,7 +524,7 @@ h1 {
 }
 
 /* Ajuster pour mobile */
-@media (max-width: 768px) {
+@media (max-width: 400px) {
   .goal-celebration {
     width: 90%;
     padding: 1rem;
@@ -553,7 +556,7 @@ h1 {
 }
 
 /* Ajuster pour mobile */
-@media (max-width: 768px) {
+@media (max-width: 400px) {
   .minutes-list {
     font-size: 0.8em;
   }
@@ -611,7 +614,7 @@ h1 {
 }
 
 /* Ajuster pour mobile */
-@media (max-width: 768px) {
+@media (max-width: 400px) {
   .section-header {
     padding: 0.8rem 0.5rem;
   }
@@ -721,7 +724,7 @@ h1 {
 }
 
 /* Ajuster pour mobile */
-@media (max-width: 768px) {
+@media (max-width: 400px) {
   .terrain {
     min-height: 600px;
   }
@@ -796,7 +799,7 @@ h1 {
 }
 
 /* Ajuster pour mobile */
-@media (max-width: 768px) {
+@media (max-width: 400px) {
   .player-name {
     font-size: 0.6em;
     bottom: -15px;
