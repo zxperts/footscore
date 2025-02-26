@@ -5,7 +5,7 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Team, TEAMS, ensureDefaultPlayer } from './models/team.model';
 import { FormsModule } from '@angular/forms';
-
+import { DispositionTactiqueComponent } from './disposition-tactique/disposition-tactique.component';
 // Déplacer l'interface en dehors de la classe, au début du fichier
 interface GroupedScorer {
   nom: string;
@@ -15,7 +15,7 @@ interface GroupedScorer {
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FormsModule],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, DispositionTactiqueComponent],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
