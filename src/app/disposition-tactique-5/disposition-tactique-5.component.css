@@ -1,0 +1,60 @@
+/* Fond et styles généraux */
+:host {
+  background: linear-gradient(rgb(255, 255, 255), rgba(0, 0, 0, 0.108)),
+              url('https://images.unsplash.com/photo-1556056504-5c7696c4c28d?ixlib=rb-1.2.1&auto=format&fit=crop&w=1920&q=80') no-repeat center center fixed;
+  min-height: 100vh;
+  display: block;
+}
+.formation-5 {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%; /* Ensure it takes full width */
+  max-width: 1000px; /* Set a max width similar to the container */
+  margin: 0 auto; /* Center the formation */
+  padding: 1rem; /* Add padding for spacing */
+  background-color: rgba(248, 249, 250, 0.8); /* Light background for visibility */
+  border-radius: 10px; /* Rounded corners */
+}
+
+.terrain {
+  position: relative;
+  width: 100%;
+  height: 300px; /* Adjust height as needed */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.gardien {
+  position: absolute;
+  top: 5%; /* Position the goalkeeper at the top */
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.milieu-gauche {
+  position: absolute;
+  bottom: 30%; /* Position the left midfielder */
+  left: 20%; /* Adjust as needed */
+}
+
+.milieu-droit {
+  position: absolute;
+  bottom: 30%; /* Position the right midfielder */
+  right: 20%; /* Adjust as needed */
+}
+
+.defenseur {
+  position: absolute;
+  bottom: 50%; /* Position the defender */
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.attaquant {
+  position: absolute;
+  bottom: 10%; /* Position the attacker */
+  left: 50%;
+  transform: translateX(-50%);
+} 

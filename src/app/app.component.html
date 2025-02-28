@@ -70,7 +70,7 @@
   </form>
 
   <div class="mt-4" *ngIf="matches.length > 0">
-    <h2>Matchs créés</h2>
+<!--     <h2>Matchs créés</h2> -->
     <div class="list-group">
       <div *ngFor="let match of matches.slice().reverse()" class="list-group-item">
         <div class="match-details">
@@ -269,7 +269,7 @@
       </div>
 
       <!-- Dans la modal, après la liste des buteurs -->
-      <div class="disposition-section mb-3">
+<!--       <div class="disposition-section mb-3">
         <div class="section-header" (click)="toggleDispositionView()">
           <h4>
             <span class="toggle-icon">{{ showDisposition ? '▼' : '▶' }}</span>
@@ -279,7 +279,7 @@
         <div *ngIf="showDisposition">
           <app-disposition-tactique></app-disposition-tactique>
         </div>
-    </div>
+    </div> -->
 
       <!-- Modifier le sélecteur de joueur -->
       <div class="player-selector" *ngIf="selectedPosition && selectedMatch">
