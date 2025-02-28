@@ -101,23 +101,29 @@
               <!-- Buteurs équipe 1 -->
               <div class="scorers-column left">
                 <div *ngFor="let buteur of getGroupedScorers(match, 1)">
-                  <span class="buteur-equipe1">
-                    ⚽ {{ buteur.nom }} 
-                    <span class="minutes-list">
-                      ({{ buteur.minutes.join("', ") }}')
+                  <div class="buteur-equipe">
+                    <span>⚽ {{ buteur.nom }}:</span>
+                    <span class="minutes-list left-team">
+                      <ng-container *ngFor="let minute of buteur.minutes; let i = index">
+                        <span *ngIf="i > 0 && i % 5 === 0"><br></span> <!-- Line break after every 5 minutes -->
+                        {{minute}}'<span *ngIf="i < buteur.minutes.length - 1">,</span>
+                      </ng-container>
                     </span>
-                  </span>
+                  </div>
                 </div>
               </div>
               <!-- Buteurs équipe 2 -->
               <div class="scorers-column right">
                 <div *ngFor="let buteur of getGroupedScorers(match, 2)">
-                  <span class="buteur-equipe2">
-                    ⚽ {{ buteur.nom }} 
-                    <span class="minutes-list">
-                      ({{ buteur.minutes.join("', ") }}')
+                  <div class="buteur-equipe">
+                    <span>⚽ {{ buteur.nom }}:</span>
+                    <span class="minutes-list right-team">
+                      <ng-container *ngFor="let minute of buteur.minutes; let i = index">
+                        <span *ngIf="i > 0 && i % 5 === 0"><br></span> <!-- Line break after every 5 minutes -->
+                        {{minute}}'<span *ngIf="i < buteur.minutes.length - 1">,</span>
+                      </ng-container>
                     </span>
-                  </span>
+                  </div>
                 </div>
               </div>
             </div>

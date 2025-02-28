@@ -337,12 +337,26 @@ h1 {
 }
 
 .minutes-list {
+
+  flex-wrap: wrap;
   margin-left: 0.5rem;
   font-size: 0.9em;
 }
 
+.minutes-list.left-team {
+  justify-content: flex-end;
+}
+
+.minutes-list.right-team {
+  justify-content: flex-start;
+}
+
+.minutes-list span {
+  margin-right: 0.5rem;
+}
+
 /* Style pour les badges des joueurs */
-.player-badges-team1 button {
+.player-badges-team1 button ZZZ{
   border-color: #3498db;
   color: #3498db;
 }
@@ -544,12 +558,6 @@ h1 {
   }
 }
 
-/* Ajouter ces styles */
-.minutes-list {
-  display: inline-block;
-  font-size: 0.9em;
-  color: #666;
-}
 
 .scorers-column div {
   margin: 0.4rem 0;
