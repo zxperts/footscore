@@ -19,19 +19,19 @@
         <div class="mb-3">
           <label for="equipe1" class="form-label">Équipe 1</label>
           <select class="form-select" id="equipe1" formControlName="equipe1" #equipe1Select
-                  (change)="equipe1Select.value === 'new' && addNewTeam(equipe1Select)">
+                  (change)="equipe1Select.value === 'new1' && addNewTeam(equipe1Select)">
             <option *ngFor="let team of teams" [value]="team.name">{{ team.name }}</option>
-            <option value="new">+ Ajouter une nouvelle équipe</option>
+            <option value="new1">+ Ajouter une nouvelle équipe</option>
           </select>
         </div>
 
         <div class="mb-3">
           <label for="equipe2" class="form-label">Équipe 2</label>
           <select class="form-select" id="equipe2" formControlName="equipe2" #equipe2Select
-                  (change)="equipe2Select.value === 'new' && addNewTeam(equipe2Select)">
+                  (change)="equipe2Select.value === 'new2' && addNewTeam(equipe2Select)">
             <option value="">Sélectionner une équipe</option>
             <option *ngFor="let team of teams" [value]="team.name">{{ team.name }}</option>
-            <option value="new">+ Ajouter une nouvelle équipe</option>
+            <option value="new2">+ Ajouter une nouvelle équipe</option>
           </select>
         </div>
       </div>
@@ -132,13 +132,13 @@
           <!-- Boutons d'action -->
           <div class="match-actions" *ngIf="match.showElements">
             <button class="btn btn-sm btn-outline-primary" (click)="selectMatch(match)">
-              🖍️
+              <span style="font-size: 2em;">⚽</span>
             </button>
             <button class="btn btn-sm btn-outline-primary" (click)="openDispositionModal(match)">
               Disposition tactique
-            </button>
-            <button class="btn btn-sm btn-outline-danger" (click)="supprimerMatch(match)">
-              🗑️
+            </button>            
+            <button class="btn btn-sm btn-outline-primary"  (click)="toggleMatchEditForm(match)">
+              <span style="font-size: 2em;">{{ showMatchEditForm ? '🖍️' : '✏️' }}</span>
             </button>
           </div>
         </div>
@@ -147,11 +147,9 @@
   </div>
 
   <!-- Modal pour modifier le score -->
-  <div *ngIf="selectedMatch" class="score-modal">
+  <div *ngIf="selectedMatch && showScoreForm" class="score-modal">
     <div class="score-modal-content">
-      <!-- Ajouter le bouton de fermeture -->
-      <button class="close-button" (click)="selectedMatch = null">×</button>
-      
+      <button class="close-button" (click)="showScoreForm = false">×</button>
       <h3>Modifier le score</h3>
 
       <!-- Ajout du score en haut -->
@@ -167,7 +165,7 @@
       <button *ngIf="!showButeurForm" 
               class="btn btn-primary mb-3" 
               (click)="showButeurForm = true">
-        Nouveau buteur
+        Créer un buteur
       </button>
 
       <!-- Formulaire d'ajout de buteur -->
@@ -177,14 +175,7 @@
           <div class="row g-3">
             <div class="col-md-5">
               <label class="form-label small">Nom du buteur</label>
-              <select class="form-select" formControlName="nom" #joueurSelect
-                      (change)="joueurSelect.value === 'new' && addNewPlayer()">
-                <option value="">Sélectionner un joueur</option>
-                <option *ngFor="let player of getPlayersList()" [value]="player">
-                  {{player}}
-                </option>
-                <option value="new">+ Ajouter un nouveau joueur</option>
-              </select>
+              <input type="text" class="form-control" placeholder="Nom du buteur" formControlName="nom">
             </div>
             <div class="col-md-3">
               <label class="form-label small">Minute</label>
@@ -206,7 +197,8 @@
           <div class="mt-2">
             <button type="submit" 
                     class="btn btn-primary me-2" 
-                    [disabled]="!buteurForm.valid">
+                    [disabled]="!buteurForm.valid"
+                    (click)="addNewPlayer(buteurForm.get('nom')?.value)">
               {{ editingButeur ? 'Enregistrer' : 'Ajouter' }}
             </button>
             <button type="button" 
@@ -312,8 +304,54 @@
     </div>
   </div>
 
+  <!-- Modifier le match -->
+  <div *ngIf="selectedMatch && showMatchEditForm" class="match-edit-modal">
+    <div class="modal-content">
+      <span class="close-button" (click)="showMatchEditForm = false">×</span>
+      <h3>Modifier le match</h3>
+      <form [formGroup]="matchEditForm" (ngSubmit)="onSubmitMatchEdit()">
+        <div class="button-group mt-3">
+          <button class="btn btn-outline-danger" (click)="supprimerMatch(this.selectedMatch)">
+            🗑️ Supprimer le match
+          </button>
+        </div>
+        <div class="form-group">
+          <label for="equipe1">Équipe 1:</label>
+          <select class="form-select" id="equipe1" formControlName="equipe1" required #equipe1Select
+            (change)="equipe1Select.value === 'new' && editNewTeam(equipe1Select)">
+            <option *ngFor="let team of teams" [value]="team.name">{{ team.name }}</option>
+            <option value="new">+ Ajouter une nouvelle équipe</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label for="equipe2">Équipe 2:</label>
+          <select class="form-select" id="equipe2" formControlName="equipe2" required #equipe2Select
+            (change)="equipe2Select.value === 'new' && editNewTeam(equipe2Select)">
+            <option *ngFor="let team of teams" [value]="team.name">{{ team.name }}</option>
+            <option value="new">+ Ajouter une nouvelle équipe</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label for="heureDebut" class="form-label">Heure de début:</label>
+          <input id="heureDebut" type="datetime-local" class="form-control" formControlName="heureDebut" required>
+        </div>
+        
+        <div class="form-group">
+          <label for="lieu" class="form-label">Lieu:</label>
+          <input id="lieu" class="form-control" formControlName="lieu" placeholder="Entrez le lieu du match">
+        </div>
+        
+        <div class="button-group mt-3">
+          <button type="submit" class="btn btn-primary" (click)="onSubmitMatchEdit()">Enregistrer les Modifications</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- Ajouter à la fin du template, juste avant la fermeture de la dernière div -->
-  <div class="goal-celebration" *ngIf="showGoalCelebration">
+  <div class="goal-celebration" (click)="onSubmitMatchEdit()" *ngIf="showGoalCelebration">
     <div class="celebration-content">
       <div class="goal-text">BUUUUT !</div>
       <div class="scorer-text">
@@ -332,8 +370,8 @@
       <button class="close-button" (click)="closeDispositionModal()">×</button>
       <h3>Disposition tactique</h3>
       
-      <button class="btn btn-outline-primary mb-3" (click)="toggleDefendersAndMidfielders()">
-        {{ showDefendersAndMidfielders ? 'Afficher Jeu à 5' : 'Afficher Jeu à 8' }}
+      <button class="btn btn-sm btn-outline-primary" (click)="toggleDefendersAndMidfielders()">
+        {{ showDefendersAndMidfielders ? '8vs8' : '5vs5' }} Jeu à 5 ou 8
       </button>
 
       <div class="disposition-content">

@@ -43,6 +43,9 @@ export class AppComponent implements OnInit {
   showDispositionModal: boolean = false;  // Ajouter cette propriété
   showElements: boolean = true; // Par défaut, afficher les éléments
   showDefendersAndMidfielders: boolean = true; // Control visibility for modal
+  showMatchEditForm: boolean = false; // Control visibility for match edit form
+  matchEditForm: FormGroup; // Form for editing match details
+  showScoreForm: boolean = false; // Control visibility for score form
 
   constructor(private fb: FormBuilder) {
     this.matchForm = this.fb.group({
@@ -61,6 +64,13 @@ export class AppComponent implements OnInit {
       nom: ['', Validators.required],
       minute: ['', [Validators.required, Validators.min(1), Validators.max(90)]],
       equipe: ['', Validators.required]
+    });
+
+    this.matchEditForm = this.fb.group({
+      equipe1: ['', Validators.required],
+      equipe2: ['', Validators.required],
+      heureDebut: ['', Validators.required],
+      lieu: ['']
     });
   }
 
@@ -144,6 +154,7 @@ export class AppComponent implements OnInit {
     
     // Ne plus initialiser showButeurForm à true
     this.showButeurForm = false;  // Masquer le formulaire par défaut
+    this.showScoreForm = true;
     this.buteurForm.patchValue({
       nom: '',
       minute: elapsedMinutes,
@@ -310,31 +321,49 @@ export class AppComponent implements OnInit {
   addNewTeam(selectElement: HTMLSelectElement) {
     const newTeamName = prompt('Entrez le nom de la nouvelle équipe:');
     if (newTeamName && newTeamName.trim()) {
-      const newTeam: Team = ensureDefaultPlayer({
+      const newTeam: Team = {
         id: this.teams.length + 1,
         name: newTeamName.trim(),
         players: []
-      });
+      };
+      
       this.teams.push(newTeam);
       selectElement.value = newTeam.name;
-      
-      // Mettre à jour le formulaire
+
+      // Update the form control based on which select element was used
       const formControl = selectElement.id === 'equipe1' ? 'equipe1' : 'equipe2';
       this.matchForm.get(formControl)?.setValue(newTeam.name);
     }
   }
 
-  addNewPlayer() {
-    const newPlayerName = prompt('Entrez le nom du nouveau joueur:');
-    if (newPlayerName && newPlayerName.trim()) {
+  editNewTeam(selectElement: HTMLSelectElement) {
+    const newTeamName = prompt('Entrez le nom de la nouvelle équipe:');
+    if (newTeamName && newTeamName.trim()) {
+      const newTeam: Team = {
+        id: this.teams.length + 1,
+        name: newTeamName.trim(),
+        players: []
+      };
+      
+      this.teams.push(newTeam);
+      selectElement.value = newTeam.name;
+
+      // Update the form control based on which select element was used
+      const formControl = selectElement.id === 'equipe1' ? 'equipe1' : 'equipe2';
+      this.matchEditForm.get(formControl)?.setValue(newTeam.name);
+    }
+  }
+
+  addNewPlayer(playerName: string) {
+    if (playerName && playerName.trim()) {
       const selectedTeam = this.teams.find(team => 
         team.name === (this.buteurForm.get('equipe')?.value === 1 ? 
           this.selectedMatch?.equipe1 : this.selectedMatch?.equipe2)
       );
       
       if (selectedTeam) {
-        selectedTeam.players.push(newPlayerName.trim());
-        this.buteurForm.get('nom')?.setValue(newPlayerName.trim());
+        selectedTeam.players.push(playerName.trim());
+        this.buteurForm.get('nom')?.setValue(playerName.trim());
       }
     }
   }
@@ -500,5 +529,40 @@ export class AppComponent implements OnInit {
 
   toggleDefendersAndMidfielders() {
     this.showDefendersAndMidfielders = !this.showDefendersAndMidfielders;
+  }
+
+  toggleMatchEditForm(match: Match) {
+    this.selectedMatch = match;
+    this.matchEditForm.patchValue({
+      equipe1: match.equipe1,
+      equipe2: match.equipe2,
+      heureDebut: this.formatDate(match.heureDebut),
+      lieu: match.lieu
+    });
+    this.showMatchEditForm = !this.showMatchEditForm;
+  }
+
+  private formatDate(date: Date): string {
+    const d = new Date(date);
+    return d.toISOString().slice(0, 16);
+  }
+
+  onSubmitMatchEdit() {
+    console.log("onSubmitMatchEdit");
+    if (this.matchEditForm.valid && this.selectedMatch) {
+        const updatedMatch = this.matchEditForm.value;
+
+        // Mettre à jour le match sélectionné avec les nouvelles valeurs
+        this.selectedMatch.equipe1 = updatedMatch.equipe1;
+        this.selectedMatch.equipe2 = updatedMatch.equipe2;
+        this.selectedMatch.heureDebut = new Date(updatedMatch.heureDebut); // Assurez-vous que c'est un objet Date
+        this.selectedMatch.lieu = updatedMatch.lieu;
+
+        // Optionnel : vous pouvez enregistrer les données ou effectuer d'autres actions
+        console.log('Match mis à jour:', this.selectedMatch);
+
+        // Fermer la modale après la soumission
+        this.showMatchEditForm = false;
+    }
   }
 }
