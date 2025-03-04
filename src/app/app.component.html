@@ -1,6 +1,6 @@
+<app-navbar></app-navbar>
 <div class="container mt-4">
-  <h1>Encodez vos scores en temps réel !</h1>
-  
+ <!-- <h1>Encodez vos scores en temps réel !</h1> -->  
   <!-- Bouton pour afficher le formulaire -->
   <button *ngIf="!showMatchForm" 
           class="btn btn-primary mt-4" 
@@ -41,7 +41,7 @@
         <div class="mb-3">
           <label for="heureDebut" class="form-label text-muted">Heure de début</label>
           <input 
-            type="datetime-local" 
+            type="datetime-local" step="3600" 
             class="form-control form-control-sm" 
             id="heureDebut" 
             formControlName="heureDebut">

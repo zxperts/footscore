@@ -5,9 +5,8 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Team, TEAMS, ensureDefaultPlayer } from './models/team.model';
 import { FormsModule } from '@angular/forms';
-import { DispositionTactiqueComponent } from './disposition-tactique/disposition-tactique.component';
-import { DispositionTactique5Component } from './disposition-tactique-5/disposition-tactique-5.component';
 import { PlayerSelectorComponent } from './player-selector/player-selector.component';
+import { NavbarComponent } from './component/navbar/navbar.component';
 // Déplacer l'interface en dehors de la classe, au début du fichier
 interface GroupedScorer {
   nom: string;
@@ -17,7 +16,7 @@ interface GroupedScorer {
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FormsModule, DispositionTactiqueComponent, DispositionTactique5Component, PlayerSelectorComponent],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, PlayerSelectorComponent, NavbarComponent],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
@@ -536,14 +535,20 @@ export class AppComponent implements OnInit {
     this.matchEditForm.patchValue({
       equipe1: match.equipe1,
       equipe2: match.equipe2,
-      heureDebut: this.formatDate(match.heureDebut),
+      heureDebut: this.getNearestValidTime(match.heureDebut),
       lieu: match.lieu
     });
     this.showMatchEditForm = !this.showMatchEditForm;
   }
 
-  private formatDate(date: Date): string {
+  private getNearestValidTime(date: Date): string {
     const d = new Date(date);
+    const minutes = d.getMinutes();
+    if (minutes < 30) {
+      d.setMinutes(0);
+    } else {
+      d.setMinutes(30);
+    }
     return d.toISOString().slice(0, 16);
   }
 
