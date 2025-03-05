@@ -1,12 +1,59 @@
 <app-navbar></app-navbar>
 <div class="container mt-4">
- <!-- <h1>Encodez vos scores en temps réel !</h1> -->  
-  <!-- Bouton pour afficher le formulaire -->
-  <button *ngIf="!showMatchForm" 
-          class="btn btn-primary mt-4" 
-          (click)="showMatchForm = true">
-    Créer un match
-  </button>
+
+  <div class="d-flex justify-content-between align-items-center mb-3">
+
+    <!-- Bouton pour afficher le formulaire -->
+    <button *ngIf="!showMatchForm" 
+            class="btn btn-primary mt-4" 
+            (click)="showMatchForm = true">
+      Créer un match
+    </button>
+
+    <button *ngIf="!showTeamFilterModal" 
+            class="btn btn-outline-primary mt-4" 
+            (click)="showTeamFilterModal = true">
+            Equipes🔎
+    </button>
+    
+
+
+      <div class="score-modal" tabindex="-1" aria-labelledby="teamFilterModalLabel" aria-hidden="true" *ngIf="showTeamFilterModal">
+        <div class="modal-dialog modal-body" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="teamFilterModalLabel">Sélectionner une Équipe</h5>
+              <button type="button" class="close-button" (click)="closeTeamFilterModal()" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <div *ngFor="let team of teams" class="form-check">
+                <input type="radio" 
+                       class="form-check-input" 
+                       [value]="team.name" 
+                       [(ngModel)]="selectedTeamFilter" 
+                       id="{{team.name}}">
+                <label class="form-check-label" for="{{team.name}}">{{ team.name }}</label>
+              </div>
+              <div class="form-check">
+                <input type="radio" 
+                       class="form-check-input" 
+                       [value]="''" 
+                       [(ngModel)]="selectedTeamFilter" 
+                       id="allTeams">
+                <label class="form-check-label" for="allTeams">Toutes les équipes</label>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" (click)="closeTeamFilterModal()">Fermer</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+  </div>
 
   <!-- Formulaire masqué par défaut -->
   <form *ngIf="showMatchForm" 
@@ -69,10 +116,10 @@
     </div>
   </form>
 
-  <div class="mt-4" *ngIf="matches.length > 0">
-<!--     <h2>Matchs créés</h2> -->
+  <div class="mt-4" *ngIf="filteredMatches.length > 0">
+    <h2>Matchs créés</h2>
     <div class="list-group">
-      <div *ngFor="let match of matches.slice().reverse()" class="list-group-item">
+      <div *ngFor="let match of filteredMatches.slice().reverse()" class="list-group-item">
         <div class="match-details">
           <div class="match-info text-muted small text-center">
             <span>{{ match.heureDebut | date:'EEEE d MMMM yyyy HH:mm' }}</span>

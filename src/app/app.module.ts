@@ -4,7 +4,7 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { AppComponent } from './app.component';
 import { PlayerSelectorComponent } from './player-selector/player-selector.component';
 import { NavbarComponent } from './component/navbar/navbar.component';
-
+import { FormsModule } from '@angular/forms';
 
 @NgModule({
   declarations: [
@@ -15,7 +15,8 @@ import { NavbarComponent } from './component/navbar/navbar.component';
 
   imports: [
     BrowserModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    FormsModule
   ],
   providers: [],
   bootstrap: [AppComponent]

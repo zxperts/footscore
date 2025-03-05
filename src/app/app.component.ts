@@ -45,6 +45,8 @@ export class AppComponent implements OnInit {
   showMatchEditForm: boolean = false; // Control visibility for match edit form
   matchEditForm: FormGroup; // Form for editing match details
   showScoreForm: boolean = false; // Control visibility for score form
+  selectedTeamFilter: string = ''; // Property to hold the selected team for filtering
+  showTeamFilterModal: boolean = false; // Control visibility for team filter modal
 
   constructor(private fb: FormBuilder) {
     this.matchForm = this.fb.group({
@@ -569,5 +571,19 @@ export class AppComponent implements OnInit {
         // Fermer la modale après la soumission
         this.showMatchEditForm = false;
     }
+  }
+
+  // Method to filter matches based on the selected team
+  get filteredMatches() {
+    console.log("filteredMatches", this.selectedTeamFilter);
+    if (!this.selectedTeamFilter) {
+      return this.matches; // Return all matches if no team is selected
+    }
+    return this.matches.filter(match => match.equipe1 === this.selectedTeamFilter || match.equipe2 === this.selectedTeamFilter);
+  }
+
+  // Method to close the team filter modal
+  closeTeamFilterModal() {
+    this.showTeamFilterModal = false;
   }
 }
