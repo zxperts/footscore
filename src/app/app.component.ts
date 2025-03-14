@@ -96,7 +96,7 @@ export class AppComponent implements OnInit {
       const newMatch: Match = {
         id: this.matches.length + 1,
         ...this.matchForm.value,
-        heureDebut: new Date(matchStartTime.getTime() - timezoneOffset), // Ajuster pour le fuseau horaire
+        //heureDebut: new Date(matchStartTime.getTime() - timezoneOffset), // Ajuster pour le fuseau horaire
         score1: 0,
         score2: 0,
         buteurs: [],
