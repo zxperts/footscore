@@ -116,8 +116,8 @@ export class AppComponent implements OnInit {
     const matchStart = new Date(matchStartTime);
     
     // Ajuster pour le fuseau horaire local
-    const timezoneOffset = matchStart.getTimezoneOffset() * 60000; // Convertir en millisecondes
-    const localMatchStart = new Date(matchStart.getTime() + timezoneOffset);
+    //const timezoneOffset = matchStart.getTimezoneOffset() * 60000; // Convertir en millisecondes
+    const localMatchStart = new Date(matchStart.getTime() );
     
     // Calculer la différence en minutes
     const diffInMinutes = Math.floor((now.getTime() - localMatchStart.getTime()) / (1000 * 60));
