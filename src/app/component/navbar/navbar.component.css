@@ -1,3 +1,7 @@
 .navbar {
   margin-bottom: 20px; /* Add some space below the navbar */
 } 
+
+a.nav-link {
+  cursor: pointer;
+}

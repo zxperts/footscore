@@ -1,5 +1,5 @@
-<app-navbar></app-navbar>
-<div class="container mt-4">
+<!-- <app-navbar></app-navbar>
+ --><div class="container mt-4">
 
   <div class="d-flex justify-content-between align-items-center mb-3">
 
@@ -209,52 +209,61 @@
       </div>
 
       <!-- Bouton pour afficher le formulaire -->
-      <button *ngIf="!showButeurForm" 
+<!--       <button *ngIf="!showButeurForm" 
               class="btn btn-primary mb-3" 
               (click)="showButeurForm = true">
         Créer un buteur
-      </button>
+      </button> -->
 
-      <!-- Formulaire d'ajout de buteur -->
-      <div class="mb-3" *ngIf="showButeurForm">
-        <form [formGroup]="buteurForm" (ngSubmit)="ajouterButeur()" class="mt-3">
-          <h4>{{ editingButeur ? 'Modifier le buteur' : 'Nouveau buteur' }}</h4>
-          <div class="row g-3">
-            <div class="col-md-5">
-              <label class="form-label small">Nom du buteur</label>
-              <input type="text" class="form-control" placeholder="Nom du buteur" formControlName="nom">
+      <!-- Modal pour ajouter/modifier un buteur -->
+      <div class="score-modal" tabindex="-1" *ngIf="showButeurForm">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">{{ editingButeur ? 'Modifier le buteur' : 'Nouveau buteur' }}</h5>
+              <button type="button" class="btn-close" (click)="showButeurForm = false"></button>
             </div>
-            <div class="col-md-3">
-              <label class="form-label small">Minute</label>
-              <input type="number" 
-                     class="form-control" 
-                     placeholder="Minute" 
-                     formControlName="minute" 
-                     min="1" 
-                     max="90">
-            </div>
-            <div class="col-md-4">
-              <label class="form-label small">Équipe</label>
-              <select class="form-select" formControlName="equipe">
-                <option [value]="1">{{ selectedMatch.equipe1 }}</option>
-                <option [value]="2">{{ selectedMatch.equipe2 }}</option>
-              </select>
+            <div class="modal-body">
+              <form [formGroup]="buteurForm" (ngSubmit)="ajouterButeur()">
+                <div class="row g-3">
+                  <div class="col-md-5">
+                    <label class="form-label small">Nom du buteur</label>
+                    <input type="text" class="form-control" placeholder="Nom du buteur" formControlName="nom">
+                  </div>
+                  <div class="col-md-3">
+                    <label class="form-label small">Minute</label>
+                    <input type="number" 
+                           class="form-control" 
+                           placeholder="Minute" 
+                           formControlName="minute" 
+                           min="1" 
+                           max="90">
+                  </div>
+                  <div class="col-md-4">
+                    <label class="form-label small">Équipe</label>
+                    <select class="form-select" formControlName="equipe">
+                      <option [value]="1">{{ selectedMatch.equipe1 }}</option>
+                      <option [value]="2">{{ selectedMatch.equipe2 }}</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="mt-2">
+                  <button type="submit" 
+                          class="btn btn-primary me-2" 
+                          [disabled]="!buteurForm.valid"
+                          (click)="addNewPlayer(buteurForm.get('nom')?.value)">
+                    {{ editingButeur ? 'Enregistrer' : 'Ajouter' }}
+                  </button>
+                  <button type="button" 
+                          class="btn btn-secondary" 
+                          (click)="annulerEditionButeur()">
+                    Annuler
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
-          <div class="mt-2">
-            <button type="submit" 
-                    class="btn btn-primary me-2" 
-                    [disabled]="!buteurForm.valid"
-                    (click)="addNewPlayer(buteurForm.get('nom')?.value)">
-              {{ editingButeur ? 'Enregistrer' : 'Ajouter' }}
-            </button>
-            <button type="button" 
-                    class="btn btn-secondary" 
-                    (click)="annulerEditionButeur()">
-              Annuler
-            </button>
-          </div>
-        </form>
+        </div>
       </div>
 
       <!-- Liste des joueurs (déplacée avant la liste des buteurs) -->
@@ -268,6 +277,11 @@
                       (click)="quickAddGoal(player, 1)">
                 ⚽ {{ player }}
               </button>
+              <button *ngIf="!showButeurForm" 
+              class="btn btn-outline-primary btn-sm me-2 mb-2"
+              (click)="showButeurForm = true">
+              +
+              </button>
             </div>
           </div>
           <div class="col-md-6">
@@ -277,6 +291,11 @@
                       class="btn btn-outline-secondary btn-sm me-2 mb-2"
                       (click)="quickAddGoal(player, 2)">
                 ⚽ {{ player }}
+              </button>
+              <button *ngIf="!showButeurForm" 
+              class="btn btn-outline-secondary btn-sm me-2 mb-2"
+              (click)="showButeurForm = true">
+              +
               </button>
             </div>
           </div>
@@ -294,18 +313,18 @@
         
         <div *ngIf="showButeursList">
           <div *ngFor="let buteur of selectedMatch.buteurs; let i = index" class="buteur-item">
-            <div class="d-flex justify-content-between align-items-center">
-              <span>
-                ⚽ {{ buteur.nom }} ({{ buteur.minute }}') - {{ buteur.equipe === 1 ? selectedMatch.equipe1 : selectedMatch.equipe2 }}
+            <div class="buteur-item d-flex justify-content-between align-items-center p-2 border rounded mb-2">
+              <span class="flex-grow-1">
+                <strong>⚽ {{ buteur.nom }}</strong> ({{ buteur.minute }}') - <em>{{ buteur.equipe === 1 ? selectedMatch.equipe1 : selectedMatch.equipe2 }}</em>
               </span>
               <div>
                 <button class="btn btn-sm btn-outline-primary me-2" 
                         (click)="modifierButeur(matches.indexOf(selectedMatch), i)">
-                  Modifier
+                  <i class="fas fa-edit"></i> Modifier
                 </button>
                 <button class="btn btn-sm btn-danger" 
                         (click)="supprimerButeur(matches.indexOf(selectedMatch), i)">
-                  Supprimer
+                  <i class="fas fa-trash-alt"></i> Supprimer
                 </button>
               </div>
             </div>
@@ -359,7 +378,7 @@
       <form [formGroup]="matchEditForm" (ngSubmit)="onSubmitMatchEdit()">
         <div class="button-group mt-3">
           <button class="btn btn-outline-danger" (click)="supprimerMatch(this.selectedMatch)">
-            🗑️ Supprimer le match
+            <i class="fas fa-trash-alt"></i> Supprimer le match
           </button>
         </div>
         <div class="form-group">

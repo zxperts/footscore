@@ -639,14 +639,14 @@ h1 {
 
 .terrain {
   background: linear-gradient(to bottom, #4CAF50, #388E3C);
-  border-radius: 10px;
+  border-radius: 0px;
   padding: 0;
   margin: 1rem 0;
   position: relative;
-  min-height: 800px;
+  min-height: 200px;
   display: flex;
   flex-direction: column;
-  gap: 2rem;
+  gap: 0rem;
 }
 
 .formation {
@@ -656,8 +656,8 @@ h1 {
 
 .player-position {
   position: absolute;
-  min-width: 40px;  /* Largeur minimum */
-  height: 40px;
+  min-width: 30px;  /* Largeur minimum */
+  height: 30px;
   width: auto;      /* Permettre l'expansion */
 }
 
