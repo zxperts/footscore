@@ -78,6 +78,7 @@ export class AppComponent implements OnInit {
   ngOnInit() {
     this.loadSavedData();
     this.startAutoSave();
+    this.loadMatchFromUrl();
   }
 
   getCurrentDateTime(): string {
@@ -585,5 +586,71 @@ export class AppComponent implements OnInit {
   // Method to close the team filter modal
   closeTeamFilterModal() {
     this.showTeamFilterModal = false;
+  }
+
+  shareMatch(match: Match) {
+    const matchUrl = `${window.location.origin}?matchId=${match.id}`;
+    const matchInfo = `
+Match : ${match.equipe1} vs ${match.equipe2}
+Score : ${match.score1} - ${match.score2}
+Date : ${match.heureDebut.toLocaleString('fr-FR', { 
+  weekday: 'long', 
+  day: 'numeric', 
+  month: 'long', 
+  year: 'numeric',
+  hour: '2-digit',
+  minute: '2-digit'
+})}
+Lieu : ${match.lieu || 'Non spécifié'}
+
+Buteurs :
+${match.equipe1}:
+${this.getGroupedScorers(match, 1).map(b => `- ${b.nom}: ${b.minutes.join(', ')}'`).join('\n')}
+
+${match.equipe2}:
+${this.getGroupedScorers(match, 2).map(b => `- ${b.nom}: ${b.minutes.join(', ')}'`).join('\n')}
+
+Lien direct vers le match : ${matchUrl}
+    `.trim();
+
+    if (navigator.share) {
+      navigator.share({
+        title: `${match.equipe1} vs ${match.equipe2}`,
+        text: matchInfo,
+        url: matchUrl
+      }).catch(console.error);
+    } else {
+      // Fallback pour les navigateurs qui ne supportent pas l'API Web Share
+      const textArea = document.createElement('textarea');
+      textArea.value = matchInfo;
+      document.body.appendChild(textArea);
+      textArea.select();
+      try {
+        document.execCommand('copy');
+        alert('Informations du match copiées dans le presse-papiers !');
+      } catch (err) {
+        console.error('Erreur lors de la copie:', err);
+      }
+      document.body.removeChild(textArea);
+    }
+  }
+
+  private loadMatchFromUrl() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const matchId = urlParams.get('matchId');
+    
+    if (matchId) {
+      const match = this.matches.find(m => m.id === parseInt(matchId));
+      if (match) {
+        this.selectMatch(match);
+        // Scroll to the match
+        setTimeout(() => {
+          const matchElement = document.querySelector(`[data-match-id="${match.id}"]`);
+          if (matchElement) {
+            matchElement.scrollIntoView({ behavior: 'smooth' });
+          }
+        }, 100);
+      }
+    }
   }
 }

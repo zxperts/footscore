@@ -119,7 +119,9 @@
   <div class="mt-4" *ngIf="filteredMatches.length > 0">
     <h2>Matchs créés</h2>
     <div class="list-group">
-      <div *ngFor="let match of filteredMatches.slice().reverse()" class="list-group-item">
+      <div *ngFor="let match of filteredMatches.slice().reverse()" 
+           class="list-group-item"
+           [attr.data-match-id]="match.id">
         <div class="match-details">
           <div class="match-info text-muted small text-center">
             <span>{{ match.heureDebut | date:'EEEE d MMMM yyyy HH:mm' }}</span>
@@ -184,8 +186,11 @@
             <button class="btn btn-sm btn-outline-primary" (click)="openDispositionModal(match)">
               Disposition tactique
             </button>            
-            <button class="btn btn-sm btn-outline-primary"  (click)="toggleMatchEditForm(match)">
+            <button class="btn btn-sm btn-outline-primary" (click)="toggleMatchEditForm(match)">
               <span style="font-size: 2em;">{{ showMatchEditForm ? '🖍️' : '✏️' }}</span>
+            </button>
+            <button class="btn btn-sm btn-outline-primary" (click)="shareMatch(match)">
+              <span style="font-size: 2em;">✉️</span>
             </button>
           </div>
         </div>
