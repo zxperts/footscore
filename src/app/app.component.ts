@@ -11,6 +11,7 @@ import { NavbarComponent } from './component/navbar/navbar.component';
 interface GroupedScorer {
   nom: string;
   minutes: number[];
+  assist?: string;
 }
 
 @Component({
@@ -36,6 +37,7 @@ export class AppComponent implements OnInit {
   showGoalCelebration: boolean = false;
   lastGoalScorer: string = '';
   lastGoalTeam: string = '';
+  lastGoalAssist: string = '';
   showButeursList: boolean = false;  // Replié par défaut
   showDisposition: boolean = false;
   selectedPosition: { team: number, position: string } | null = null;
@@ -47,6 +49,8 @@ export class AppComponent implements OnInit {
   showScoreForm: boolean = false; // Control visibility for score form
   selectedTeamFilter: string = ''; // Property to hold the selected team for filtering
   showTeamFilterModal: boolean = false; // Control visibility for team filter modal
+  remainingDots: number = 10;
+  private celebrationTimer: any;
 
   constructor(private fb: FormBuilder) {
     this.matchForm = this.fb.group({
@@ -64,7 +68,16 @@ export class AppComponent implements OnInit {
     this.buteurForm = this.fb.group({
       nom: ['', Validators.required],
       minute: ['', [Validators.required, Validators.min(1), Validators.max(90)]],
-      equipe: ['', Validators.required]
+      equipe: ['', Validators.required],
+      assist: ['']
+    });
+
+    // Mettre à jour la liste des joueurs disponibles pour l'assist quand l'équipe change
+    this.buteurForm.get('equipe')?.valueChanges.subscribe(equipe => {
+      const assistControl = this.buteurForm.get('assist');
+      if (assistControl) {
+        assistControl.setValue('');
+      }
     });
 
     this.matchEditForm = this.fb.group({
@@ -236,7 +249,8 @@ export class AppComponent implements OnInit {
       const buteur: Buteur = {
         nom: this.buteurForm.value.nom,
         minute: this.buteurForm.value.minute,
-        equipe: this.buteurForm.value.equipe
+        equipe: this.buteurForm.value.equipe,
+        assist: this.buteurForm.value.assist || undefined
       };
 
       const index = this.matches.findIndex(m => m.id === this.selectedMatch!.id);
@@ -251,19 +265,19 @@ export class AppComponent implements OnInit {
         
         // Mettre à jour le score
         if (buteur.equipe === 1) {
-          this.matches[index].score1++;  // But pour l'équipe 1
+          this.matches[index].score1++;
           this.lastGoalTeam = this.selectedMatch.equipe1;
         } else {
-          this.matches[index].score2++;  // But pour l'équipe 2
+          this.matches[index].score2++;
           this.lastGoalTeam = this.selectedMatch.equipe2;
         }
         
         // Déclencher la célébration
         this.lastGoalScorer = buteur.nom;
-        this.showGoalCelebration = true;
+/*         this.showGoalCelebration = true;
         setTimeout(() => {
           this.showGoalCelebration = false;
-        }, 3000);
+        }, 3000); */
         
         this.buteurForm.reset();
         this.editingButeur = null;
@@ -381,33 +395,45 @@ export class AppComponent implements OnInit {
   quickAddGoal(playerName: string, teamNumber: 1 | 2) {
     if (this.selectedMatch) {
       const elapsedMinutes = this.calculateElapsedMinutes(this.selectedMatch.heureDebut);
+      this.lastGoalScorer = playerName;
+      this.lastGoalTeam = teamNumber === 1 ? this.selectedMatch.equipe1 : this.selectedMatch.equipe2;
+      this.lastGoalAssist = '';
+      this.remainingDots = 10;
+      this.showGoalCelebration = true;
+      
+      // Démarrer le compte à rebours
+      this.celebrationTimer = setInterval(() => {
+        this.remainingDots--;
+        if (this.remainingDots <= 0) {
+          this.showGoalCelebration = false;
+          clearInterval(this.celebrationTimer);
+        }
+      }, 1000);
+    }
+  }
+
+  saveGoalWithAssist() {
+    if (this.selectedMatch) {
       const buteur: Buteur = {
-        nom: playerName,
-        minute: elapsedMinutes,
-        equipe: teamNumber
+        nom: this.lastGoalScorer,
+        minute: this.calculateElapsedMinutes(this.selectedMatch.heureDebut),
+        equipe: this.lastGoalTeam === this.selectedMatch.equipe1 ? 1 : 2,
+        assist: this.lastGoalAssist || undefined
       };
 
       const index = this.matches.findIndex(m => m.id === this.selectedMatch!.id);
       if (index !== -1) {
-        // Ajouter le buteur
         this.matches[index].buteurs.push(buteur);
         
-        // Mettre à jour le score
-        if (teamNumber === 1) {
+        if (buteur.equipe === 1) {
           this.matches[index].score1++;
-          this.lastGoalTeam = this.selectedMatch.equipe1;
         } else {
           this.matches[index].score2++;
-          this.lastGoalTeam = this.selectedMatch.equipe2;
         }
-        this.saveData();
         
-        // Déclencher la célébration
-        this.lastGoalScorer = playerName;
-        this.showGoalCelebration = true;
-        setTimeout(() => {
-          this.showGoalCelebration = false;
-        }, 3000); // Disparaît après 3 secondes
+        this.saveData();
+        clearInterval(this.celebrationTimer);
+        this.showGoalCelebration = false;
       }
     }
   }
@@ -473,8 +499,16 @@ export class AppComponent implements OnInit {
           existingScorer.minutes.push(buteur.minute);
           // Trier les minutes dans l'ordre croissant
           existingScorer.minutes.sort((a, b) => a - b);
+          // Mettre à jour l'assist si présent
+          if (buteur.assist) {
+            existingScorer.assist = buteur.assist;
+          }
         } else {
-          acc.push({ nom: buteur.nom, minutes: [buteur.minute] });
+          acc.push({ 
+            nom: buteur.nom, 
+            minutes: [buteur.minute],
+            assist: buteur.assist 
+          });
         }
         return acc;
       }, [] as GroupedScorer[]);
@@ -576,7 +610,7 @@ export class AppComponent implements OnInit {
 
   // Method to filter matches based on the selected team
   get filteredMatches() {
-    console.log("filteredMatches", this.selectedTeamFilter);
+    //console.log("filteredMatches", this.selectedTeamFilter);
     if (!this.selectedTeamFilter) {
       return this.matches; // Return all matches if no team is selected
     }
@@ -652,5 +686,14 @@ Lien direct vers le match : ${matchUrl}
         }, 100);
       }
     }
+  }
+
+  // Mettre à jour l'affichage des buteurs dans la liste
+  getButeurDisplay(buteur: Buteur): string {
+    let display = `⚽ ${buteur.nom} (${buteur.minute}')`;
+    if (buteur.assist) {
+      display += ` (Assist: ${buteur.assist})`;
+    }
+    return display;
   }
 }

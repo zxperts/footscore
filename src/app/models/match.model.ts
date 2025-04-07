@@ -2,6 +2,7 @@ export interface Buteur {
   nom: string;
   minute: number;
   equipe: 1 | 2; // 1 pour equipe1, 2 pour equipe2
+  assist?: string; // Ajout du champ assist optionnel
 }
 
 export interface Match {

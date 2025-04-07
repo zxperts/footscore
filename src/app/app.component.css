@@ -910,3 +910,26 @@ body {
   background-color: rgba(0, 0, 0, 0.1);
   color: #333;
 }
+
+.countdown-dots {
+  margin: 10px 0;
+  text-align: center;
+}
+
+.dot {
+  display: inline-block;
+  margin: 0 2px;
+  font-size: 20px;
+  transition: opacity 0.3s ease;
+}
+
+.dot.fade {
+  opacity: 0.2;
+}
+
+.assist-info {
+  font-size: 0.8em;
+  color: #666;
+  margin-left: 5px;
+  font-style: italic;
+}
