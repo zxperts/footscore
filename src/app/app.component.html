@@ -192,8 +192,15 @@
               <span style="font-size: 2em;">{{ showMatchEditForm ? '🖍️' : '✏️' }}</span>
             </button>
             <button class="btn btn-sm btn-outline-primary" (click)="shareMatch(match)">
-              <span style="font-size: 2em;">✉️</span>
+              <span style="font-size: 2em;">📣</span>
             </button>
+            <button class="btn btn-sm btn-outline-primary" (click)="shareMatch(match)">
+              <span style="font-size: 2em;">💾</span>
+            </button>
+            <div class="match-actions" *ngIf="selectedMatch">
+              <!--<button (click)="updateScore()">🔄Mettre à zéro le score</button>-->
+              <button (click)="saveMatchToFirestore(selectedMatch)">💾</button>
+            </div>
           </div>
         </div>
       </div>
@@ -435,8 +442,7 @@
 
   <!-- Ajouter à la fin du template, juste avant la fermeture de la dernière div -->
   <div class="goal-celebration" *ngIf="showGoalCelebration">
-    <div class="celebration-content">
-      <div class="goal-text">BUUUT !</div>
+    <div class="celebration-content">⚽      <div class="goal-text">BUUUT !</div>
       <div class="scorer-text">
         {{ lastGoalScorer }}
       </div>
@@ -644,3 +650,10 @@
     </div>
   </div>
 </div>
+
+  <!-- <div class="match-actions" *ngIf="selectedMatch">
+    <button (click)="updateScore()">Mettre à zéro le score</button>
+    <button (click)="saveMatchToFirestore(selectedMatch)">Enregistrer dans Firestore</button>
+    <button (click)="supprimerMatch(selectedMatch)">Supprimer le match</button>
+  </div>
+-->

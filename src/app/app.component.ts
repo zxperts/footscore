@@ -7,6 +7,7 @@ import { Team, TEAMS, ensureDefaultPlayer } from './models/team.model';
 import { FormsModule } from '@angular/forms';
 import { PlayerSelectorComponent } from './player-selector/player-selector.component';
 import { NavbarComponent } from './component/navbar/navbar.component';
+import { FirestoreService } from './firestore.service';
 // Déplacer l'interface en dehors de la classe, au début du fichier
 interface GroupedScorer {
   nom: string;
@@ -52,7 +53,10 @@ export class AppComponent implements OnInit {
   remainingDots: number = 10;
   private celebrationTimer: any;
 
-  constructor(private fb: FormBuilder) {
+  constructor(
+    private fb: FormBuilder,
+    private firestoreService: FirestoreService
+  ) {
     this.matchForm = this.fb.group({
       equipe1: [this.teams[0].name, Validators.required],
       equipe2: ['', Validators.required],
@@ -695,5 +699,16 @@ Lien direct vers le match : ${matchUrl}
       display += ` (Assist: ${buteur.assist})`;
     }
     return display;
+  }
+
+  async saveMatchToFirestore(match: Match) {
+    try {
+      const matchId = await this.firestoreService.saveMatch(match);
+      console.log('Match enregistré avec succès dans Firestore. ID:', matchId);
+      // Vous pouvez ajouter ici une notification de succès
+    } catch (error) {
+      console.error('Erreur lors de l\'enregistrement du match dans Firestore:', error);
+      // Vous pouvez ajouter ici une notification d'erreur
+    }
   }
 }
