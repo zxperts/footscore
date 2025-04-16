@@ -1,5 +1,6 @@
 {
   "name": "foot-score",
+  "homepage": "https://zxperts.github.io/footscore",
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
