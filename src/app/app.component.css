@@ -933,3 +933,37 @@ body {
   margin-left: 5px;
   font-style: italic;
 }
+
+.sport-title {
+  font-family: 'Arial Black', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-bottom: 1rem;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.sport-text {
+  color: #3498db;
+  font-weight: 900;
+  font-size: 3.5rem;
+  display: inline-block;
+  transform: skew(-5deg);
+  text-shadow: 3px 3px 0 #fff, 5px 5px 0 rgba(0, 0, 0, 0.1);
+}
+
+.domain-text {
+  color: #343a40;
+  font-size: 2.5rem;
+  font-weight: 700;
+  display: inline-block;
+  transform: skew(-5deg);
+}
+
+@media (max-width: 768px) {
+  .sport-text {
+    font-size: 2.5rem;
+  }
+  .domain-text {
+    font-size: 1.8rem;
+  }
+}

@@ -1,17 +1,24 @@
 <!-- <app-navbar></app-navbar>
- --><div class="container mt-4">
+ --><div class="container">
+  <div class="text-center">
+    <h2 class="display-4 sport-title">
+      <span class="sport-text">BUUUT</span>
+      <span class="domain-text">.be</span>
+    </h2>
+    <p class="lead text-muted">Enregistrez maintenant tous vos buts!</p>
+  </div>
 
   <div class="d-flex justify-content-between align-items-center mb-3">
 
     <!-- Bouton pour afficher le formulaire -->
     <button *ngIf="!showMatchForm" 
-            class="btn btn-primary mt-4" 
+            class="btn btn-primary mt-2" 
             (click)="showMatchForm = true">
-      Créer un match
+      Nouveau Match
     </button>
 
     <button *ngIf="!showTeamFilterModal" 
-            class="btn btn-outline-primary mt-4" 
+            class="btn btn-primary mt-2" 
             (click)="showTeamFilterModal = true">
             Equipes🔎
     </button>
@@ -193,9 +200,6 @@
             </button>
             <button class="btn btn-sm btn-outline-primary" (click)="shareMatch(match)">
               <span style="font-size: 2em;">📣</span>
-            </button>
-            <button class="btn btn-sm btn-outline-primary" (click)="shareMatch(match)">
-              <span style="font-size: 2em;">💾</span>
             </button>
             <div class="match-actions" *ngIf="selectedMatch">
               <!--<button (click)="updateScore()">🔄Mettre à zéro le score</button>-->
@@ -657,3 +661,4 @@
     <button (click)="supprimerMatch(selectedMatch)">Supprimer le match</button>
   </div>
 -->
+<router-outlet></router-outlet>

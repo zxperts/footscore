@@ -8,6 +8,7 @@ import { FormsModule } from '@angular/forms';
 import { PlayerSelectorComponent } from './player-selector/player-selector.component';
 import { NavbarComponent } from './component/navbar/navbar.component';
 import { FirestoreService } from './firestore.service';
+import { RouterModule } from '@angular/router';
 // Déplacer l'interface en dehors de la classe, au début du fichier
 interface GroupedScorer {
   nom: string;
@@ -18,7 +19,14 @@ interface GroupedScorer {
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FormsModule, PlayerSelectorComponent, NavbarComponent],
+  imports: [
+    CommonModule, 
+    ReactiveFormsModule, 
+    FormsModule, 
+    PlayerSelectorComponent, 
+    NavbarComponent,
+    RouterModule
+  ],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
@@ -705,10 +713,10 @@ Lien direct vers le match : ${matchUrl}
     try {
       const matchId = await this.firestoreService.saveMatch(match);
       console.log('Match enregistré avec succès dans Firestore. ID:', matchId);
-      // Vous pouvez ajouter ici une notification de succès
+      // Rediriger vers la page de détail du match
+      window.location.href = `/match/${matchId}`;
     } catch (error) {
       console.error('Erreur lors de l\'enregistrement du match dans Firestore:', error);
-      // Vous pouvez ajouter ici une notification d'erreur
     }
   }
 }
