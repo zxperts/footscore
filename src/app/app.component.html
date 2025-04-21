@@ -11,19 +11,19 @@
   <div class="d-flex justify-content-between align-items-center mb-3">
 
     <!-- Bouton pour afficher le formulaire -->
-    <button *ngIf="!showMatchForm" 
+    <button *ngIf="!showMatchForm && !showTeamFilterModal && !showCompetitionFilterModal" 
             class="btn btn-primary mt-2" 
             (click)="showMatchForm = true">
       Nouveau Match
     </button>
 
-    <button *ngIf="!showTeamFilterModal" 
+    <button *ngIf="!showMatchForm && !showTeamFilterModal && !showCompetitionFilterModal" 
             class="btn btn-primary mt-2" 
             (click)="showTeamFilterModal = true">
             Equipes
     </button>
 
-    <button *ngIf="!showCompetitionFilterModal" 
+    <button *ngIf="!showCompetitionFilterModal && !showTeamFilterModal && !showMatchForm" 
             class="btn btn-primary mt-2" 
             (click)="showCompetitionFilterModal = true">
             Compét.
