@@ -50,7 +50,7 @@ h1 {
 
 .match-details:hover {
   transform: translateY(-3px);
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 5px 15px #4b29b967;
 }
 
 .match-score {
@@ -138,12 +138,12 @@ h1 {
 .list-group-item {
   border: none;
   margin-bottom: 0rem;
-  padding: 0.5rem 0;
+  padding: 0.5rem 0.5rem 0.5rem 0.5rem;
   transition: all 0.3s ease;
 }
 
 .list-group-item:hover {
-  background-color: rgba(0, 0, 0, 0.05);
+  background-color: rgba(176, 159, 149, 0.196);
 }
 
 /* Animations */
