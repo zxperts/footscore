@@ -106,10 +106,10 @@ export class AppComponent implements OnInit {
     });
   }
 
-  ngOnInit() {
+  async ngOnInit() {
     this.loadSavedData();
     this.startAutoSave();
-    this.loadMatchFromUrl();
+    await this.loadMatchFromUrl();
   }
 
   getCurrentDateTime(): string {
@@ -648,9 +648,15 @@ export class AppComponent implements OnInit {
     this.showTeamFilterModal = false;
   }
 
-  shareMatch(match: Match) {
-    const matchUrl = `${window.location.origin}?matchId=${match.id}`;
-    const matchInfo = `
+  async shareMatch(match: Match) {
+    try {
+      // Sauvegarder le match dans Firestore
+      const matchId = await this.firestoreService.saveMatch(match);
+      
+      // Construire l'URL avec l'ID Firestore
+      const matchUrl = `${window.location.origin}?matchId=${matchId}`;
+      
+      const matchInfo = `
 Match : ${match.equipe1} vs ${match.equipe2}
 Score : ${match.score1} - ${match.score2}
 Date : ${match.heureDebut.toLocaleString('fr-FR', { 
@@ -662,54 +668,77 @@ Date : ${match.heureDebut.toLocaleString('fr-FR', {
   minute: '2-digit'
 })}
 Lieu : ${match.lieu || 'Non spécifié'}
+Compétition : ${match.competition || 'Non spécifiée'}
 
 Buteurs :
 ${match.equipe1}:
-${this.getGroupedScorers(match, 1).map(b => `- ${b.nom}: ${b.minutes.join(', ')}'`).join('\n')}
+${this.getGroupedScorers(match, 1).map(b => `- ${b.nom}: ${b.minutes.join(', ')}'${b.assist ? ` (Assist: ${b.assist})` : ''}`).join('\n')}
 
 ${match.equipe2}:
-${this.getGroupedScorers(match, 2).map(b => `- ${b.nom}: ${b.minutes.join(', ')}'`).join('\n')}
+${this.getGroupedScorers(match, 2).map(b => `- ${b.nom}: ${b.minutes.join(', ')}'${b.assist ? ` (Assist: ${b.assist})` : ''}`).join('\n')}
 
 Lien direct vers le match : ${matchUrl}
-    `.trim();
+      `.trim();
 
-    if (navigator.share) {
-      navigator.share({
-        title: `${match.equipe1} vs ${match.equipe2}`,
-        text: matchInfo,
-        url: matchUrl
-      }).catch(console.error);
-    } else {
-      // Fallback pour les navigateurs qui ne supportent pas l'API Web Share
-      const textArea = document.createElement('textarea');
-      textArea.value = matchInfo;
-      document.body.appendChild(textArea);
-      textArea.select();
-      try {
-        document.execCommand('copy');
-        alert('Informations du match copiées dans le presse-papiers !');
-      } catch (err) {
-        console.error('Erreur lors de la copie:', err);
+      if (navigator.share) {
+        navigator.share({
+          title: `${match.equipe1} vs ${match.equipe2}`,
+          text: matchInfo,
+          url: matchUrl
+        }).catch(console.error);
+      } else {
+        // Fallback pour les navigateurs qui ne supportent pas l'API Web Share
+        const textArea = document.createElement('textarea');
+        textArea.value = matchInfo;
+        document.body.appendChild(textArea);
+        textArea.select();
+        try {
+          document.execCommand('copy');
+          alert('Informations du match copiées dans le presse-papiers !');
+        } catch (err) {
+          console.error('Erreur lors de la copie:', err);
+        }
+        document.body.removeChild(textArea);
       }
-      document.body.removeChild(textArea);
+    } catch (error) {
+      console.error('Erreur lors de la sauvegarde ou du partage du match:', error);
+      alert('Une erreur est survenue lors de la sauvegarde ou du partage du match.');
     }
   }
 
-  private loadMatchFromUrl() {
+  private async loadMatchFromUrl() {
     const urlParams = new URLSearchParams(window.location.search);
     const matchId = urlParams.get('matchId');
     
     if (matchId) {
-      const match = this.matches.find(m => m.id === parseInt(matchId));
-      if (match) {
-        this.selectMatch(match);
-        // Scroll to the match
-        setTimeout(() => {
-          const matchElement = document.querySelector(`[data-match-id="${match.id}"]`);
-          if (matchElement) {
-            matchElement.scrollIntoView({ behavior: 'smooth' });
+      try {
+        const match = await this.firestoreService.getMatchById(matchId);
+        if (match) {
+          // Convertir la date string en Date object
+          match.heureDebut = new Date(match.heureDebut);
+          
+          // Vérifier si le match existe déjà dans matches
+          const existingMatchIndex = this.matches.findIndex(m => m.id === match.id);
+          if (existingMatchIndex === -1) {
+            // Ajouter le match à la liste s'il n'existe pas déjà
+            this.matches.push(match);
+            // Sauvegarder les données
+            this.saveData();
           }
-        }, 100);
+          
+          this.selectMatch(match);
+          // Scroll to the match
+          setTimeout(() => {
+            const matchElement = document.querySelector(`[data-match-id="${match.id}"]`);
+            if (matchElement) {
+              matchElement.scrollIntoView({ behavior: 'smooth' });
+            }
+          }, 100);
+        } else {
+          console.error('Match non trouvé dans Firestore');
+        }
+      } catch (error) {
+        console.error('Erreur lors du chargement du match depuis Firestore:', error);
       }
     }
   }
