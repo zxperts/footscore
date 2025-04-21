@@ -419,6 +419,8 @@ export class AppComponent implements OnInit {
         if (this.remainingDots <= 0) {
           this.showGoalCelebration = false;
           clearInterval(this.celebrationTimer);
+          // Enregistrer automatiquement le but
+          this.saveGoalWithAssist();
         }
       }, 1000);
     }
@@ -448,6 +450,14 @@ export class AppComponent implements OnInit {
         this.showGoalCelebration = false;
       }
     }
+  }
+
+  cancelGoal() {
+    this.showGoalCelebration = false;
+    clearInterval(this.celebrationTimer);
+    this.lastGoalScorer = '';
+    this.lastGoalTeam = '';
+    this.lastGoalAssist = '';
   }
 
   supprimerMatch(match: Match) {

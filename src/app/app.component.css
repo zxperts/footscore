@@ -967,3 +967,17 @@ body {
     font-size: 1.8rem;
   }
 }
+
+.share-icon {
+  color: #3498db;
+  font-size: 1.2em;
+  margin-right: 0.5rem;
+  transition: transform 0.3s ease;
+  display: inline-block;
+  transform: scaleX(-1); /* Rotation horizontale de 180 degrés */
+}
+
+.share-icon:hover {
+  transform: scaleX(-1) scale(1.2);
+  color: #2980b9;
+}

@@ -198,8 +198,8 @@
             <button class="btn btn-sm btn-outline-primary" (click)="toggleMatchEditForm(match)">
               <span style="font-size: 2em;">{{ showMatchEditForm ? '🖍️' : '✏️' }}</span>
             </button>
-            <button class="btn btn-sm btn-outline-primary" (click)="shareMatch(match)">
-              <span style="font-size: 2em;">📣</span>
+            <button class="btn btn-sm btn-outline-primary share-icon" (click)="shareMatch(match)">
+              <span style="font-size: 2em;">📢</span>
             </button>
             <div class="match-actions" *ngIf="selectedMatch">
               <!--<button (click)="updateScore()">🔄Mettre à zéro le score</button>-->
@@ -446,7 +446,8 @@
 
   <!-- Ajouter à la fin du template, juste avant la fermeture de la dernière div -->
   <div class="goal-celebration" *ngIf="showGoalCelebration">
-    <div class="celebration-content">⚽      <div class="goal-text">BUUUT !</div>
+    <div class="celebration-content">   
+      <div class="goal-text">BUUUT !</div>
       <div class="scorer-text">
         {{ lastGoalScorer }}
       </div>
@@ -466,7 +467,6 @@
       
       <!-- Ajout du champ assist -->
       <div class="assist-section mt-3">
-        <label class="form-label">Assist (optionnel)</label>
         <select class="form-select" [(ngModel)]="lastGoalAssist">
           <option value="">Aucun assist</option>
           <option *ngFor="let player of getTeamPlayers(lastGoalTeam === selectedMatch?.equipe1 ? 1 : 2)" 
@@ -475,9 +475,14 @@
             {{ player }}
           </option>
         </select>
-        <button class="btn btn-primary mt-2" (click)="saveGoalWithAssist()">
-          Enregistrer
-        </button>
+        <div class="button-group mt-2">
+          <button class="btn btn-primary" (click)="saveGoalWithAssist()">
+            Enregistrer
+          </button>
+          <button class="btn btn-outline-danger ms-2" (click)="cancelGoal()">
+            Annuler
+          </button>
+        </div>
       </div>
     </div>
   </div>
