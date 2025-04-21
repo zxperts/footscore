@@ -64,6 +64,12 @@ export class AppComponent implements OnInit {
   private celebrationTimer: any;
   private usedColors: string[] = [];
   private static competitionColors = new Map<string, string>();
+  showExportModal: boolean = false;
+  exportFormats = {
+    txt: false,
+    csv: false,
+    json: false
+  };
 
   constructor(
     private fb: FormBuilder,
@@ -808,5 +814,300 @@ Lien direct vers le match : ${matchUrl}
     AppComponent.competitionColors.set(competition, selectedColor);
     
     return selectedColor;
+  }
+
+  exportMatches() {
+    this.showExportModal = true;
+  }
+
+  closeExportModal() {
+    this.showExportModal = false;
+    this.exportFormats = {
+      txt: false,
+      csv: false,
+      json: false
+    };
+  }
+
+  isExportFormatSelected(): boolean {
+    return this.exportFormats.txt || this.exportFormats.csv || this.exportFormats.json;
+  }
+
+  async confirmExport() {
+    if (this.exportFormats.txt) {
+      const content = this.exportToTxt();
+      this.downloadFile(content, 'matches.txt');
+    }
+    if (this.exportFormats.csv) {
+      const content = this.exportToCsv();
+      this.downloadFile(content, 'matches.csv');
+    }
+    if (this.exportFormats.json) {
+      const content = this.exportToJson();
+      this.downloadFile(content, 'matches.json');
+    }
+    this.closeExportModal();
+  }
+
+  private exportToTxt(): string {
+    return this.matches.map(match => {
+      const scorers1 = this.getGroupedScorers(match, 1);
+      const scorers2 = this.getGroupedScorers(match, 2);
+      
+      return `
+Match : ${match.equipe1} vs ${match.equipe2}
+Score : ${match.score1} - ${match.score2}
+Date : ${match.heureDebut.toLocaleString('fr-FR', { 
+  weekday: 'long', 
+  day: 'numeric', 
+  month: 'long', 
+  year: 'numeric',
+  hour: '2-digit',
+  minute: '2-digit'
+})}
+Lieu : ${match.lieu || 'Non spécifié'}
+Compétition : ${match.competition || 'Non spécifiée'}
+
+Buteurs :
+${match.equipe1}:
+${scorers1.map(b => `- ${b.nom}: ${b.minutes.join(', ')}'${b.assist ? ` (Assist: ${b.assist})` : ''}`).join('\n')}
+
+${match.equipe2}:
+${scorers2.map(b => `- ${b.nom}: ${b.minutes.join(', ')}'${b.assist ? ` (Assist: ${b.assist})` : ''}`).join('\n')}
+----------------------------------------
+`.trim();
+    }).join('\n\n');
+  }
+
+  private exportToCsv(): string {
+    const headers = ['Équipe 1', 'Équipe 2', 'Score 1', 'Score 2', 'Date', 'Lieu', 'Compétition', 'Buteurs Équipe 1', 'Buteurs Équipe 2'];
+    const rows = this.matches.map(match => {
+      const scorers1 = this.getGroupedScorers(match, 1);
+      const scorers2 = this.getGroupedScorers(match, 2);
+      
+      return [
+        match.equipe1,
+        match.equipe2,
+        match.score1,
+        match.score2,
+        match.heureDebut.toLocaleString('fr-FR'),
+        match.lieu || '',
+        match.competition || '',
+        scorers1.map(b => `${b.nom} (${b.minutes.join(', ')}'${b.assist ? `, Assist: ${b.assist}` : ''})`).join('; '),
+        scorers2.map(b => `${b.nom} (${b.minutes.join(', ')}'${b.assist ? `, Assist: ${b.assist}` : ''})`).join('; ')
+      ].map(field => `"${field}"`).join(',');
+    });
+
+    return [headers.map(h => `"${h}"`).join(','), ...rows].join('\n');
+  }
+
+  private exportToJson(): string {
+    return JSON.stringify(this.matches.map(match => ({
+      ...match,
+      heureDebut: match.heureDebut.toISOString(),
+      buteurs: match.buteurs.map(b => ({
+        ...b,
+        assist: b.assist || null
+      }))
+    })), null, 2);
+  }
+
+  private downloadFile(content: string, filename: string) {
+    const blob = new Blob([content], { type: 'text/plain' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    window.URL.revokeObjectURL(url);
+    document.body.removeChild(a);
+  }
+
+  importMatches() {
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = '.txt,.csv,.json';
+    fileInput.onchange = (event: Event) => {
+      const file = (event.target as HTMLInputElement).files?.[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const content = e.target?.result as string;
+          const extension = file.name.split('.').pop()?.toLowerCase();
+          
+          try {
+            let importedMatches: Match[] = [];
+            
+            switch (extension) {
+              case 'txt':
+                importedMatches = this.parseTxtImport(content);
+                break;
+              case 'csv':
+                importedMatches = this.parseCsvImport(content);
+                break;
+              case 'json':
+                importedMatches = this.parseJsonImport(content);
+                break;
+              default:
+                throw new Error('Format de fichier non supporté');
+            }
+            
+            if (importedMatches.length > 0) {
+              if (confirm(`Voulez-vous importer ${importedMatches.length} match(s) ?`)) {
+                this.matches.push(...importedMatches);
+                this.saveData();
+                alert('Import réussi !');
+              }
+            } else {
+              alert('Aucun match trouvé dans le fichier.');
+            }
+          } catch (error) {
+            console.error('Erreur lors de l\'import:', error);
+            alert('Erreur lors de l\'import du fichier. Vérifiez le format.');
+          }
+        };
+        reader.readAsText(file);
+      }
+    };
+    fileInput.click();
+  }
+
+  private parseTxtImport(content: string): Match[] {
+    const matches: Match[] = [];
+    const matchBlocks = content.split('----------------------------------------');
+    
+    for (const block of matchBlocks) {
+      if (!block.trim()) continue;
+      
+      const lines = block.trim().split('\n');
+      const match: Partial<Match> = {
+        id: this.matches.length + matches.length + 1,
+        score1: 0,
+        score2: 0,
+        buteurs: []
+      };
+      
+      for (const line of lines) {
+        if (line.startsWith('Match : ')) {
+          const teams = line.replace('Match : ', '').split(' vs ');
+          match.equipe1 = teams[0].trim();
+          match.equipe2 = teams[1].trim();
+        } else if (line.startsWith('Score : ')) {
+          const scores = line.replace('Score : ', '').split(' - ');
+          match.score1 = parseInt(scores[0]);
+          match.score2 = parseInt(scores[1]);
+        } else if (line.startsWith('Date : ')) {
+          match.heureDebut = new Date(line.replace('Date : ', ''));
+        } else if (line.startsWith('Lieu : ')) {
+          match.lieu = line.replace('Lieu : ', '').trim();
+        } else if (line.startsWith('Compétition : ')) {
+          match.competition = line.replace('Compétition : ', '').trim();
+        } else if (line.includes(':')) {
+          const [player, minutes] = line.split(':');
+          const playerName = player.replace('-', '').trim();
+          const minuteMatches = minutes.match(/\d+/g);
+          const assistMatch = minutes.match(/\(Assist: (.*?)\)/);
+          
+          if (minuteMatches) {
+            minuteMatches.forEach(minute => {
+              match.buteurs?.push({
+                nom: playerName,
+                minute: parseInt(minute),
+                equipe: line.includes(match.equipe1!) ? 1 : 2,
+                assist: assistMatch ? assistMatch[1] : undefined
+              });
+            });
+          }
+        }
+      }
+      
+      if (match.equipe1 && match.equipe2) {
+        matches.push(match as Match);
+      }
+    }
+    
+    return matches;
+  }
+
+  private parseCsvImport(content: string): Match[] {
+    const matches: Match[] = [];
+    const lines = content.split('\n');
+    const headers = lines[0].split(',').map(h => h.replace(/"/g, '').trim());
+    
+    for (let i = 1; i < lines.length; i++) {
+      if (!lines[i].trim()) continue;
+      
+      const values = lines[i].split(',').map(v => v.replace(/"/g, '').trim());
+      const match: Partial<Match> = {
+        id: this.matches.length + matches.length + 1,
+        score1: 0,
+        score2: 0,
+        buteurs: []
+      };
+      
+      headers.forEach((header, index) => {
+        const value = values[index];
+        switch (header) {
+          case 'Équipe 1':
+            match.equipe1 = value;
+            break;
+          case 'Équipe 2':
+            match.equipe2 = value;
+            break;
+          case 'Score 1':
+            match.score1 = parseInt(value);
+            break;
+          case 'Score 2':
+            match.score2 = parseInt(value);
+            break;
+          case 'Date':
+            match.heureDebut = new Date(value);
+            break;
+          case 'Lieu':
+            match.lieu = value;
+            break;
+          case 'Compétition':
+            match.competition = value;
+            break;
+          case 'Buteurs Équipe 1':
+          case 'Buteurs Équipe 2':
+            const team = header === 'Buteurs Équipe 1' ? 1 : 2;
+            const scorers = value.split(';').map(s => s.trim());
+            scorers.forEach(scorer => {
+              const [name, rest] = scorer.split('(');
+              const minutes = rest.match(/\d+/g);
+              const assistMatch = rest.match(/Assist: (.*?)\)/);
+              
+              if (minutes) {
+                minutes.forEach(minute => {
+                  match.buteurs?.push({
+                    nom: name.trim(),
+                    minute: parseInt(minute),
+                    equipe: team,
+                    assist: assistMatch ? assistMatch[1] : undefined
+                  });
+                });
+              }
+            });
+            break;
+        }
+      });
+      
+      if (match.equipe1 && match.equipe2) {
+        matches.push(match as Match);
+      }
+    }
+    
+    return matches;
+  }
+
+  private parseJsonImport(content: string): Match[] {
+    const data = JSON.parse(content);
+    return Array.isArray(data) ? data.map((match: any, index: number) => ({
+      ...match,
+      id: this.matches.length + index + 1,
+      heureDebut: new Date(match.heureDebut)
+    })) : [];
   }
 }

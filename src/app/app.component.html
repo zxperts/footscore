@@ -14,7 +14,7 @@
     <button *ngIf="!showMatchForm" 
             class="btn btn-primary mt-2" 
             (click)="showMatchForm = true">
-      Ajouter un Match
+      Nouveau Match
     </button>
 
     <button *ngIf="!showTeamFilterModal" 
@@ -164,12 +164,21 @@
     </div>
 
     <div>
-      <button type="submit" class="btn btn-primary me-2" [disabled]="!matchForm.valid">
-        Créer le match
-      </button>
-      <button type="button" class="btn btn-secondary" (click)="showMatchForm = false">
-        Annuler
-      </button>
+      <div class="d-flex gap-2 ms-2">
+        <button type="submit" class="btn btn-primary px-4" [disabled]="!matchForm.valid">
+          Créer le match
+        </button>
+        <button type="button" class="btn btn-outline-secondary" (click)="showMatchForm = false">
+          Annuler
+        </button>
+        <button type="button" class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+          🧰
+        </button>
+        <ul class="dropdown-menu">
+          <li><a class="dropdown-item" (click)="exportMatches()">Exporter les matchs</a></li>
+          <li><a class="dropdown-item" (click)="importMatches()">Importer des matchs</a></li>
+        </ul>
+      </div>
     </div>
   </form>
 
@@ -713,6 +722,42 @@
           <button class="btn btn-sm btn-secondary mt-2" (click)="selectedPosition = null">
             Annuler
           </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal pour l'export -->
+  <div *ngIf="showExportModal" class="score-modal">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Choisir le format d'export</h5>
+          <button type="button" class="btn-close" (click)="closeExportModal()"></button>
+        </div>
+        <div class="modal-body">
+          <div class="form-check mb-2">
+            <input class="form-check-input" type="checkbox" id="txtFormat" [(ngModel)]="exportFormats.txt">
+            <label class="form-check-label" for="txtFormat">
+              Format TXT
+            </label>
+          </div>
+          <div class="form-check mb-2">
+            <input class="form-check-input" type="checkbox" id="csvFormat" [(ngModel)]="exportFormats.csv">
+            <label class="form-check-label" for="csvFormat">
+              Format CSV
+            </label>
+          </div>
+          <div class="form-check mb-2">
+            <input class="form-check-input" type="checkbox" id="jsonFormat" [(ngModel)]="exportFormats.json">
+            <label class="form-check-label" for="jsonFormat">
+              Format JSON
+            </label>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="closeExportModal()">Annuler</button>
+          <button type="button" class="btn btn-primary" (click)="confirmExport()" [disabled]="!isExportFormatSelected()">Exporter</button>
         </div>
       </div>
     </div>
