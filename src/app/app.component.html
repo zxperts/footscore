@@ -14,13 +14,19 @@
     <button *ngIf="!showMatchForm" 
             class="btn btn-primary mt-2" 
             (click)="showMatchForm = true">
-      Nouveau Match
+      Ajouter un Match
     </button>
 
     <button *ngIf="!showTeamFilterModal" 
             class="btn btn-primary mt-2" 
             (click)="showTeamFilterModal = true">
             Equipes🔎
+    </button>
+
+    <button *ngIf="!showCompetitionFilterModal" 
+            class="btn btn-primary mt-2" 
+            (click)="showCompetitionFilterModal = true">
+            Compétitions🔎
     </button>
     
 
@@ -54,6 +60,40 @@
             </div>
             <div class="modal-footer">
               <button type="button" class="btn btn-secondary" (click)="closeTeamFilterModal()">Fermer</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="score-modal" tabindex="-1" aria-labelledby="competitionFilterModalLabel" aria-hidden="true" *ngIf="showCompetitionFilterModal">
+        <div class="modal-dialog modal-body" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="competitionFilterModalLabel">Sélectionner une Compétition</h5>
+              <button type="button" class="close-button" (click)="closeCompetitionFilterModal()" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <div *ngFor="let competition of uniqueCompetitions" class="form-check">
+                <input type="radio" 
+                       class="form-check-input" 
+                       [value]="competition" 
+                       [(ngModel)]="selectedCompetitionFilter" 
+                       id="{{competition}}">
+                <label class="form-check-label" for="{{competition}}">{{ competition }}</label>
+              </div>
+              <div class="form-check">
+                <input type="radio" 
+                       class="form-check-input" 
+                       [value]="''" 
+                       [(ngModel)]="selectedCompetitionFilter" 
+                       id="allCompetitions">
+                <label class="form-check-label" for="allCompetitions">Toutes les compétitions</label>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" (click)="closeCompetitionFilterModal()">Fermer</button>
             </div>
           </div>
         </div>
@@ -110,6 +150,16 @@
             formControlName="lieu"
             placeholder="Stade, ville...">
         </div>
+
+        <div class="mb-3">
+          <label for="competition" class="form-label text-muted">Compétition (optionnel)</label>
+          <input 
+            type="text" 
+            class="form-control form-control-sm" 
+            id="competition" 
+            formControlName="competition"
+            placeholder="Championnat, tournoi, amical...">
+        </div>
       </div>
     </div>
 
@@ -124,7 +174,7 @@
   </form>
 
   <div class="mt-4" *ngIf="filteredMatches.length > 0">
-    <h2>Matchs créés</h2>
+    <h2></h2>
     <div class="list-group">
       <div *ngFor="let match of filteredMatches.slice().reverse()" 
            class="list-group-item"
@@ -134,6 +184,10 @@
             <span>{{ match.heureDebut | date:'EEEE d MMMM yyyy HH:mm' }}</span>
             <span class="mx-2" *ngIf="match.lieu">•</span>
             <span *ngIf="match.lieu">{{ match.lieu }}</span>
+            <span class="mx-2" *ngIf="match.competition">•</span>
+            <span *ngIf="match.competition">
+              <span class="badge" [ngClass]="getCompetitionBadgeColor(match.competition)">{{ match.competition }}</span>
+            </span>
             
             <!-- Ajouter le bouton de toggle ici -->
             <button class="btn btn-link p-0" (click)="toggleVisibility(match)" style="font-size: 1.2em; cursor: pointer;">
@@ -435,6 +489,11 @@
         <div class="form-group">
           <label for="lieu" class="form-label">Lieu:</label>
           <input id="lieu" class="form-control" formControlName="lieu" placeholder="Entrez le lieu du match">
+        </div>
+        
+        <div class="form-group">
+          <label for="competition" class="form-label">Compétition:</label>
+          <input id="competition" class="form-control" formControlName="competition" placeholder="Championnat, tournoi, amical...">
         </div>
         
         <div class="button-group mt-3">

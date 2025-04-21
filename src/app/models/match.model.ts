@@ -16,4 +16,5 @@ export interface Match {
   lieu?: string;
   positions?: { [key: string]: string };
   showElements?: boolean;
+  competition?: string; // Ajout du champ compétition
 } 

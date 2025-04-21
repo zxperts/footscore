@@ -58,8 +58,12 @@ export class AppComponent implements OnInit {
   showScoreForm: boolean = false; // Control visibility for score form
   selectedTeamFilter: string = ''; // Property to hold the selected team for filtering
   showTeamFilterModal: boolean = false; // Control visibility for team filter modal
+  selectedCompetitionFilter: string = ''; // Property to hold the selected competition for filtering
+  showCompetitionFilterModal: boolean = false; // Control visibility for competition filter modal
   remainingDots: number = 10;
   private celebrationTimer: any;
+  private usedColors: string[] = [];
+  private static competitionColors = new Map<string, string>();
 
   constructor(
     private fb: FormBuilder,
@@ -69,7 +73,8 @@ export class AppComponent implements OnInit {
       equipe1: [this.teams[0].name, Validators.required],
       equipe2: ['', Validators.required],
       heureDebut: [this.getCurrentDateTime(), Validators.required],
-      lieu: ['']
+      lieu: [''],
+      competition: ['']
     });
 
     this.scoreForm = this.fb.group({
@@ -96,7 +101,8 @@ export class AppComponent implements OnInit {
       equipe1: ['', Validators.required],
       equipe2: ['', Validators.required],
       heureDebut: ['', Validators.required],
-      lieu: ['']
+      lieu: [''],
+      competition: ['']
     });
   }
 
@@ -595,7 +601,8 @@ export class AppComponent implements OnInit {
       equipe1: match.equipe1,
       equipe2: match.equipe2,
       heureDebut: this.getNearestValidTime(match.heureDebut),
-      lieu: match.lieu
+      lieu: match.lieu,
+      competition: match.competition
     });
     this.showMatchEditForm = !this.showMatchEditForm;
   }
@@ -612,31 +619,28 @@ export class AppComponent implements OnInit {
   }
 
   onSubmitMatchEdit() {
-    console.log("onSubmitMatchEdit");
     if (this.matchEditForm.valid && this.selectedMatch) {
-        const updatedMatch = this.matchEditForm.value;
-
-        // Mettre à jour le match sélectionné avec les nouvelles valeurs
-        this.selectedMatch.equipe1 = updatedMatch.equipe1;
-        this.selectedMatch.equipe2 = updatedMatch.equipe2;
-        this.selectedMatch.heureDebut = new Date(updatedMatch.heureDebut); // Assurez-vous que c'est un objet Date
-        this.selectedMatch.lieu = updatedMatch.lieu;
-
-        // Optionnel : vous pouvez enregistrer les données ou effectuer d'autres actions
-        console.log('Match mis à jour:', this.selectedMatch);
-
-        // Fermer la modale après la soumission
-        this.showMatchEditForm = false;
+      const updatedMatch = this.matchEditForm.value;
+      this.selectedMatch.equipe1 = updatedMatch.equipe1;
+      this.selectedMatch.equipe2 = updatedMatch.equipe2;
+      this.selectedMatch.heureDebut = new Date(updatedMatch.heureDebut);
+      this.selectedMatch.lieu = updatedMatch.lieu;
+      this.selectedMatch.competition = updatedMatch.competition;
+      this.saveData();
+      this.showMatchEditForm = false;
     }
   }
 
   // Method to filter matches based on the selected team
-  get filteredMatches() {
-    //console.log("filteredMatches", this.selectedTeamFilter);
-    if (!this.selectedTeamFilter) {
-      return this.matches; // Return all matches if no team is selected
-    }
-    return this.matches.filter(match => match.equipe1 === this.selectedTeamFilter || match.equipe2 === this.selectedTeamFilter);
+  get filteredMatches(): Match[] {
+    return this.matches.filter(match => {
+      const teamFilter = !this.selectedTeamFilter || 
+                        match.equipe1 === this.selectedTeamFilter || 
+                        match.equipe2 === this.selectedTeamFilter;
+      const competitionFilter = !this.selectedCompetitionFilter || 
+                              match.competition === this.selectedCompetitionFilter;
+      return teamFilter && competitionFilter;
+    });
   }
 
   // Method to close the team filter modal
@@ -728,5 +732,52 @@ Lien direct vers le match : ${matchUrl}
     } catch (error) {
       console.error('Erreur lors de l\'enregistrement du match dans Firestore:', error);
     }
+  }
+
+  closeCompetitionFilterModal() {
+    this.showCompetitionFilterModal = false;
+  }
+
+  get uniqueCompetitions(): string[] {
+    const competitions = this.matches
+      .map(match => match.competition)
+      .filter((competition): competition is string => 
+        competition !== undefined && competition !== '');
+    return [...new Set(competitions)];
+  }
+
+  getCompetitionBadgeColor(competition: string): string {
+    // Liste de classes de couleurs pastelles
+    const colors = [
+      'badge-pastel-primary',
+      'badge-pastel-secondary',
+      'badge-pastel-success',
+      'badge-pastel-danger',
+      'badge-pastel-warning',
+      'badge-pastel-info',
+      'badge-pastel-dark',
+      'badge-pastel-purple',
+      'badge-pastel-pink',
+      'badge-pastel-teal'
+    ];
+    
+    // Si la compétition a déjà une couleur assignée, la retourner
+    if (AppComponent.competitionColors.has(competition)) {
+      return AppComponent.competitionColors.get(competition)!;
+    }
+    
+    // Générer un index basé sur le nom de la compétition
+    const hash = competition.split('').reduce((acc, char) => {
+      return char.charCodeAt(0) + ((acc << 5) - acc);
+    }, 0);
+    
+    // Utiliser l'index pour sélectionner une couleur de manière cohérente
+    const index = Math.abs(hash) % colors.length;
+    const selectedColor = colors[index];
+    
+    // Stocker la couleur pour cette compétition
+    AppComponent.competitionColors.set(competition, selectedColor);
+    
+    return selectedColor;
   }
 }
