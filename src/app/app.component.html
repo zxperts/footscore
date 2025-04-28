@@ -5,7 +5,12 @@
       <span class="sport-text">BUUUT</span>
       <span class="domain-text">.be</span>
     </h2>
-    <p class="lead text-muted">Enregistrez maintenant tous vos buts!</p>
+    <div class="d-flex justify-content-center align-items-center">
+      <p class="lead text-muted mb-0">Enregistrez maintenant tous vos buts!</p>
+      <button class="btn btn-link ms-2" (click)="showHelpModal = true">
+        <i class="fas fa-question-circle text-warning"></i>
+      </button>
+    </div>
   </div>
 
   <div class="d-flex justify-content-between align-items-center mb-3">
@@ -14,20 +19,22 @@
     <button *ngIf="!showMatchForm && !showTeamFilterModal && !showCompetitionFilterModal" 
             class="btn btn-primary mt-2" 
             (click)="showMatchForm = true">
-      Nouveau Match
+      <i class="fas fa-plus-circle text-white"></i>
+       Match
     </button>
 
     <button *ngIf="!showMatchForm && !showTeamFilterModal && !showCompetitionFilterModal" 
             class="btn btn-primary mt-2" 
             (click)="showTeamFilterModal = true">
+            <i class="fas fa-filter text-white"></i>
             Equipes
     </button>
 
-    <button *ngIf="!showCompetitionFilterModal && !showTeamFilterModal && !showMatchForm" 
+    <!--<button *ngIf="!showCompetitionFilterModal && !showTeamFilterModal && !showMatchForm" 
             class="btn btn-primary mt-2" 
             (click)="showCompetitionFilterModal = true">
             Compét.
-    </button>
+    </button>-->
     
 
 
@@ -261,8 +268,8 @@
             <button class="btn btn-sm btn-outline-primary" (click)="toggleMatchEditForm(match)">
               <span style="font-size: 2em;">{{ showMatchEditForm ? '🖍️' : '✏️' }}</span>
             </button>
-            <button class="btn btn-sm btn-outline-primary share-icon" (click)="shareMatch(match)">
-              <span style="font-size: 2em;">📢</span>
+            <button class="btn btn-sm btn-outline-primary" (click)="shareMatch(match)">
+              <span style="font-size: 2em;">📢</span>Partager
             </button>
             <div class="match-actions" *ngIf="selectedMatch">
               <!--<button (click)="updateScore()">🔄Mettre à zéro le score</button>-->
@@ -758,6 +765,50 @@
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" (click)="closeExportModal()">Annuler</button>
           <button type="button" class="btn btn-primary" (click)="confirmExport()" [disabled]="!isExportFormatSelected()">Exporter</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal d'aide -->
+  <div *ngIf="showHelpModal" class="score-modal">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Comment utiliser BUUUT.be</h5>
+          <button type="button" class="btn-close" (click)="showHelpModal = false"></button>
+        </div>
+        <div class="modal-body">
+          <h6>Fonctionnalités principales :</h6>
+          <ul class="list-unstyled">
+            <li class="mb-3">
+              <i class="fas fa-plus-circle text-primary"></i>
+              <strong>Créer un match :</strong> Cliquez sur "Nouveau Match" pour enregistrer un nouveau match.
+            </li>
+            <li class="mb-3">
+              <i class="fas fa-futbol text-primary"></i>
+              <strong>Enregistrer les buts :</strong> Cliquez sur le score pour ajouter les buteurs et leurs minutes.
+            </li>
+            <li class="mb-3">
+              <i class="fas fa-users text-primary"></i>
+              <strong>Gérer les équipes :</strong> Ajoutez des joueurs à vos équipes lors de l'enregistrement des buts.
+            </li>
+            <li class="mb-3">
+              <i class="fas fa-share-alt text-primary"></i>
+              <strong>Partager :</strong> Partagez vos matchs via le bouton de partage.
+            </li>
+            <li class="mb-3">
+              <i class="fas fa-download text-primary"></i>
+              <strong>Exporter :</strong> Exportez vos matchs en TXT, CSV ou JSON.
+            </li>
+            <li class="mb-3">
+              <i class="fas fa-upload text-primary"></i>
+              <strong>Importer :</strong> Importez des matchs depuis différents formats.
+            </li>
+          </ul>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="showHelpModal = false">Fermer</button>
         </div>
       </div>
     </div>

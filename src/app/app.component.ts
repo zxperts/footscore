@@ -70,6 +70,7 @@ export class AppComponent implements OnInit {
     csv: false,
     json: false
   };
+  showHelpModal = false;
 
   constructor(
     private fb: FormBuilder,
