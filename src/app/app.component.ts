@@ -1111,4 +1111,8 @@ ${scorers2.map(b => `- ${b.nom}: ${b.minutes.join(', ')}'${b.assist ? ` (Assist:
       heureDebut: new Date(match.heureDebut)
     })) : [];
   }
+
+  getSortedMatches(): Match[] {
+    return this.filteredMatches.slice().sort((a, b) => new Date(b.heureDebut).getTime() - new Date(a.heureDebut).getTime());
+  }
 }

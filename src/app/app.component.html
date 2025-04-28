@@ -192,7 +192,7 @@
   <div class="mt-4" *ngIf="filteredMatches.length > 0">
     <h2></h2>
     <div class="list-group">
-      <div *ngFor="let match of filteredMatches.slice().reverse()" 
+      <div *ngFor="let match of getSortedMatches()" 
            class="list-group-item"
            [attr.data-match-id]="match.id">
         <div class="match-details">
