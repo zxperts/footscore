@@ -16,6 +16,18 @@ interface GroupedScorer {
   assist?: string;
 }
 
+interface TeamStats {
+  name: string;
+  points: number;
+  matches: number;
+  wins: number;
+  draws: number;
+  losses: number;
+  goalsFor: number;
+  goalsAgainst: number;
+  goalDifference: number;
+}
+
 @Component({
   selector: 'app-root',
   standalone: true,
@@ -71,6 +83,8 @@ export class AppComponent implements OnInit {
     json: false
   };
   showHelpModal = false;
+  showRankingModal = false;
+  currentRanking: TeamStats[] = [];
 
   constructor(
     private fb: FormBuilder,
@@ -1114,5 +1128,82 @@ ${scorers2.map(b => `- ${b.nom}: ${b.minutes.join(', ')}'${b.assist ? ` (Assist:
 
   getSortedMatches(): Match[] {
     return this.filteredMatches.slice().sort((a, b) => new Date(b.heureDebut).getTime() - new Date(a.heureDebut).getTime());
+  }
+
+  calculateRanking(competition: string): TeamStats[] {
+    const teamStats = new Map<string, TeamStats>();
+    
+    // Filtrer les matchs de la compétition
+    const competitionMatches = this.matches.filter(m => m.competition === competition);
+    
+    competitionMatches.forEach(match => {
+      // Initialiser les stats pour les deux équipes si nécessaire
+      [match.equipe1, match.equipe2].forEach(team => {
+        if (!teamStats.has(team)) {
+          teamStats.set(team, {
+            name: team,
+            points: 0,
+            matches: 0,
+            wins: 0,
+            draws: 0,
+            losses: 0,
+            goalsFor: 0,
+            goalsAgainst: 0,
+            goalDifference: 0
+          });
+        }
+      });
+
+      const team1Stats = teamStats.get(match.equipe1)!;
+      const team2Stats = teamStats.get(match.equipe2)!;
+
+      // Mettre à jour les statistiques
+      team1Stats.matches++;
+      team2Stats.matches++;
+      team1Stats.goalsFor += match.score1;
+      team1Stats.goalsAgainst += match.score2;
+      team2Stats.goalsFor += match.score2;
+      team2Stats.goalsAgainst += match.score1;
+
+      if (match.score1 > match.score2) {
+        team1Stats.wins++;
+        team1Stats.points += 3;
+        team2Stats.losses++;
+      } else if (match.score1 < match.score2) {
+        team2Stats.wins++;
+        team2Stats.points += 3;
+        team1Stats.losses++;
+      } else {
+        team1Stats.draws++;
+        team2Stats.draws++;
+        team1Stats.points += 1;
+        team2Stats.points += 1;
+      }
+    });
+
+    // Calculer la différence de buts
+    teamStats.forEach(stats => {
+      stats.goalDifference = stats.goalsFor - stats.goalsAgainst;
+    });
+
+    // Convertir en tableau et trier
+    return Array.from(teamStats.values()).sort((a, b) => {
+      if (b.points !== a.points) return b.points - a.points;
+      if (b.goalDifference !== a.goalDifference) return b.goalDifference - a.goalDifference;
+      return b.goalsFor - a.goalsFor;
+    });
+  }
+
+  showRanking() {
+    if (this.selectedCompetitionFilter) {
+      this.currentRanking = this.calculateRanking(this.selectedCompetitionFilter);
+      this.showRankingModal = true;
+    } else {
+      alert('Veuillez sélectionner une compétition pour voir le classement');
+    }
+  }
+
+  closeRankingModal() {
+    this.showRankingModal = false;
   }
 }
