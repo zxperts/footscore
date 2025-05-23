@@ -72,7 +72,7 @@ export class AppComponent implements OnInit {
   showTeamFilterModal: boolean = false; // Control visibility for team filter modal
   selectedCompetitionFilter: string = ''; // Property to hold the selected competition for filtering
   showCompetitionFilterModal: boolean = false; // Control visibility for competition filter modal
-  remainingDots: number = 10;
+  remainingDots: number = 5;
   private celebrationTimer: any;
   private usedColors: string[] = [];
   private static competitionColors = new Map<string, string>();
@@ -437,7 +437,7 @@ export class AppComponent implements OnInit {
       this.lastGoalScorer = playerName;
       this.lastGoalTeam = teamNumber === 1 ? this.selectedMatch.equipe1 : this.selectedMatch.equipe2;
       this.lastGoalAssist = '';
-      this.remainingDots = 10;
+      this.remainingDots = 5;
       this.showGoalCelebration = true;
       
       // Démarrer le compte à rebours

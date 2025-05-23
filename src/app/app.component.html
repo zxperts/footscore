@@ -538,9 +538,9 @@
   </div>
 
   <!-- Ajouter à la fin du template, juste avant la fermeture de la dernière div -->
-  <div class="goal-celebration" *ngIf="showGoalCelebration">
-    <div class="celebration-content">   
-      <div class="goal-text">BUUUT !</div>
+  <div class="goal-celebration" style="margin-top: -100px;" *ngIf="showGoalCelebration">
+    <div class="celebration-content" style="width: 300px;">   
+      <div class="goal-text" style="transform: scale(1.5);">BUUUT !</div>
       <div class="scorer-text">
         {{ lastGoalScorer }}
       </div>
@@ -551,7 +551,7 @@
       
       <!-- Compte à rebours avec points -->
       <div class="countdown-dots">
-        <span *ngFor="let dot of [].constructor(10); let i = index" 
+        <span *ngFor="let dot of [].constructor(5); let i = index" 
               class="dot" 
               [class.fade]="i >= remainingDots">
           •
