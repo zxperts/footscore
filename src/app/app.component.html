@@ -20,7 +20,7 @@
             class="btn btn-primary mt-2" 
             (click)="showMatchForm = true">
       <i class="fas fa-plus-circle text-white"></i>
-       Match
+       <span [hidden]="selectedCompetitionFilter"> Match</span>
     </button>
 
     <button *ngIf="!showMatchForm && !showTeamFilterModal && !showCompetitionFilterModal" 
@@ -140,9 +140,12 @@
         [formGroup]="matchForm" 
         (ngSubmit)="onSubmit()" 
         class="mt-4">
-    <div class="row">
+    <div class="row" style="width: 95%; margin: 0 auto; padding: 20px; border-radius: 10px; background: linear-gradient(to top, rgba(0,0,0,0.1) 0%, transparent 70%);">
       <!-- Informations principales -->
       <div class="col-md-6">
+        <h4 class="mb-4 text-primary text-center fw-bold" style="font-size: 1.8rem; text-shadow: 2px 2px 4px rgba(0,0,0,0.1);">
+          <i class="fas fa-futbol me-2"></i>Ajouter un Match!
+        </h4>
         <div class="mb-3">
           <label for="equipe1" class="form-label">Équipe 1</label>
           <select class="form-select" id="equipe1" formControlName="equipe1" #equipe1Select
@@ -194,25 +197,26 @@
             placeholder="Championnat, tournoi, amical...">
         </div>
       </div>
-    </div>
-
-    <div>
-      <div class="d-flex gap-2 ms-2">
-        <button type="submit" class="btn btn-primary px-4" [disabled]="!matchForm.valid">
-          Créer le match
-        </button>
-        <button type="button" class="btn btn-outline-secondary" (click)="showMatchForm = false">
-          Annuler
-        </button>
-        <button type="button" class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-          🧰
-        </button>
-        <ul class="dropdown-menu">
-          <li><a class="dropdown-item" (click)="exportMatches()">Exporter les matchs</a></li>
-          <li><a class="dropdown-item" (click)="importMatches()">Importer des matchs</a></li>
-        </ul>
+      <div>
+        <div class="d-flex gap-2 ms-2">
+          <button type="submit" class="btn btn-primary px-4" [disabled]="!matchForm.valid">
+            Créer le match
+          </button>
+          <button type="button" class="btn btn-outline-secondary" (click)="showMatchForm = false">
+            Annuler
+          </button>
+          <button type="button" class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+            🧰
+          </button>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" (click)="exportMatches()">Exporter les matchs</a></li>
+            <li><a class="dropdown-item" (click)="importMatches()">Importer des matchs</a></li>
+          </ul>
+        </div>
       </div>
     </div>
+
+
   </form>
 
   <div class="mt-4" *ngIf="filteredMatches.length > 0">
