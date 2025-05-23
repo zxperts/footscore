@@ -55,8 +55,9 @@
     class="btn btn-outline-info mt-2" 
     [ngClass]="selectedCompetitionFilter ? getCompetitionBadgeColor(selectedCompetitionFilter) : 'btn-info'"
             [hidden]="!selectedCompetitionFilter"
-            (click)="shareCompetition()">
-            <i class="fas fa-share-alt " [class.text-white]="selectedCompetitionFilter"></i>
+            (click)="shareCompetition()"
+            [disabled]="isSharingCompetition">
+            <i class="fas" [ngClass]="isSharingCompetition ? 'fa-spinner fa-spin' : 'fa-share-alt'" [class.text-white]="selectedCompetitionFilter"></i>
             <span [class.text-white]="selectedCompetitionFilter"></span>
     </button>
     
@@ -306,9 +307,10 @@
             </button>
             <button class="btn btn-sm btn-primary d-flex align-items-center" 
                     (click)="shareMatch(match)"
-                    title="Partager le match">
-              <i class="fas fa-share-alt me-1"></i>
-              <span>Partager</span>
+                    title="Partager le match"
+                    [disabled]="isSharingMatch">
+              <i class="fas" [ngClass]="isSharingMatch ? 'fa-spinner fa-spin' : 'fa-share-alt'"></i>
+              <span class="ms-1">Partager</span>
             </button>
           </div>
         </div>

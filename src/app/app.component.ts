@@ -85,6 +85,8 @@ export class AppComponent implements OnInit {
   showHelpModal = false;
   showRankingModal = false;
   currentRanking: TeamStats[] = [];
+  isSharingCompetition: boolean = false;
+  isSharingMatch: boolean = false;
 
   constructor(
     private fb: FormBuilder,
@@ -670,6 +672,7 @@ export class AppComponent implements OnInit {
   }
 
   async shareMatch(match: Match) {
+    this.isSharingMatch = true;
     try {
       // Sauvegarder le match dans Firestore
       const matchId = await this.firestoreService.saveMatch(match);
@@ -702,11 +705,11 @@ Lien direct vers le match : ${matchUrl}
       `.trim();
 
       if (navigator.share) {
-        navigator.share({
+        await navigator.share({
           title: `${match.equipe1} vs ${match.equipe2}`,
           text: matchInfo,
           url: matchUrl
-        }).catch(console.error);
+        });
       } else {
         // Fallback pour les navigateurs qui ne supportent pas l'API Web Share
         const textArea = document.createElement('textarea');
@@ -724,6 +727,8 @@ Lien direct vers le match : ${matchUrl}
     } catch (error) {
       console.error('Erreur lors de la sauvegarde ou du partage du match:', error);
       alert('Une erreur est survenue lors de la sauvegarde ou du partage du match.');
+    } finally {
+      this.isSharingMatch = false;
     }
   }
 
@@ -1213,13 +1218,14 @@ ${scorers2.map(b => `- ${b.nom}: ${b.minutes.join(', ')}'${b.assist ? ` (Assist:
       return;
     }
 
-    const competitionMatches = this.matches.filter(m => m.competition === this.selectedCompetitionFilter);
-    if (competitionMatches.length === 0) {
-      alert('Aucun match trouvé pour cette compétition');
-      return;
-    }
-
+    this.isSharingCompetition = true;
     try {
+      const competitionMatches = this.matches.filter(m => m.competition === this.selectedCompetitionFilter);
+      if (competitionMatches.length === 0) {
+        alert('Aucun match trouvé pour cette compétition');
+        return;
+      }
+
       // Sauvegarder tous les matchs dans Firestore
       const matchIds = await Promise.all(
         competitionMatches.map(match => this.firestoreService.saveMatch(match))
@@ -1278,6 +1284,8 @@ Lien vers la compétition : ${window.location.origin}?competition=${encodeURICom
     } catch (error) {
       console.error('Erreur lors de la sauvegarde ou du partage de la compétition:', error);
       alert('Une erreur est survenue lors de la sauvegarde ou du partage de la compétition.');
+    } finally {
+      this.isSharingCompetition = false;
     }
   }
 }
