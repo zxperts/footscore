@@ -105,7 +105,7 @@ h1 {
   height: 99%;
   background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
   border-radius: 0;
-  padding: 0.5rem;
+  padding: 0rem;
   box-shadow: none;
   overflow-y: auto;
   position: relative;
@@ -888,11 +888,11 @@ body {
 
 .modal-content {
   background: white;
-  padding: 1rem;
+  padding: 0.5rem;
   border-radius: 10px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  max-width: 600px;
-  width: 90%; /* Responsive width */
+  max-width: 1000px;
+  width: 98%; /* Responsive width */
 }
 
 .close-button {
