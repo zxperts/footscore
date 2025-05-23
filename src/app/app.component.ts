@@ -1206,4 +1206,78 @@ ${scorers2.map(b => `- ${b.nom}: ${b.minutes.join(', ')}'${b.assist ? ` (Assist:
   closeRankingModal() {
     this.showRankingModal = false;
   }
+
+  async shareCompetition() {
+    if (!this.selectedCompetitionFilter) {
+      alert('Veuillez sélectionner une compétition');
+      return;
+    }
+
+    const competitionMatches = this.matches.filter(m => m.competition === this.selectedCompetitionFilter);
+    if (competitionMatches.length === 0) {
+      alert('Aucun match trouvé pour cette compétition');
+      return;
+    }
+
+    try {
+      // Sauvegarder tous les matchs dans Firestore
+      const matchIds = await Promise.all(
+        competitionMatches.map(match => this.firestoreService.saveMatch(match))
+      );
+
+      // Construire le message de partage
+      const competitionInfo = `
+Compétition : ${this.selectedCompetitionFilter}
+Nombre de matchs : ${competitionMatches.length}
+
+Matchs :
+${competitionMatches.map(match => `
+${match.equipe1} vs ${match.equipe2}
+Score : ${match.score1} - ${match.score2}
+Date : ${match.heureDebut.toLocaleString('fr-FR', { 
+  weekday: 'long', 
+  day: 'numeric', 
+  month: 'long', 
+  year: 'numeric',
+  hour: '2-digit',
+  minute: '2-digit'
+})}
+Lieu : ${match.lieu || 'Non spécifié'}
+
+Buteurs :
+${match.equipe1}:
+${this.getGroupedScorers(match, 1).map(b => `- ${b.nom}: ${b.minutes.join(', ')}'${b.assist ? ` (Assist: ${b.assist})` : ''}`).join('\n')}
+
+${match.equipe2}:
+${this.getGroupedScorers(match, 2).map(b => `- ${b.nom}: ${b.minutes.join(', ')}'${b.assist ? ` (Assist: ${b.assist})` : ''}`).join('\n')}
+----------------------------------------`).join('\n')}
+
+Lien vers la compétition : ${window.location.origin}?competition=${encodeURIComponent(this.selectedCompetitionFilter)}
+      `.trim();
+
+      if (navigator.share) {
+        navigator.share({
+          title: `Compétition ${this.selectedCompetitionFilter}`,
+          text: competitionInfo,
+          url: `${window.location.origin}?competition=${encodeURIComponent(this.selectedCompetitionFilter)}`
+        }).catch(console.error);
+      } else {
+        // Fallback pour les navigateurs qui ne supportent pas l'API Web Share
+        const textArea = document.createElement('textarea');
+        textArea.value = competitionInfo;
+        document.body.appendChild(textArea);
+        textArea.select();
+        try {
+          document.execCommand('copy');
+          alert('Informations de la compétition copiées dans le presse-papiers !');
+        } catch (err) {
+          console.error('Erreur lors de la copie:', err);
+        }
+        document.body.removeChild(textArea);
+      }
+    } catch (error) {
+      console.error('Erreur lors de la sauvegarde ou du partage de la compétition:', error);
+      alert('Une erreur est survenue lors de la sauvegarde ou du partage de la compétition.');
+    }
+  }
 }

@@ -31,20 +31,33 @@
     </button>
 
     <button *ngIf="!showCompetitionFilterModal && !showTeamFilterModal && !showMatchForm" 
-            class="btn btn-primary mt-2" 
+            class="btn mt-2" 
+            [ngClass]="selectedCompetitionFilter ? getCompetitionBadgeColor(selectedCompetitionFilter) : 'btn-info'"
             (click)="showCompetitionFilterModal = true">
-            <i class="fas fa-trophy text-white"></i>
-            <!-- Compétitions -->
+              <i class="fas fa-trophy text-white"></i>
+              <span class="text-white"> {{ selectedCompetitionFilter || 'Compétitions' }}</span>
     </button>
 
     <button 
     *ngIf="!showCompetitionFilterModal && !showTeamFilterModal && !showMatchForm"
-    class="btn btn-outline-secondary mt-2" 
-            [class.btn-success]="selectedCompetitionFilter"
-            [disabled]="!selectedCompetitionFilter"
+    class="btn btn-outline-info mt-2" 
+    [ngClass]="selectedCompetitionFilter ? getCompetitionBadgeColor(selectedCompetitionFilter) : 'btn-info'"
+            [hidden]="!selectedCompetitionFilter"
             (click)="showRanking()">
             <i class="fas fa-list-ol" [class.text-white]="selectedCompetitionFilter"></i>
-            <span [class.text-white]="selectedCompetitionFilter">Classement</span>
+            <span [class.text-white]="selectedCompetitionFilter">
+              <!-- Classement -->
+            </span>
+    </button>
+
+    <button 
+    *ngIf="!showCompetitionFilterModal && !showTeamFilterModal && !showMatchForm"
+    class="btn btn-outline-info mt-2" 
+    [ngClass]="selectedCompetitionFilter ? getCompetitionBadgeColor(selectedCompetitionFilter) : 'btn-info'"
+            [hidden]="!selectedCompetitionFilter"
+            (click)="shareCompetition()">
+            <i class="fas fa-share-alt " [class.text-white]="selectedCompetitionFilter"></i>
+            <span [class.text-white]="selectedCompetitionFilter"></span>
     </button>
     
 
