@@ -299,7 +299,7 @@
                     (click)="openDispositionModal(match)"
                     title="Disposition tactique">
               <i class="fas fa-tshirt"></i>
-            </button>            
+            </button>
             <button class="btn btn-sm btn-primary d-flex align-items-center" 
                     (click)="toggleMatchEditForm(match)"
                     title="Modifier le match">
@@ -310,7 +310,6 @@
                     title="Partager le match"
                     [disabled]="isSharingMatch">
               <i class="fas" [ngClass]="isSharingMatch ? 'fa-spinner fa-spin' : 'fa-share-alt'"></i>
-              <span class="ms-1">Partager</span>
             </button>
           </div>
         </div>
@@ -333,69 +332,31 @@
         </div>
       </div>
 
-      <!-- Bouton pour afficher le formulaire -->
-<!--       <button *ngIf="!showButeurForm" 
-              class="btn btn-primary mb-3" 
-              (click)="showButeurForm = true">
-        Créer un buteur
-      </button> -->
-
-      <!-- Modal pour ajouter/modifier un buteur -->
-      <div class="score-modal" tabindex="-1" *ngIf="showButeurForm">
-        <div class="modal-dialog">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h5 class="modal-title">{{ editingButeur ? 'Modifier le buteur' : 'Nouveau buteur' }}</h5>
-              <button type="button" class="btn-close" (click)="showButeurForm = false"></button>
-            </div>
-            <div class="modal-body">
-              <form [formGroup]="buteurForm" (ngSubmit)="ajouterButeur()">
-                <div class="row g-3">
-                  <div class="col-md-5">
-                    <label class="form-label small">Nom du buteur</label>
-                    <input type="text" class="form-control" placeholder="Nom du buteur" formControlName="nom">
-                  </div>
-                  <div class="col-md-3">
-                    <label class="form-label small">Minute</label>
-                    <input type="number" 
-                           class="form-control" 
-                           placeholder="Minute" 
-                           formControlName="minute" 
-                           min="1" 
-                           max="90">
-                  </div>
-                  <div class="col-md-4">
-                    <label class="form-label small">Équipe</label>
-                    <select class="form-select" formControlName="equipe">
-                      <option [value]="1">{{ selectedMatch.equipe1 }}</option>
-                      <option [value]="2">{{ selectedMatch.equipe2 }}</option>
-                    </select>
-                  </div>
-                  <div class="col-md-12">
-                    <label class="form-label small">Assist (optionnel)</label>
-                    <select class="form-select" formControlName="assist">
-                      <option value="">Aucun assist</option>
-                      <option *ngFor="let player of getTeamPlayers(buteurForm.get('equipe')?.value)" 
-                              [value]="player">
-                        {{ player }}
-                      </option>
-                    </select>
-                  </div>
-                </div>
-                <div class="mt-2">
-                  <button type="submit" 
-                          class="btn btn-primary me-2" 
-                          [disabled]="!buteurForm.valid"
-                          (click)="addNewPlayer(buteurForm.get('nom')?.value)">
-                    {{ editingButeur ? 'Enregistrer' : 'Ajouter' }}
-                  </button>
-                  <button type="button" 
-                          class="btn btn-secondary" 
-                          (click)="annulerEditionButeur()">
-                    Annuler
-                  </button>
-                </div>
-              </form>
+      <!-- Liste des buteurs -->
+      <div class="buteurs-list mb-3">
+        <div class="section-header" (click)="toggleButeursList()">
+          <h4>
+            <span class="toggle-icon">{{ showButeursList ? '▼' : '▶' }}</span>
+            Buteurs ({{ selectedMatch.buteurs.length }})
+          </h4>
+        </div>
+        
+        <div *ngIf="showButeursList">
+          <div *ngFor="let buteur of selectedMatch.buteurs; let i = index" class="buteur-item">
+            <div class="buteur-item d-flex justify-content-between align-items-center p-2 border rounded mb-2">
+              <span class="flex-grow-1">
+                <strong>{{ getButeurDisplay(buteur) }}</strong> - <em>{{ buteur.equipe === 1 ? selectedMatch.equipe1 : selectedMatch.equipe2 }}</em>
+              </span>
+              <div>
+                <button class="btn btn-sm btn-outline-primary me-2" 
+                        (click)="modifierButeur(matches.indexOf(selectedMatch), i)">
+                  <i class="fas fa-edit"></i> Modifier
+                </button>
+                <button class="btn btn-sm btn-danger" 
+                        (click)="supprimerButeur(matches.indexOf(selectedMatch), i)">
+                  <i class="fas fa-trash-alt"></i> Supprimer
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -437,49 +398,6 @@
         </div>
       </div>
 
-      <!-- Remplacer la liste par des divs simples -->
-      <div class="buteurs-list mb-3">
-        <div class="section-header" (click)="toggleButeursList()">
-          <h4>
-            <span class="toggle-icon">{{ showButeursList ? '▼' : '▶' }}</span>
-            Buteurs ({{ selectedMatch.buteurs.length }})
-          </h4>
-        </div>
-        
-        <div *ngIf="showButeursList">
-          <div *ngFor="let buteur of selectedMatch.buteurs; let i = index" class="buteur-item">
-            <div class="buteur-item d-flex justify-content-between align-items-center p-2 border rounded mb-2">
-              <span class="flex-grow-1">
-                <strong>{{ getButeurDisplay(buteur) }}</strong> - <em>{{ buteur.equipe === 1 ? selectedMatch.equipe1 : selectedMatch.equipe2 }}</em>
-              </span>
-              <div>
-                <button class="btn btn-sm btn-outline-primary me-2" 
-                        (click)="modifierButeur(matches.indexOf(selectedMatch), i)">
-                  <i class="fas fa-edit"></i> Modifier
-                </button>
-                <button class="btn btn-sm btn-danger" 
-                        (click)="supprimerButeur(matches.indexOf(selectedMatch), i)">
-                  <i class="fas fa-trash-alt"></i> Supprimer
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Dans la modal, après la liste des buteurs -->
-<!--       <div class="disposition-section mb-3">
-        <div class="section-header" (click)="toggleDispositionView()">
-          <h4>
-            <span class="toggle-icon">{{ showDisposition ? '▼' : '▶' }}</span>
-            Disposition tactique
-          </h4>
-        </div> 
-        <div *ngIf="showDisposition">
-          <app-disposition-tactique></app-disposition-tactique>
-        </div>
-    </div> -->
-
       <!-- Modifier le sélecteur de joueur -->
       <div class="player-selector" *ngIf="selectedPosition && selectedMatch">
         <div class="player-selector-content">
@@ -496,6 +414,117 @@
           </button>
         </div>
       </div>
+
+            <!-- Liste des récupérations -->
+            <div class="recuperations-list mb-3">
+              <div class="section-header" (click)="toggleRecuperationsList()">
+                <h4>
+                  <span class="toggle-icon">{{ showRecuperationsList ? '▼' : '▶' }}</span>
+                  Récupérations ({{ selectedMatch.recuperations.length || 0 }})
+                </h4>
+              </div>
+              <!-- BOUTONS AJOUT RECUPERATION POUR CHAQUE EQUIPE -->
+              <div class="d-flex gap-2 justify-content-center mb-2">
+                <button class="btn btn-sm btn-dark d-flex align-items-center" 
+                        (click)="showRecuperationForm = true; recuperationForm.patchValue({equipe: 1})"
+                        title="Ajouter une récupération pour {{selectedMatch.equipe1}}">
+                  <i class="fas fa-shield"></i>
+                  <span class="ms-1">{{selectedMatch.equipe1}}</span>
+                </button>
+                <button class="btn btn-sm btn-dark d-flex align-items-center" 
+                        (click)="showRecuperationForm = true; recuperationForm.patchValue({equipe: 2})"
+                        title="Ajouter une récupération pour {{selectedMatch.equipe2}}">
+                  <i class="fas fa-shield"></i>
+                  <span class="ms-1">{{selectedMatch.equipe2}}</span>
+                </button>
+              </div>
+              
+              <div *ngIf="showRecuperationsList">
+                <div *ngFor="let recuperation of selectedMatch.recuperations; let i = index" class="recuperation-item">
+                  <div class="recuperation-item d-flex justify-content-between align-items-center p-2 border rounded mb-2">
+                    <span class="flex-grow-1">
+                      <i class="fas fa-shield text-success me-2"></i>
+                      <strong>{{ recuperation.nom }}</strong> - {{ recuperation.minute }}' - 
+                      <em>{{ recuperation.equipe === 1 ? selectedMatch.equipe1 : selectedMatch.equipe2 }}</em>
+                    </span>
+                    <div>
+                      <button class="btn btn-sm btn-outline-primary me-2" 
+                              (click)="modifierRecuperation(matches.indexOf(selectedMatch), i)">
+                        <i class="fas fa-edit"></i> Modifier
+                      </button>
+                      <button class="btn btn-sm btn-danger" 
+                              (click)="supprimerRecuperation(matches.indexOf(selectedMatch), i)">
+                        <i class="fas fa-trash-alt"></i> Supprimer
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+      
+            <!-- Formulaire pour ajouter/modifier une récupération -->
+            <div class="score-modal" tabindex="-1" *ngIf="showRecuperationForm">
+              <div class="modal-dialog">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title">{{ editingRecuperation ? 'Modifier la récupération' : 'Nouvelle récupération' }}</h5>
+                    <button type="button" class="btn-close" (click)="annulerEditionRecuperation()"></button>
+                  </div>
+                  <div class="modal-body">
+                    <form [formGroup]="recuperationForm" (ngSubmit)="ajouterRecuperation()">
+                      <div class="row g-3">
+                        <div class="col-md-5">
+                          <label class="form-label small">Nom du joueur</label>
+                          <select class="form-select" formControlName="nom">
+                            <option value="">Sélectionner un joueur</option>
+                            <option *ngFor="let player of getTeamPlayers(recuperationForm.get('equipe')?.value || 1)" 
+                                    [value]="player">
+                              {{ player }}
+                            </option>
+                          </select>
+                        </div>
+                        <div class="col-md-3">
+                          <label class="form-label small">Minute</label>
+                          <input type="number" 
+                                 class="form-control" 
+                                 placeholder="Minute" 
+                                 formControlName="minute" 
+                                 min="1" 
+                                 max="90"
+                                 [ngModel]="calculateElapsedMinutes(selectedMatch.heureDebut)">
+                        </div>
+                        <div class="col-md-4">
+                          <label class="form-label small">Équipe</label>
+                          <select class="form-select" formControlName="equipe">
+                            <option [value]="1">{{ selectedMatch.equipe1 }}</option>
+                            <option [value]="2">{{ selectedMatch.equipe2 }}</option>
+                          </select>
+                        </div>
+                      </div>
+                      <div class="mt-2">
+                        <button type="submit" 
+                                class="btn btn-primary me-2" 
+                                [disabled]="!recuperationForm.valid">
+                          {{ editingRecuperation ? 'Enregistrer' : 'Ajouter' }}
+                        </button>
+                        <button type="button" 
+                                class="btn btn-secondary" 
+                                (click)="annulerEditionRecuperation()">
+                          Annuler
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            </div>
+      
+            <!-- Bouton pour ajouter une récupération
+            <button *ngIf="!showRecuperationForm" 
+                    class="btn btn-success mb-3" 
+                    (click)="showRecuperationForm = true">
+              <i class="fas fa-hand-paper me-2"></i>Ajouter une récupération
+            </button> -->
 
       <div class="mt-3">
         <button type="button" class="btn btn-secondary" (click)="selectedMatch = null">
