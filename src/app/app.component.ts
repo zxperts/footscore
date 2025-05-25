@@ -251,16 +251,23 @@ export class AppComponent implements OnInit {
   }
 
   updateScore() {
-    if (this.scoreForm.valid && this.selectedMatch) {
+    if (this.selectedMatch) {
+      // S'assurer que les scores ne sont pas négatifs
+      const score1 = Math.max(0, this.selectedMatch.score1);
+      const score2 = Math.max(0, this.selectedMatch.score2);
+
       const index = this.matches.findIndex(m => m.id === this.selectedMatch!.id);
       if (index !== -1) {
         this.matches[index] = {
           ...this.matches[index],
-          score1: this.scoreForm.value.score1,
-          score2: this.scoreForm.value.score2
+          score1: score1,
+          score2: score2
         };
-        this.selectedMatch = null;
-        this.scoreForm.reset({ score1: 0, score2: 0 });
+        // Mettre à jour aussi le selectedMatch pour refléter les changements
+        this.selectedMatch.score1 = score1;
+        this.selectedMatch.score2 = score2;
+        this.saveData();
+        this.showScoreForm = false;
       }
     }
   }
@@ -349,11 +356,11 @@ export class AppComponent implements OnInit {
     const match = this.matches[matchIndex];
     const buteur = match.buteurs[buteurIndex];
     
-    // Décrémenter le score de l'équipe correspondante
+    // Décrémenter le score et s'assurer qu'il n'est pas négatif
     if (buteur.equipe === 1) {
-      match.score1--;  // Retirer le but de l'équipe 1
+      match.score1 = this.validateScore(match.score1 - 1);
     } else {
-      match.score2--;  // Retirer le but de l'équipe 2
+      match.score2 = this.validateScore(match.score2 - 1);
     }
     
     // Supprimer le buteur
@@ -1287,5 +1294,9 @@ Lien vers la compétition : ${window.location.origin}?competition=${encodeURICom
     } finally {
       this.isSharingCompetition = false;
     }
+  }
+
+  validateScore(score: number): number {
+    return Math.max(0, score);
   }
 }
