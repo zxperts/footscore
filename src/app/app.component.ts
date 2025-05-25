@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, FormArray } from '@angular/forms';
-import { Match, Buteur, Recuperation } from './models/match.model';
+import { Match, Buteur } from './models/match.model';
 import { ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Team, TEAMS, ensureDefaultPlayer } from './models/team.model';
@@ -9,7 +9,6 @@ import { PlayerSelectorComponent } from './player-selector/player-selector.compo
 import { NavbarComponent } from './component/navbar/navbar.component';
 import { FirestoreService } from './firestore.service';
 import { RouterModule } from '@angular/router';
-
 // Déplacer l'interface en dehors de la classe, au début du fichier
 interface GroupedScorer {
   nom: string;
@@ -47,7 +46,6 @@ export class AppComponent implements OnInit {
   matchForm: FormGroup;
   scoreForm: FormGroup;
   buteurForm: FormGroup;
-  recuperationForm: FormGroup;
   matches: Match[] = [];
   selectedMatch: Match | null = null;
   showButeurForm = false;
@@ -89,9 +87,6 @@ export class AppComponent implements OnInit {
   currentRanking: TeamStats[] = [];
   isSharingCompetition: boolean = false;
   isSharingMatch: boolean = false;
-  showRecuperationForm = false;
-  editingRecuperation: { index: number, recuperation: Recuperation } | null = null;
-  showRecuperationsList: boolean = false;
 
   constructor(
     private fb: FormBuilder,
@@ -115,12 +110,6 @@ export class AppComponent implements OnInit {
       minute: ['', [Validators.required, Validators.min(1), Validators.max(90)]],
       equipe: ['', Validators.required],
       assist: ['']
-    });
-
-    this.recuperationForm = this.fb.group({
-      nom: ['', Validators.required],
-      minute: ['', [Validators.required, Validators.min(1), Validators.max(90)]],
-      equipe: ['', Validators.required]
     });
 
     // Mettre à jour la liste des joueurs disponibles pour l'assist quand l'équipe change
@@ -162,10 +151,10 @@ export class AppComponent implements OnInit {
       const newMatch: Match = {
         id: this.matches.length + 1,
         ...this.matchForm.value,
+        //heureDebut: new Date(matchStartTime.getTime() - timezoneOffset), // Ajuster pour le fuseau horaire
         score1: 0,
         score2: 0,
         buteurs: [],
-        recuperations: [],
         showElements: true // Initialiser la visibilité
       };
       this.matches.push(newMatch);
@@ -521,8 +510,7 @@ export class AppComponent implements OnInit {
       if (expirationDate > new Date()) {
         this.matches = data.matches.map((match: any) => ({
           ...match,
-          heureDebut: new Date(match.heureDebut),
-          recuperations: match.recuperations || [] // S'assurer que recuperations est initialisé
+          heureDebut: new Date(match.heureDebut)
         }));
       } else {
         // Supprimer les données expirées
@@ -1299,71 +1287,5 @@ Lien vers la compétition : ${window.location.origin}?competition=${encodeURICom
     } finally {
       this.isSharingCompetition = false;
     }
-  }
-
-  ajouterRecuperation() {
-    if (this.recuperationForm.valid && this.selectedMatch) {
-      const recuperation: Recuperation = {
-        nom: this.recuperationForm.value.nom,
-        minute: this.recuperationForm.value.minute,
-        equipe: this.recuperationForm.value.equipe
-      };
-
-      const index = this.matches.findIndex(m => m.id === this.selectedMatch!.id);
-      if (index !== -1) {
-        if (!this.matches[index].recuperations) {
-          this.matches[index].recuperations = [];
-        }
-        
-        if (this.editingRecuperation !== null) {
-          // Mode modification
-          this.matches[index].recuperations[this.editingRecuperation.index] = recuperation;
-        } else {
-          // Mode ajout
-          this.matches[index].recuperations.push(recuperation);
-        }
-        
-        this.recuperationForm.reset();
-        this.editingRecuperation = null;
-        this.showRecuperationForm = false;
-        this.saveData();
-      }
-    }
-  }
-
-  modifierRecuperation(matchIndex: number, recuperationIndex: number) {
-    const match = this.matches[matchIndex];
-    const recuperation = match.recuperations[recuperationIndex];
-    
-    this.editingRecuperation = { index: recuperationIndex, recuperation: { ...recuperation } };
-    this.recuperationForm.patchValue({
-      nom: recuperation.nom,
-      minute: recuperation.minute,
-      equipe: recuperation.equipe
-    });
-    this.showRecuperationForm = true;
-  }
-
-  supprimerRecuperation(matchIndex: number, recuperationIndex: number) {
-    const match = this.matches[matchIndex];
-    match.recuperations.splice(recuperationIndex, 1);
-    this.saveData();
-  }
-
-  annulerEditionRecuperation() {
-    this.editingRecuperation = null;
-    this.recuperationForm.reset();
-    this.showRecuperationForm = false;
-  }
-
-  getRecuperationsList(match: Match, equipe: 1 | 2): Recuperation[] {
-    if (!match.recuperations) return [];
-    return match.recuperations
-      .filter(r => r.equipe === equipe)
-      .sort((a, b) => a.minute - b.minute);
-  }
-
-  toggleRecuperationsList() {
-    this.showRecuperationsList = !this.showRecuperationsList;
   }
 }
