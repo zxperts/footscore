@@ -946,7 +946,7 @@ ${scorers2.map(b => `- ${b.nom}: ${b.minutes.join(', ')}'${b.assist ? ` (Assist:
   private exportToJson(): string {
     return JSON.stringify(this.matches.map(match => ({
       ...match,
-      heureDebut: match.heureDebut.toISOString(),
+      heureDebut: match.heureDebut instanceof Date ? match.heureDebut.toISOString() : new Date().toISOString(),
       buteurs: match.buteurs.map(b => ({
         ...b,
         assist: b.assist || null
@@ -1149,7 +1149,8 @@ ${scorers2.map(b => `- ${b.nom}: ${b.minutes.join(', ')}'${b.assist ? ` (Assist:
     return Array.isArray(data) ? data.map((match: any, index: number) => ({
       ...match,
       id: this.matches.length + index + 1,
-      heureDebut: new Date(match.heureDebut)
+      heureDebut: match.heureDebut ? new Date(match.heureDebut) : new Date(),
+      buteurs: match.buteurs || []
     })) : [];
   }
 
