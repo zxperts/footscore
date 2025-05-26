@@ -741,9 +741,24 @@ Lien direct vers le match : ${matchUrl}
 
   private async loadMatchFromUrl() {
     const urlParams = new URLSearchParams(window.location.search);
+    const competitionId = urlParams.get('competitionId');
     const matchId = urlParams.get('matchId');
     
-    if (matchId) {
+    if (competitionId) {
+      try {
+        const competition = await this.firestoreService.getCompetitionById(competitionId);
+        if (competition) {
+          const matches = await this.firestoreService.getMatchesByCompetition(competitionId);
+          if (matches.length > 0) {
+            this.matches = matches;
+            this.selectedCompetitionFilter = competition.name;
+            this.saveData();
+          }
+        }
+      } catch (error) {
+        console.error('Erreur lors du chargement de la compétition:', error);
+      }
+    } else if (matchId) {
       try {
         const match = await this.firestoreService.getMatchById(matchId);
         if (match) {
@@ -1233,46 +1248,46 @@ ${scorers2.map(b => `- ${b.nom}: ${b.minutes.join(', ')}'${b.assist ? ` (Assist:
         return;
       }
 
-      // Sauvegarder tous les matchs dans Firestore
-      const matchIds = await Promise.all(
-        competitionMatches.map(match => this.firestoreService.saveMatch(match))
+      // Sauvegarder la compétition dans Firestore
+      const competitionId = await this.firestoreService.shareCompetition(
+        this.selectedCompetitionFilter, competitionMatches
       );
 
       // Construire le message de partage
       const competitionInfo = `
-Compétition : ${this.selectedCompetitionFilter}
-Nombre de matchs : ${competitionMatches.length}
+          Compétition : ${this.selectedCompetitionFilter}
+          Nombre de matchs : ${competitionMatches.length}
 
-Matchs :
-${competitionMatches.map(match => `
-${match.equipe1} vs ${match.equipe2}
-Score : ${match.score1} - ${match.score2}
-Date : ${match.heureDebut.toLocaleString('fr-FR', { 
-  weekday: 'long', 
-  day: 'numeric', 
-  month: 'long', 
-  year: 'numeric',
-  hour: '2-digit',
-  minute: '2-digit'
-})}
-Lieu : ${match.lieu || 'Non spécifié'}
+          Matchs :
+          ${competitionMatches.map(match => `
+          ${match.equipe1} vs ${match.equipe2}
+          Score : ${match.score1} - ${match.score2}
+          Date : ${match.heureDebut.toLocaleString('fr-FR', { 
+            weekday: 'long', 
+            day: 'numeric', 
+            month: 'long', 
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+          })}
+          Lieu : ${match.lieu || 'Non spécifié'}
 
-Buteurs :
-${match.equipe1}:
-${this.getGroupedScorers(match, 1).map(b => `- ${b.nom}: ${b.minutes.join(', ')}'${b.assist ? ` (Assist: ${b.assist})` : ''}`).join('\n')}
+          Buteurs :
+          ${match.equipe1}:
+          ${this.getGroupedScorers(match, 1).map(b => `- ${b.nom}: ${b.minutes.join(', ')}'${b.assist ? ` (Assist: ${b.assist})` : ''}`).join('\n')}
 
-${match.equipe2}:
-${this.getGroupedScorers(match, 2).map(b => `- ${b.nom}: ${b.minutes.join(', ')}'${b.assist ? ` (Assist: ${b.assist})` : ''}`).join('\n')}
-----------------------------------------`).join('\n')}
+          ${match.equipe2}:
+          ${this.getGroupedScorers(match, 2).map(b => `- ${b.nom}: ${b.minutes.join(', ')}'${b.assist ? ` (Assist: ${b.assist})` : ''}`).join('\n')}
+          ----------------------------------------`).join('\n')}
 
-Lien vers la compétition : ${window.location.origin}?competition=${encodeURIComponent(this.selectedCompetitionFilter)}
-      `.trim();
+          Lien vers la compétition : ${window.location.origin}?competitionId=${competitionId}
+                `.trim();
 
       if (navigator.share) {
         navigator.share({
           title: `Compétition ${this.selectedCompetitionFilter}`,
           text: competitionInfo,
-          url: `${window.location.origin}?competition=${encodeURIComponent(this.selectedCompetitionFilter)}`
+          url: `${window.location.origin}?competitionId=${competitionId}`
         }).catch(console.error);
       } else {
         // Fallback pour les navigateurs qui ne supportent pas l'API Web Share
