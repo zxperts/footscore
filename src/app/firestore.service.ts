@@ -13,7 +13,8 @@ export class FirestoreService {
   async saveMatch(match: Match): Promise<string> {
     const matchRef = await addDoc(collection(this.firestore, 'matches'), {
       ...match,
-      heureDebut: match.heureDebut.toISOString()
+      heureDebut: match.heureDebut.toISOString(),
+      updatedAt: new Date()
     });
     console.log('Match saved:', matchRef.id);
     return matchRef.id;
@@ -34,7 +35,8 @@ export class FirestoreService {
         heureDebut: new Date(data['date']),
         lieu: data['lieu'] || '',
         positions: data['positions'] || {},
-        showElements: data['showElements'] !== undefined ? data['showElements'] : true
+        showElements: data['showElements'] !== undefined ? data['showElements'] : true,
+        updatedAt: data['updatedAt'] ? new Date(data['updatedAt']) : new Date()
       };
     });
   }
@@ -54,7 +56,8 @@ export class FirestoreService {
         lieu: data['lieu'] || '',
         positions: data['positions'] || {},
         showElements: data['showElements'] !== undefined ? data['showElements'] : true,
-        competition: data['competition'] || undefined
+        competition: data['competition'] || undefined,
+        updatedAt: data['updatedAt'] ? new Date(data['updatedAt']) : new Date()
       };
       return match;
     }
