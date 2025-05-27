@@ -1273,13 +1273,7 @@ ${scorers2.map(b => `- ${b.nom}: ${b.minutes.join(', ')}'${b.assist ? ` (Assist:
           })}
           Lieu : ${match.lieu || 'Non spécifié'}
 
-          Buteurs :
-          ${match.equipe1}:
-          ${this.getGroupedScorers(match, 1).map(b => `- ${b.nom}: ${b.minutes.join(', ')}'${b.assist ? ` (Assist: ${b.assist})` : ''}`).join('\n')}
-
-          ${match.equipe2}:
-          ${this.getGroupedScorers(match, 2).map(b => `- ${b.nom}: ${b.minutes.join(', ')}'${b.assist ? ` (Assist: ${b.assist})` : ''}`).join('\n')}
-          ----------------------------------------`).join('\n')}
+         ----------------------------------------`).join('\n')}
 
           Lien vers la compétition : ${window.location.origin}?competitionId=${competitionId}
                 `.trim();

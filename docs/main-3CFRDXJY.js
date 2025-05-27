@@ -71,15 +71,7 @@ ${r.map(i=>`- ${i.nom}: ${i.minutes.join(", ")}'${i.assist?` (Assist: ${i.assist
           Date : ${i.heureDebut.toLocaleString("fr-FR",{weekday:"long",day:"numeric",month:"long",year:"numeric",hour:"2-digit",minute:"2-digit"})}
           Lieu : ${i.lieu||"Non sp\xE9cifi\xE9"}
 
-          Buteurs :
-          ${i.equipe1}:
-          ${this.getGroupedScorers(i,1).map(o=>`- ${o.nom}: ${o.minutes.join(", ")}'${o.assist?` (Assist: ${o.assist})`:""}`).join(`
-`)}
-
-          ${i.equipe2}:
-          ${this.getGroupedScorers(i,2).map(o=>`- ${o.nom}: ${o.minutes.join(", ")}'${o.assist?` (Assist: ${o.assist})`:""}`).join(`
-`)}
-          ----------------------------------------`).join(`
+         ----------------------------------------`).join(`
 `)}
 
           Lien vers la comp\xE9tition : ${window.location.origin}?competitionId=${n}
