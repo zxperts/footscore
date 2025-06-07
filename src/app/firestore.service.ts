@@ -128,7 +128,11 @@ export class FirestoreService {
     return matches;
   }
 
-  async shareCompetition(competitionName: string, matches: Match[]): Promise<string> {
+  async shareCompetition(
+    competitionName: string, 
+    matches: Match[], 
+    onLog?: (message: string) => void
+  ): Promise<string> {
     // Créer une nouvelle compétition
     const competition = {
       name: competitionName,
@@ -137,13 +141,7 @@ export class FirestoreService {
       updatedAt: new Date()
     };
     const competitionId = await this.saveCompetition(competition);
-
-    // Sauvegarder les matchs et les ajouter à la compétition
-    for (const match of matches) {
-      const matchId = await this.saveMatch(match);
-      await this.addMatchToCompetition(competitionId, matchId);
-    }
-
+    onLog?.('Compétition créée');
     return competitionId;
   }
 } 

@@ -87,6 +87,7 @@ export class AppComponent implements OnInit {
   currentRanking: TeamStats[] = [];
   isSharingCompetition: boolean = false;
   isSharingMatch: boolean = false;
+  sharingLogs: string[] = [];
 
   constructor(
     private fb: FormBuilder,
@@ -1242,6 +1243,8 @@ ${scorers2.map(b => `- ${b.nom}: ${b.minutes.join(', ')}'${b.assist ? ` (Assist:
     }
 
     this.isSharingCompetition = true;
+    this.sharingLogs = ['Compétition en cours de sauvegarde...'];
+    
     try {
       const competitionMatches = this.matches.filter(m => m.competition === this.selectedCompetitionFilter);
       if (competitionMatches.length === 0) {
@@ -1251,7 +1254,11 @@ ${scorers2.map(b => `- ${b.nom}: ${b.minutes.join(', ')}'${b.assist ? ` (Assist:
 
       // Sauvegarder la compétition dans Firestore
       const competitionId = await this.firestoreService.shareCompetition(
-        this.selectedCompetitionFilter, competitionMatches
+        this.selectedCompetitionFilter, 
+        competitionMatches,
+        (log) => {
+          this.sharingLogs.push(log);
+        }
       );
 
       // Construire le message de partage
@@ -1272,18 +1279,18 @@ ${scorers2.map(b => `- ${b.nom}: ${b.minutes.join(', ')}'${b.assist ? ` (Assist:
             minute: '2-digit'
           })}
           Lieu : ${match.lieu || 'Non spécifié'}
-
-         ----------------------------------------`).join('\n')}
+          ----------------------------------------`).join('\n')}
 
           Lien vers la compétition : ${window.location.origin}?competitionId=${competitionId}
                 `.trim();
 
+      // Partager immédiatement après la création de la compétition
       if (navigator.share) {
-        navigator.share({
+        await navigator.share({
           title: `Compétition ${this.selectedCompetitionFilter}`,
           text: competitionInfo,
           url: `${window.location.origin}?competitionId=${competitionId}`
-        }).catch(console.error);
+        });
       } else {
         // Fallback pour les navigateurs qui ne supportent pas l'API Web Share
         const textArea = document.createElement('textarea');
@@ -1298,8 +1305,19 @@ ${scorers2.map(b => `- ${b.nom}: ${b.minutes.join(', ')}'${b.assist ? ` (Assist:
         }
         document.body.removeChild(textArea);
       }
+
+      // Continuer l'association des matchs en arrière-plan
+      this.sharingLogs.push('Association des matchs en cours...');
+      for (const match of competitionMatches) {
+        const matchId = await this.firestoreService.saveMatch(match);
+        this.sharingLogs.push(`Match ${match.equipe1} vs ${match.equipe2} sauvegardé`);
+        await this.firestoreService.addMatchToCompetition(competitionId, matchId);
+      }
+      this.sharingLogs.push('Compétition sauvegardée avec succès !');
+
     } catch (error) {
       console.error('Erreur lors de la sauvegarde ou du partage de la compétition:', error);
+      this.sharingLogs.push('Erreur lors de la sauvegarde de la compétition');
       alert('Une erreur est survenue lors de la sauvegarde ou du partage de la compétition.');
     } finally {
       this.isSharingCompetition = false;
