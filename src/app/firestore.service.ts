@@ -129,29 +129,21 @@ export class FirestoreService {
   }
 
   async shareCompetition(competitionName: string, matches: Match[]): Promise<string> {
-    // Vérifier si la compétition existe déjà
-    let competition = await this.getCompetitionByName(competitionName);
-    console.log('Competition:', competition);
-    
-    if (!competition) {
-      // Créer une nouvelle compétition
-      console.log('Creating new competition:', competitionName);
-      competition = {
-        name: competitionName,
-        matchIds: [],
-        createdAt: new Date(),
-        updatedAt: new Date()
-      };
-      const competitionId = await this.saveCompetition(competition);
-      competition.id = competitionId;
-    }
+    // Créer une nouvelle compétition
+    const competition = {
+      name: competitionName,
+      matchIds: [],
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+    const competitionId = await this.saveCompetition(competition);
 
     // Sauvegarder les matchs et les ajouter à la compétition
     for (const match of matches) {
       const matchId = await this.saveMatch(match);
-      await this.addMatchToCompetition(competition.id!, matchId);
+      await this.addMatchToCompetition(competitionId, matchId);
     }
 
-    return competition.id!;
+    return competitionId;
   }
 } 
