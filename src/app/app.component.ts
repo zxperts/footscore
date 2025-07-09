@@ -88,6 +88,9 @@ export class AppComponent implements OnInit {
   isSharingCompetition: boolean = false;
   isSharingMatch: boolean = false;
   sharingLogs: string[] = [];
+  showEditPlayersModal: boolean = false;
+  teamToEdit: Team | null = null;
+  // newPlayerName déjà présente
 
   constructor(
     private fb: FormBuilder,
@@ -1326,5 +1329,46 @@ ${scorers2.map(b => `- ${b.nom}: ${b.minutes.join(', ')}'${b.assist ? ` (Assist:
 
   validateScore(score: number): number {
     return Math.max(0, score);
+  }
+
+  openEditPlayersModal(teamName: string) {
+    const found = this.teams.find(t => t.name === teamName);
+    if (found) {
+      // On clone pour éviter la mutation directe avant validation
+      this.teamToEdit = { ...found, players: [...found.players] };
+      this.showEditPlayersModal = true;
+    }
+  }
+
+  closeEditPlayersModal() {
+    this.showEditPlayersModal = false;
+    this.teamToEdit = null;
+    this.newPlayerName = '';
+  }
+
+  addPlayer() {
+    if (this.teamToEdit && this.newPlayerName.trim()) {
+      if (!this.teamToEdit.players.includes(this.newPlayerName.trim())) {
+        this.teamToEdit.players.push(this.newPlayerName.trim());
+      }
+      this.newPlayerName = '';
+    }
+  }
+
+  removePlayer(index: number) {
+    if (this.teamToEdit) {
+      this.teamToEdit.players.splice(index, 1);
+    }
+  }
+
+  savePlayersEdit() {
+    if (this.teamToEdit) {
+      const idx = this.teams.findIndex(t => t.name === this.teamToEdit!.name);
+      if (idx !== -1) {
+        this.teams[idx].players = [...this.teamToEdit.players];
+        this.saveData();
+      }
+    }
+    this.closeEditPlayersModal();
   }
 }
