@@ -1371,4 +1371,52 @@ ${scorers2.map(b => `- ${b.nom}: ${b.minutes.join(', ')}'${b.assist ? ` (Assist:
     }
     this.closeEditPlayersModal();
   }
+
+  // Retourne la liste des joueurs de teamToEdit triée par nombre de buts marqués (décroissant)
+  getPlayersSortedByGoals(): string[] {
+    if (!this.teamToEdit) return [];
+    // Compter les buts pour chaque joueur de l'équipe (tous matchs confondus)
+    const goalCounts: { [player: string]: number } = {};
+    for (const player of this.teamToEdit.players) {
+      goalCounts[player] = 0;
+      for (const match of this.matches) {
+        // Vérifier si l'équipe correspond
+        if (match.equipe1 === this.teamToEdit.name || match.equipe2 === this.teamToEdit.name) {
+          for (const buteur of match.buteurs) {
+            // Le buteur doit être dans l'équipe et avoir le même nom
+            if (buteur.nom === player) {
+              // Vérifier que le buteur est bien dans la bonne équipe (1 ou 2)
+              const isTeam1 = match.equipe1 === this.teamToEdit.name && buteur.equipe === 1;
+              const isTeam2 = match.equipe2 === this.teamToEdit.name && buteur.equipe === 2;
+              if (isTeam1 || isTeam2) {
+                goalCounts[player]++;
+              }
+            }
+          }
+        }
+      }
+    }
+    // Retourner les joueurs triés par nombre de buts décroissant
+    return [...this.teamToEdit.players].sort((a, b) => goalCounts[b] - goalCounts[a]);
+  }
+
+  // Retourne le nombre de buts marqués par un joueur pour l'équipe en cours d'édition
+  getGoalsForPlayer(player: string): number {
+    if (!this.teamToEdit) return 0;
+    let count = 0;
+    for (const match of this.matches) {
+      if (match.equipe1 === this.teamToEdit.name || match.equipe2 === this.teamToEdit.name) {
+        for (const buteur of match.buteurs) {
+          if (buteur.nom === player) {
+            const isTeam1 = match.equipe1 === this.teamToEdit.name && buteur.equipe === 1;
+            const isTeam2 = match.equipe2 === this.teamToEdit.name && buteur.equipe === 2;
+            if (isTeam1 || isTeam2) {
+              count++;
+            }
+          }
+        }
+      }
+    }
+    return count;
+  }
 }

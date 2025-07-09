@@ -932,7 +932,13 @@
       </div>
       <div class="modal-body">
         <ul class="list-group mb-3">
-          <li *ngFor="let player of teamToEdit.players; let i = index" class="list-group-item d-flex justify-content-between align-items-center">
+          <li *ngFor="let player of getPlayersSortedByGoals(); let i = index" class="list-group-item d-flex justify-content-between align-items-center">
+            <span>
+              {{ player }}
+              <span class="badge bg-primary ms-2" *ngIf="getGoalsForPlayer(player) > 0">
+                {{ getGoalsForPlayer(player) }} ⚽
+              </span>
+            </span>
             <input [(ngModel)]="teamToEdit.players[i]" class="form-control form-control-sm me-2" style="max-width: 200px; display: inline-block;" />
             <button class="btn btn-danger btn-sm" (click)="removePlayer(i)"><i class="fas fa-trash"></i></button>
           </li>
