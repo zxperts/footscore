@@ -333,10 +333,10 @@
               {{ selectedMatch.score1 }} - {{ selectedMatch.score2 }}
             </ng-container>
             <ng-container *ngIf="showScoreForm">
-              <div class="d-flex align-items-center justify-content-center gap-2">
+              <div class="d-flex align-items-center justify-content-center gap-1">
                 <input type="number" 
                        class="form-control form-control-sm" 
-                       style="width: 60px; text-align: center;"
+                       style="width: 42px; text-align: center; padding: 2px 4px;"
                        [(ngModel)]="selectedMatch.score1" 
                        min="0"
                        (input)="selectedMatch.score1 = validateScore(selectedMatch.score1)"
@@ -344,15 +344,13 @@
                 <span>-</span>
                 <input type="number" 
                        class="form-control form-control-sm" 
-                       style="width: 60px; text-align: center;"
+                       style="width: 42px; text-align: center; padding: 2px 4px;"
                        [(ngModel)]="selectedMatch.score2" 
                        min="0"
                        (input)="selectedMatch.score2 = validateScore(selectedMatch.score2)"
                        onkeypress="return event.charCode >= 48">
-                <button class="btn btn-sm btn-primary" (click)="updateScore()">
-                  <i class="fas fa-check"></i>
-                </button>
               </div>
+              
             </ng-container>
           </div>
           <div class="team-name" style="flex: 1; text-align: center;">{{ selectedMatch.equipe2 }}</div>
