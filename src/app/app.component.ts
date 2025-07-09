@@ -278,11 +278,11 @@ export class AppComponent implements OnInit {
     const buteur = match.buteurs[buteurIndex];
     
     // Décrémenter le score de l'équipe correspondante
-    if (buteur.equipe === 1) {
+/*     if (buteur.equipe === 1) {
       match.score1--;  // Retirer le but de l'équipe 1
     } else {
       match.score2--;  // Retirer le but de l'équipe 2
-    }
+    } */
     
     this.editingButeur = { index: buteurIndex, buteur: { ...buteur } };
     this.buteurForm.patchValue({
