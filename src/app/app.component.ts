@@ -59,7 +59,7 @@ export class AppComponent implements OnInit {
   lastGoalScorer: string = '';
   lastGoalTeam: string = '';
   lastGoalAssist: string = '';
-  showButeursList: boolean = false;  // Replié par défaut
+  showButeursList: boolean = true;  // Replié par défaut
   showDisposition: boolean = false;
   selectedPosition: { team: number, position: string } | null = null;
   showDispositionModal: boolean = false;  // Ajouter cette propriété

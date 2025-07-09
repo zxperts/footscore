@@ -101,18 +101,17 @@ h1 {
 }
 
 .score-modal-content {
-  width: 99%;
-  height: 99%;
-  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-  border-radius: 0;
-  padding: 0rem;
-  box-shadow: none;
-  overflow-y: auto;
   position: relative;
-  border-radius: 8px;
+  width: 100%;
+  max-width: 1000px;
+  margin: 1.75rem auto;
+  background: #fff;
+  border-radius: 0.5rem;
+  box-shadow: 0 0.5rem 1rem rgba(0,0,0,.15);
+  padding: 1.5rem;
+  outline: 0;
   overflow-y: auto;
-  width: 99%;
-  margin: 0.5rem;
+  animation: fadeIn .3s;
 }
 
 .modal-body {
@@ -381,6 +380,15 @@ h1 {
   color: white;
 }
 
+/* Style pour colorer le texte des buteurs selon l'équipe */
+.buteur-team1 {
+  color: #3498db;
+}
+
+.buteur-team2 {
+  color: #27ae60;
+}
+
 /* Style pour les titres des équipes */
 .team-title-1 {
   color: #3498db;
@@ -581,7 +589,7 @@ h1 {
   position: absolute;
   right: 1rem;
   top: 1rem;
-  background: none;
+  background:none;
   border: none;
   font-size: 2em;
   color: #666;
@@ -900,17 +908,6 @@ body {
   overflow-y: auto;
 }
 
-.close-button {
-  position: absolute;
-  right: 1rem;
-  top: 1rem;
-  background: none;
-  border: none;
-  font-size: 1.5em;
-  color: #666;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
 
 .close-button:hover {
   background-color: rgba(0, 0, 0, 0.1);

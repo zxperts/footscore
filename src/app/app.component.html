@@ -325,9 +325,12 @@
 
   <!-- Modal pour modifier le score -->
   <div *ngIf="selectedMatch && showScoreForm" class="score-modal">
+    
     <div class="score-modal-content">
+      
       <button class="close-button" (click)="showScoreForm = false">×</button>
-      <h3>Modifier le score</h3>
+      <h3 style="text-align: center;">Modifier le score</h3>
+      <br>
 
       <!-- Ajout du score en haut -->
       <div class="match-score-display mb-4">
@@ -426,7 +429,7 @@
       <!-- Liste des joueurs (déplacée avant la liste des buteurs) -->
       <div class="mt-4">
         <div class="row">
-          <div class="col-md-6">
+          <div class="col-6">
             <h5 class="team-title-1">{{ selectedMatch.equipe1 }}</h5>
             <div class="player-badges player-badges-team1">
               <button *ngFor="let player of getTeamPlayers(1)" 
@@ -441,7 +444,7 @@
               </button>
             </div>
           </div>
-          <div class="col-md-6">
+          <div class="col-6">
             <h5 class="team-title-2">{{ selectedMatch.equipe2 }}</h5>
             <div class="player-badges player-badges-team2">
               <button *ngFor="let player of getTeamPlayers(2)" 
@@ -472,16 +475,16 @@
           <div *ngFor="let buteur of selectedMatch.buteurs; let i = index" class="buteur-item">
             <div class="buteur-item d-flex justify-content-between align-items-center p-2 border rounded mb-2">
               <span class="flex-grow-1">
-                <strong>{{ getButeurDisplay(buteur) }}</strong> - <em>{{ buteur.equipe === 1 ? selectedMatch.equipe1 : selectedMatch.equipe2 }}</em>
+                <strong [ngClass]="buteur.equipe === 1 ? 'buteur-team1' : 'buteur-team2'">{{ getButeurDisplay(buteur) }}</strong> - <em [ngClass]="buteur.equipe === 1 ? 'buteur-team1' : 'buteur-team2'">{{ buteur.equipe === 1 ? selectedMatch.equipe1 : selectedMatch.equipe2 }}</em>
               </span>
               <div>
-                <button class="btn btn-sm btn-outline-primary me-2" 
+                <button class="btn btn-sm btn-primary me-2" 
                         (click)="modifierButeur(matches.indexOf(selectedMatch), i)">
-                  <i class="fas fa-edit"></i> Modifier
+                  <i class="fas fa-edit"></i>
                 </button>
                 <button class="btn btn-sm btn-danger" 
                         (click)="supprimerButeur(matches.indexOf(selectedMatch), i)">
-                  <i class="fas fa-trash-alt"></i> Supprimer
+                  <i class="fas fa-trash-alt"></i>
                 </button>
               </div>
             </div>
@@ -934,12 +937,12 @@
         <ul class="list-group mb-3">
           <li *ngFor="let player of getPlayersSortedByGoals(); let i = index" class="list-group-item d-flex justify-content-between align-items-center">
             <span>
-              {{ player }}
+              <!-- {{ player }} -->
               <span class="badge bg-primary ms-2" *ngIf="getGoalsForPlayer(player) > 0">
                 {{ getGoalsForPlayer(player) }} ⚽
               </span>
             </span>
-            <input [(ngModel)]="teamToEdit.players[i]" class="form-control form-control-sm me-2" style="max-width: 200px; display: inline-block;" />
+            <input class="form-control form-control-sm me-2" style="max-width: 200px; display: inline-block;" value="{{ player }}" />
             <button class="btn btn-danger btn-sm" (click)="removePlayer(i)"><i class="fas fa-trash"></i></button>
           </li>
         </ul>
