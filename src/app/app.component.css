@@ -88,15 +88,16 @@ h1 {
 /* Style de la modal */
 .score-modal {
   position: fixed;
-  top: 0;
+  top: 10px; /* Décale le haut de la modale sous le haut de la page */
   left: 0;
   width: 100%;
-  height: 100%;
+  height: calc(100% - 10px); /* Ajuste la hauteur pour ne pas dépasser le bas */
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: flex-start; /* Aligne le contenu en haut, sous le top */
   z-index: 1000;
   padding: 0;
+  overflow-y: auto;
 }
 
 .score-modal-content {
@@ -109,6 +110,13 @@ h1 {
   overflow-y: auto;
   position: relative;
   border-radius: 8px;
+  overflow-y: auto;
+  width: 99%;
+  margin: 0.5rem;
+}
+
+.modal-body {
+  overflow-y: auto;
 }
 
 /* Style des formulaires */
@@ -184,10 +192,6 @@ h1 {
     padding: 0.2rem 0.4rem;
   }
 
-  .score-modal-content {
-    width: 99%;
-    margin: 0.5rem;
-  }
 
   .team-scorers {
     gap: 1rem;
@@ -893,6 +897,7 @@ body {
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   max-width: 1000px;
   width: 98%; /* Responsive width */
+  overflow-y: auto;
 }
 
 .close-button {
