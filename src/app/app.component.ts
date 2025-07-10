@@ -102,6 +102,8 @@ export class AppComponent implements OnInit {
   newTeamPlayers: { name: string, type: 'attaquant' | 'milieu' | 'defenseur' }[] = [
     { name: '', type: 'milieu' }
   ];
+  competitionSearch: string = '';
+  filteredCompetitions: string[] = [];
 
   constructor(
     private fb: FormBuilder,
@@ -1548,5 +1550,23 @@ ${scorers2.map(b => `- ${b.nom}: ${b.minutes.join(', ')}'${b.assist ? ` (Assist:
 
   canCreateNewTeam(): boolean {
     return !this.newTeamName.trim() || this.newTeamPlayers.every(p => !p.name.trim());
+  }
+
+  updateFilteredCompetitions() {
+    const search = this.competitionSearch.toLowerCase();
+    if (search.length < 3) {
+      this.filteredCompetitions = [];
+      return;
+    }
+    // Récupère toutes les compétitions uniques des matchs
+    const competitions = Array.from(new Set(this.matches.map(m => m.competition).filter((c): c is string => !!c)));
+    this.filteredCompetitions = competitions
+      .filter(name => typeof name === 'string' && name.toLowerCase().includes(search));
+  }
+
+  selectCompetition(name: string) {
+    this.matchForm.patchValue({ competition: name });
+    this.competitionSearch = name;
+    this.filteredCompetitions = [];
   }
 }
