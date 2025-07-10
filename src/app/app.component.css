@@ -1053,3 +1053,29 @@ body {
   color: #3498db;
   background: #eaf6ff;
 }
+
+.type-icon.type-icon-clickable {
+  font-size: 1em;
+  color: #fff;
+  background: #3498db;
+  border: 2px solid #3498db;
+  border-radius: 25%;
+  padding: 0.25em 0.35em;
+  margin-right: 0.5em;
+  box-shadow: 0 2px 8px rgba(52,152,219,0.25);
+  cursor: pointer;
+  transition: transform 0.1s, box-shadow 0.2s, background 0.2s;
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+.type-icon.type-icon-clickable:hover {
+  background: #217dbb;
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(52,152,219,0.35);
+  transform: scale(1.12) rotate(-8deg);
+}
+.type-icon.type-icon-clickable:active {
+  background: #176093;
+  transform: scale(0.95) rotate(4deg);
+  box-shadow: 0 2px 8px rgba(52,152,219,0.15);
+}
