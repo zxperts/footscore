@@ -1061,17 +1061,19 @@
       </div>
       <div class="modal-body">
         <ul class="list-group mb-3">
-          <li *ngFor="let player of teamToEdit.players; let i = index" class="list-group-item d-flex justify-content-between align-items-center">
-            <span class="d-flex align-items-center">
-              <i *ngIf="player.type === 'attaquant'" class="fas fa-futbol me-2 type-icon type-icon-clickable" (click)="cyclePlayerType(player)" title="Changer le type (Attaquant)"></i>
-              <i *ngIf="player.type === 'milieu'" class="fas fa-arrows-alt-h me-2 type-icon type-icon-clickable" (click)="cyclePlayerType(player)" title="Changer le type (Milieu)"></i>
-              <i *ngIf="player.type === 'defenseur'" class="fas fa-shield-alt me-2 type-icon type-icon-clickable" (click)="cyclePlayerType(player)" title="Changer le type (Défenseur)"></i>
-              <input class="form-control form-control-sm me-2" style="max-width: 140px; display: inline-block;" [(ngModel)]="player.name" />
-              <span class="badge bg-primary ms-2" *ngIf="getGoalsForPlayer(player.name) > 0">
-                {{ getGoalsForPlayer(player.name) }} ⚽
+          <li *ngFor="let player of teamToEdit.players; let i = index" class="list-group-item d-flex flex-column align-items-start">
+            <div class="d-flex w-100 align-items-center justify-content-between">
+              <span class="d-flex align-items-center">
+                <i *ngIf="player.type === 'attaquant'" class="fas fa-futbol me-2 type-icon type-icon-clickable" (click)="cyclePlayerType(player)" title="Changer le type (Attaquant)"></i>
+                <i *ngIf="player.type === 'milieu'" class="fas fa-arrows-alt-h me-2 type-icon type-icon-clickable" (click)="cyclePlayerType(player)" title="Changer le type (Milieu)"></i>
+                <i *ngIf="player.type === 'defenseur'" class="fas fa-shield-alt me-2 type-icon type-icon-clickable" (click)="cyclePlayerType(player)" title="Changer le type (Défenseur)"></i>
+                <input class="form-control form-control-sm me-2" style="max-width: 140px; display: inline-block;" [(ngModel)]="player.name" />
+                <span class="badge bg-primary ms-2" style="cursor:pointer;" *ngIf="getGoalsForPlayer(player.name) > 0" (click)="openPlayerGoalsModal(player)">
+                  {{ getGoalsForPlayer(player.name) }} ⚽
+                </span>
               </span>
-            </span>
-            <button class="btn btn-danger btn-sm" (click)="removePlayer(i)"><i class="fas fa-trash"></i></button>
+              <button class="btn btn-danger btn-sm" (click)="removePlayer(i)"><i class="fas fa-trash"></i></button>
+            </div>
           </li>
         </ul>
         <div class="input-group">
@@ -1086,6 +1088,33 @@
         <button type="button" class="btn btn-secondary" (click)="closeEditPlayersModal()">Fermer</button>
         <button type="button" class="btn btn-primary" (click)="savePlayersEdit()">Enregistrer</button>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modale des buts du joueur -->
+<div class="modal fade show" tabindex="-1" style="display:block; background:rgba(0,0,0,0.5);" *ngIf="selectedPlayerGoalsModal">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Buts de {{ selectedPlayerGoalsModal?.name }}</h5>
+        <button type="button" class="btn-close" aria-label="Fermer" (click)="closePlayerGoalsModal()"></button>
+      </div>
+      <ng-container *ngIf="selectedPlayerGoalsModal">
+        <div class="modal-body">
+          <div *ngFor="let goal of getPlayerGoalsDetails(selectedPlayerGoalsModal!)" class="mb-2">
+            <i class="fas fa-calendar-alt me-1"></i>
+            {{ goal.match?.heureDebut | date:'dd/MM/yyyy HH:mm' }}
+            <span class="ms-2"><i class="fas fa-stopwatch"></i> {{ goal.minute }}'</span>
+            <span class="ms-2">vs {{ goal.match?.equipe1 === teamToEdit?.name ? goal.match?.equipe2 : goal.match?.equipe1 }}</span>
+            <span class="ms-2">(score: {{ goal.match?.score1 }} - {{ goal.match?.score2 }})</span>
+          </div>
+          <div *ngIf="getPlayerGoalsDetails(selectedPlayerGoalsModal!).length === 0" class="small text-muted">Aucun but trouvé.</div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" (click)="closePlayerGoalsModal()">Fermer</button>
+        </div>
+      </ng-container>
     </div>
   </div>
 </div>

@@ -92,6 +92,8 @@ export class AppComponent implements OnInit {
   teamToEdit: Team | null = null;
   newPlayerType: 'attaquant' | 'milieu' | 'defenseur' = 'milieu';
   // newPlayerName déjà présente
+  selectedPlayerGoalsIndex: number | null = null;
+  selectedPlayerGoalsModal: Player | null = null;
 
   constructor(
     private fb: FormBuilder,
@@ -1443,5 +1445,27 @@ ${scorers2.map(b => `- ${b.nom}: ${b.minutes.join(', ')}'${b.assist ? ` (Assist:
     if (this.newPlayerType === 'attaquant') this.newPlayerType = 'milieu';
     else if (this.newPlayerType === 'milieu') this.newPlayerType = 'defenseur';
     else this.newPlayerType = 'attaquant';
+  }
+
+  getPlayerGoalsDetails(player: Player): { match: Match, minute: number }[] {
+    const details: { match: Match, minute: number }[] = [];
+    for (const match of this.matches) {
+      if (match.equipe1 === this.teamToEdit?.name || match.equipe2 === this.teamToEdit?.name) {
+        for (const buteur of match.buteurs) {
+          if (buteur.nom === player.name) {
+            details.push({ match, minute: buteur.minute });
+          }
+        }
+      }
+    }
+    return details;
+  }
+
+  openPlayerGoalsModal(player: Player) {
+    this.selectedPlayerGoalsModal = player;
+  }
+
+  closePlayerGoalsModal() {
+    this.selectedPlayerGoalsModal = null;
   }
 }
