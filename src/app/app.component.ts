@@ -90,7 +90,7 @@ export class AppComponent implements OnInit {
   sharingLogs: string[] = [];
   showEditPlayersModal: boolean = false;
   teamToEdit: Team | null = null;
-  newPlayerType: 'milieu' = 'milieu';
+  newPlayerType: 'attaquant' | 'milieu' | 'defenseur' = 'milieu';
   // newPlayerName déjà présente
 
   constructor(
@@ -1431,5 +1431,17 @@ ${scorers2.map(b => `- ${b.nom}: ${b.minutes.join(', ')}'${b.assist ? ` (Assist:
       }
     }
     return count;
+  }
+
+  cyclePlayerType(player: Player) {
+    if (player.type === 'attaquant') player.type = 'milieu';
+    else if (player.type === 'milieu') player.type = 'defenseur';
+    else player.type = 'attaquant';
+  }
+
+  cycleNewPlayerType() {
+    if (this.newPlayerType === 'attaquant') this.newPlayerType = 'milieu';
+    else if (this.newPlayerType === 'milieu') this.newPlayerType = 'defenseur';
+    else this.newPlayerType = 'attaquant';
   }
 }

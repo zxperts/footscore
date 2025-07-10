@@ -1034,3 +1034,22 @@ body {
   background-color: #b3ffe6;
   color: #2c3e50;
 }
+
+.type-icons .type-icon {
+  font-size: 1.3em;
+  margin: 0 0.2em;
+  cursor: pointer;
+  color: #bbb;
+  transition: color 0.2s, background 0.2s, border 0.2s;
+  border-radius: 50%;
+  padding: 0.2em 0.3em;
+}
+.type-icons .type-icon.active-type {
+  color: #fff;
+  background: #3498db;
+  border: 2px solid #3498db;
+}
+.type-icons .type-icon:hover {
+  color: #3498db;
+  background: #eaf6ff;
+}

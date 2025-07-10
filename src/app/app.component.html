@@ -1063,15 +1063,10 @@
         <ul class="list-group mb-3">
           <li *ngFor="let player of teamToEdit.players; let i = index" class="list-group-item d-flex justify-content-between align-items-center">
             <span class="d-flex align-items-center">
-              <i *ngIf="player.type === 'attaquant'" class="fas fa-futbol me-2"></i>
-              <i *ngIf="player.type === 'defenseur'" class="fas fa-shield-alt me-2"></i>
-              <i *ngIf="player.type === 'milieu'" class="fas fa-arrows-alt-h me-2"></i>
+              <i *ngIf="player.type === 'attaquant'" class="fas fa-futbol me-2 type-icon type-icon-clickable" (click)="cyclePlayerType(player)" title="Changer le type (Attaquant)"></i>
+              <i *ngIf="player.type === 'milieu'" class="fas fa-arrows-alt-h me-2 type-icon type-icon-clickable" (click)="cyclePlayerType(player)" title="Changer le type (Milieu)"></i>
+              <i *ngIf="player.type === 'defenseur'" class="fas fa-shield-alt me-2 type-icon type-icon-clickable" (click)="cyclePlayerType(player)" title="Changer le type (Défenseur)"></i>
               <input class="form-control form-control-sm me-2" style="max-width: 140px; display: inline-block;" [(ngModel)]="player.name" />
-              <select class="form-select form-select-sm me-2" style="width: 110px; display: inline-block;" [(ngModel)]="player.type">
-                <option value="attaquant">Attaquant</option>
-                <option value="milieu">Milieu</option>
-                <option value="defenseur">Défenseur</option>
-              </select>
               <span class="badge bg-primary ms-2" *ngIf="getGoalsForPlayer(player.name) > 0">
                 {{ getGoalsForPlayer(player.name) }} ⚽
               </span>
@@ -1081,11 +1076,9 @@
         </ul>
         <div class="input-group">
           <input [(ngModel)]="newPlayerName" class="form-control" placeholder="Ajouter un joueur..." (keyup.enter)="addPlayer()" />
-          <select class="form-select" style="max-width: 120px;" [(ngModel)]="newPlayerType">
-            <option value="attaquant">Attaquant</option>
-            <option value="milieu">Milieu</option>
-            <option value="defenseur">Défenseur</option>
-          </select>
+          <i *ngIf="newPlayerType === 'attaquant'" class="fas fa-futbol type-icon type-icon-clickable" (click)="cycleNewPlayerType()" title="Changer le type (Attaquant)"></i>
+          <i *ngIf="newPlayerType === 'milieu'" class="fas fa-arrows-alt-h type-icon type-icon-clickable" (click)="cycleNewPlayerType()" title="Changer le type (Milieu)"></i>
+          <i *ngIf="newPlayerType === 'defenseur'" class="fas fa-shield-alt type-icon type-icon-clickable" (click)="cycleNewPlayerType()" title="Changer le type (Défenseur)"></i>
           <button class="btn btn-success" (click)="addPlayer()">Ajouter</button>
         </div>
       </div>
