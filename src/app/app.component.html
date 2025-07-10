@@ -1118,17 +1118,17 @@
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title">Buts de {{ selectedPlayerGoalsModal?.name }}</h5>
+        <h5 class="modal-title">Buts de {{ selectedPlayerGoalsModal.name }}</h5>
         <button type="button" class="btn-close" aria-label="Fermer" (click)="closePlayerGoalsModal()"></button>
       </div>
       <ng-container *ngIf="selectedPlayerGoalsModal">
         <div class="modal-body">
           <div *ngFor="let goal of getPlayerGoalsDetails(selectedPlayerGoalsModal!)" class="mb-2">
             <i class="fas fa-calendar-alt me-1"></i>
-            {{ goal.match?.heureDebut | date:'dd/MM/yyyy HH:mm' }}
+            {{ goal.match.heureDebut | date:'dd/MM/yyyy HH:mm' }}
             <span class="ms-2"><i class="fas fa-stopwatch"></i> {{ goal.minute }}'</span>
-            <span class="ms-2">vs {{ goal.match?.equipe1 === teamToEdit?.name ? goal.match?.equipe2 : goal.match?.equipe1 }}</span>
-            <span class="ms-2">(score: {{ goal.match?.score1 }} - {{ goal.match?.score2 }})</span>
+            <span class="ms-2">vs {{ goal.match.equipe1 === teamToEdit?.name ? goal.match.equipe2 : goal.match.equipe1 }}</span>
+            <span class="ms-2">(score: {{ goal.match.score1 }} - {{ goal.match.score2 }})</span>
           </div>
           <div *ngIf="getPlayerGoalsDetails(selectedPlayerGoalsModal!).length === 0" class="small text-muted">Aucun but trouvé.</div>
         </div>

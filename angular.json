@@ -13,7 +13,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:application",
           "options": {
-            "baseHref": "/footscore/",
+            "baseHref": "/",
             "outputPath": "docs",
             "index": "src/index.html",
             "browser": "src/main.ts",
@@ -44,13 +44,15 @@
                   "maximumError": "5mb"
                 }
               ],
-              "baseHref": "/footscore/",
+              "baseHref": "/",
+              "outputPath": "docs",
               "outputHashing": "all"
             },
             "development": {
               "optimization": false,
               "extractLicenses": false,
-              "baseHref": "/footscore/",
+              "baseHref": "/",
+              "outputPath": "docs",
               "sourceMap": true
             }
           },

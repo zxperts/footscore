@@ -163,6 +163,10 @@ export class AppComponent implements OnInit {
   }
 
   onSubmit() {
+    console.log('onSubmit() appelée');
+    console.log('matchForm valid:', this.matchForm.valid);
+    console.log('matchForm value:', this.matchForm.value);
+    
     if (this.matchForm.valid) {
       const matchStartTime = new Date(this.matchForm.value.heureDebut);
       const timezoneOffset = matchStartTime.getTimezoneOffset() * 60000;
@@ -176,12 +180,17 @@ export class AppComponent implements OnInit {
         buteurs: [],
         showElements: true // Initialiser la visibilité
       };
+      console.log('Nouveau match créé:', newMatch);
       this.matches.push(newMatch);
+      console.log('matches après ajout:', this.matches);
       this.saveData();
       this.matchForm.reset({
         heureDebut: this.getCurrentDateTime()
       });
       this.showMatchForm = false;
+      console.log('Match ajouté avec succès');
+    } else {
+      console.log('MatchForm invalide - soumission annulée');
     }
   }
 
@@ -270,121 +279,136 @@ export class AppComponent implements OnInit {
   }
 
   updateScore() {
-    if (this.selectedMatch) {
-      // S'assurer que les scores ne sont pas négatifs
-      const score1 = Math.max(0, this.selectedMatch.score1);
-      const score2 = Math.max(0, this.selectedMatch.score2);
-
-      const index = this.matches.findIndex(m => m.id === this.selectedMatch!.id);
-      if (index !== -1) {
-        this.matches[index] = {
-          ...this.matches[index],
-          score1: score1,
-          score2: score2
-        };
-        // Mettre à jour aussi le selectedMatch pour refléter les changements
-        this.selectedMatch.score1 = score1;
-        this.selectedMatch.score2 = score2;
-        this.saveData();
-        this.showScoreForm = false;
-      }
+    console.log('updateScore() appelée');
+    
+    if (!this.selectedMatch) {
+      console.log('selectedMatch null - mise à jour annulée');
+      return;
     }
+    
+    console.log('Score avant mise à jour:', {
+      score1: this.selectedMatch.score1,
+      score2: this.selectedMatch.score2
+    });
+    
+    this.selectedMatch.score1 = 0;
+    this.selectedMatch.score2 = 0;
+    this.selectedMatch.buteurs = [];
+    
+    console.log('Score après mise à jour:', {
+      score1: this.selectedMatch.score1,
+      score2: this.selectedMatch.score2,
+      buteurs: this.selectedMatch.buteurs
+    });
+    
+    this.saveData();
+    console.log('Score mis à zéro avec succès');
   }
 
   modifierButeur(matchIndex: number, buteurIndex: number) {
+    console.log('modifierButeur() appelée avec matchIndex:', matchIndex, 'buteurIndex:', buteurIndex);
+    
     const match = this.matches[matchIndex];
     const buteur = match.buteurs[buteurIndex];
     
-    // Décrémenter le score de l'équipe correspondante
-/*     if (buteur.equipe === 1) {
-      match.score1--;  // Retirer le but de l'équipe 1
-    } else {
-      match.score2--;  // Retirer le but de l'équipe 2
-    } */
+    console.log('Match trouvé:', match);
+    console.log('Buteur à modifier:', buteur);
     
     this.editingButeur = { index: buteurIndex, buteur: { ...buteur } };
     this.buteurForm.patchValue({
       nom: buteur.nom,
       minute: buteur.minute,
-      equipe: buteur.equipe
+      equipe: buteur.equipe,
+      assist: buteur.assist || ''
     });
+    
+    console.log('editingButeur défini:', this.editingButeur);
     this.showButeurForm = true;
   }
 
   ajouterButeur() {
+    console.log('ajouterButeur() appelée');
+    console.log('buteurForm valid:', this.buteurForm.valid);
+    console.log('buteurForm value:', this.buteurForm.value);
+    
     if (this.buteurForm.valid && this.selectedMatch) {
-      const buteur: Buteur = {
-        nom: this.buteurForm.value.nom,
-        minute: this.buteurForm.value.minute,
-        equipe: this.buteurForm.value.equipe,
-        assist: this.buteurForm.value.assist || undefined
+      const buteurData = this.buteurForm.value;
+      console.log('Données du buteur:', buteurData);
+      
+      const newButeur: Buteur = {
+        nom: buteurData.nom,
+        minute: buteurData.minute,
+        equipe: buteurData.equipe,
+        assist: buteurData.assist || undefined
       };
-
-      const index = this.matches.findIndex(m => m.id === this.selectedMatch!.id);
-      if (index !== -1) {
-        if (this.editingButeur !== null) {
-          // Mode modification
-          this.matches[index].buteurs[this.editingButeur.index] = buteur;
-        } else {
-          // Mode ajout
-          this.matches[index].buteurs.push(buteur);
-        }
-        
-        // Mettre à jour le score
-        if (buteur.equipe === 1) {
-          this.matches[index].score1++;
-          this.lastGoalTeam = this.selectedMatch.equipe1;
-        } else {
-          this.matches[index].score2++;
-          this.lastGoalTeam = this.selectedMatch.equipe2;
-        }
-        
-        // Déclencher la célébration
-        this.lastGoalScorer = buteur.nom;
-/*         this.showGoalCelebration = true;
-        setTimeout(() => {
-          this.showGoalCelebration = false;
-        }, 3000); */
-        
-        this.buteurForm.reset();
-        this.editingButeur = null;
-        this.showButeurForm = false;
-        this.saveData();
+      
+      console.log('Nouveau buteur créé:', newButeur);
+      
+      if (this.editingButeur) {
+        // Modification d'un buteur existant
+        console.log('Modification du buteur existant');
+        const matchIndex = this.matches.indexOf(this.selectedMatch);
+        this.matches[matchIndex].buteurs[this.editingButeur.index] = newButeur;
+        console.log('Buteur modifié dans le match');
+      } else {
+        // Ajout d'un nouveau buteur
+        console.log('Ajout d\'un nouveau buteur');
+        this.selectedMatch.buteurs.push(newButeur);
+        console.log('Buteur ajouté au match');
       }
+      
+      // Mise à jour du score
+      if (newButeur.equipe === 1) {
+        this.selectedMatch.score1++;
+        console.log('Score équipe 1 incrémenté:', this.selectedMatch.score1);
+      } else {
+        this.selectedMatch.score2++;
+        console.log('Score équipe 2 incrémenté:', this.selectedMatch.score2);
+      }
+      
+      console.log('Match après ajout/modification:', this.selectedMatch);
+      this.saveData();
+      this.buteurForm.reset();
+      this.showButeurForm = false;
+      this.editingButeur = null;
+      console.log('Buteur ajouté/modifié avec succès');
+    } else {
+      console.log('ButeurForm invalide ou selectedMatch null - ajout annulé');
     }
   }
 
   annulerEditionButeur() {
-    if (this.editingButeur && this.selectedMatch) {
-      const index = this.matches.findIndex(m => m.id === this.selectedMatch!.id);
-      if (index !== -1) {
-        const buteur = this.editingButeur.buteur;
-        if (buteur.equipe === 1) {
-          this.matches[index].score1++;
-        } else {
-          this.matches[index].score2++;
-        }
-      }
-    }
-    this.editingButeur = null;
+    console.log('annulerEditionButeur() appelée');
     this.buteurForm.reset();
     this.showButeurForm = false;
+    this.editingButeur = null;
+    console.log('Édition de buteur annulée');
   }
 
   supprimerButeur(matchIndex: number, buteurIndex: number) {
+    console.log('supprimerButeur() appelée avec matchIndex:', matchIndex, 'buteurIndex:', buteurIndex);
+    
     const match = this.matches[matchIndex];
     const buteur = match.buteurs[buteurIndex];
     
-    // Décrémenter le score et s'assurer qu'il n'est pas négatif
+    console.log('Match:', match);
+    console.log('Buteur à supprimer:', buteur);
+    
+    // Mise à jour du score
     if (buteur.equipe === 1) {
-      match.score1 = this.validateScore(match.score1 - 1);
+      match.score1 = Math.max(0, match.score1 - 1);
+      console.log('Score équipe 1 décrémenté:', match.score1);
     } else {
-      match.score2 = this.validateScore(match.score2 - 1);
+      match.score2 = Math.max(0, match.score2 - 1);
+      console.log('Score équipe 2 décrémenté:', match.score2);
     }
     
-    // Supprimer le buteur
     match.buteurs.splice(buteurIndex, 1);
+    console.log('Buteur supprimé du match');
+    console.log('Match après suppression:', match);
+    
     this.saveData();
+    console.log('Buteur supprimé avec succès');
   }
 
   getPlayersList(): Player[] {
@@ -462,59 +486,119 @@ export class AppComponent implements OnInit {
   }
 
   quickAddGoal(playerName: string, teamNumber: 1 | 2) {
-    if (this.selectedMatch) {
-      const elapsedMinutes = this.calculateElapsedMinutes(this.selectedMatch.heureDebut);
-      this.lastGoalScorer = playerName;
-      this.lastGoalTeam = teamNumber === 1 ? this.selectedMatch.equipe1 : this.selectedMatch.equipe2;
-      this.lastGoalAssist = '';
-      this.remainingDots = 5;
-      this.showGoalCelebration = true;
-      
-      // Démarrer le compte à rebours
-      this.celebrationTimer = setInterval(() => {
-        this.remainingDots--;
-        if (this.remainingDots <= 0) {
-          this.showGoalCelebration = false;
-          clearInterval(this.celebrationTimer);
-          // Enregistrer automatiquement le but
-          this.saveGoalWithAssist();
-        }
-      }, 1000);
+    console.log('quickAddGoal() appelée avec playerName:', playerName, 'teamNumber:', teamNumber);
+    
+    if (!this.selectedMatch) {
+      console.log('selectedMatch null - ajout rapide annulé');
+      return;
     }
+    
+    console.log('Match sélectionné:', this.selectedMatch);
+    
+    // Calculer la minute actuelle
+    const elapsedMinutes = this.calculateElapsedMinutes(this.selectedMatch.heureDebut);
+    console.log('Minutes écoulées:', elapsedMinutes);
+    
+    if (elapsedMinutes < 0) {
+      console.log('Match pas encore commencé - ajout rapide annulé');
+      return;
+    }
+    
+    const newButeur: Buteur = {
+      nom: playerName,
+      minute: elapsedMinutes,
+      equipe: teamNumber
+    };
+    
+    console.log('Nouveau buteur rapide créé:', newButeur);
+    
+    this.selectedMatch.buteurs.push(newButeur);
+    console.log('Buteur ajouté au match');
+    
+    // Mise à jour du score
+    if (teamNumber === 1) {
+      this.selectedMatch.score1++;
+      console.log('Score équipe 1 incrémenté:', this.selectedMatch.score1);
+    } else {
+      this.selectedMatch.score2++;
+      console.log('Score équipe 2 incrémenté:', this.selectedMatch.score2);
+    }
+    
+    console.log('Match après ajout rapide:', this.selectedMatch);
+    this.saveData();
+    
+    // Célébration du but
+    this.lastGoalScorer = playerName;
+    this.lastGoalTeam = teamNumber === 1 ? this.selectedMatch.equipe1 : this.selectedMatch.equipe2;
+    this.showGoalCelebration = true;
+    this.remainingDots = 5;
+    
+    console.log('Célébration du but:', {
+      scorer: this.lastGoalScorer,
+      team: this.lastGoalTeam,
+      showCelebration: this.showGoalCelebration
+    });
+    
+    this.startCelebrationTimer();
+    console.log('But ajouté rapidement avec succès');
   }
 
   saveGoalWithAssist() {
-    if (this.selectedMatch) {
-      const buteur: Buteur = {
-        nom: this.lastGoalScorer,
-        minute: this.calculateElapsedMinutes(this.selectedMatch.heureDebut),
-        equipe: this.lastGoalTeam === this.selectedMatch.equipe1 ? 1 : 2,
-        assist: this.lastGoalAssist || undefined
-      };
-
-      const index = this.matches.findIndex(m => m.id === this.selectedMatch!.id);
-      if (index !== -1) {
-        this.matches[index].buteurs.push(buteur);
-        
-        if (buteur.equipe === 1) {
-          this.matches[index].score1++;
-        } else {
-          this.matches[index].score2++;
-        }
-        
-        this.saveData();
-        clearInterval(this.celebrationTimer);
-        this.showGoalCelebration = false;
-      }
+    console.log('saveGoalWithAssist() appelée');
+    console.log('lastGoalScorer:', this.lastGoalScorer);
+    console.log('lastGoalTeam:', this.lastGoalTeam);
+    console.log('lastGoalAssist:', this.lastGoalAssist);
+    
+    if (!this.selectedMatch || !this.lastGoalScorer) {
+      console.log('selectedMatch ou lastGoalScorer null - sauvegarde annulée');
+      return;
     }
+    
+    // Trouver le dernier but ajouté et ajouter l'assist
+    const lastButeur = this.selectedMatch.buteurs[this.selectedMatch.buteurs.length - 1];
+    if (lastButeur && lastButeur.nom === this.lastGoalScorer) {
+      lastButeur.assist = this.lastGoalAssist;
+      console.log('Assist ajouté au buteur:', lastButeur);
+    }
+    
+    this.saveData();
+    //this.cancelGoal();
+    this.showGoalCelebration = false;
+    console.log('But avec assist sauvegardé avec succès');
   }
 
   cancelGoal() {
+    console.log('cancelGoal() appelée');
+    
+    if (!this.selectedMatch) {
+      console.log('selectedMatch null - annulation annulée');
+      return;
+    }
+    
+    // Supprimer le dernier but ajouté
+    if (this.selectedMatch.buteurs.length > 0) {
+      const lastButeur = this.selectedMatch.buteurs[this.selectedMatch.buteurs.length - 1];
+      console.log('Dernier buteur à supprimer:', lastButeur);
+      
+      // Mettre à jour le score
+      if (lastButeur.equipe === 1) {
+        this.selectedMatch.score1 = Math.max(0, this.selectedMatch.score1 - 1);
+        console.log('Score équipe 1 décrémenté:', this.selectedMatch.score1);
+      } else {
+        this.selectedMatch.score2 = Math.max(0, this.selectedMatch.score2 - 1);
+        console.log('Score équipe 2 décrémenté:', this.selectedMatch.score2);
+      }
+      
+      this.selectedMatch.buteurs.pop();
+      console.log('Dernier buteur supprimé');
+    }
+    
     this.showGoalCelebration = false;
-    clearInterval(this.celebrationTimer);
     this.lastGoalScorer = '';
     this.lastGoalTeam = '';
     this.lastGoalAssist = '';
+    
+    console.log('But annulé avec succès');
   }
 
   supprimerMatch(match: Match) {
@@ -1354,7 +1438,9 @@ ${scorers2.map(b => `- ${b.nom}: ${b.minutes.join(', ')}'${b.assist ? ` (Assist:
   }
 
   validateScore(score: number): number {
-    return Math.max(0, score);
+    const validatedScore = Math.max(0, score);
+    console.log('validateScore() appelée avec:', score, 'retourne:', validatedScore);
+    return validatedScore;
   }
 
   openEditPlayersModal(teamName: string) {
@@ -1568,5 +1654,19 @@ ${scorers2.map(b => `- ${b.nom}: ${b.minutes.join(', ')}'${b.assist ? ` (Assist:
     this.matchForm.patchValue({ competition: name });
     this.competitionSearch = name;
     this.filteredCompetitions = [];
+  }
+
+  startCelebrationTimer() {
+    console.log('startCelebrationTimer() appelée');
+    this.celebrationTimer = setInterval(() => {
+      this.remainingDots--;
+      console.log('Dots restants:', this.remainingDots);
+      if (this.remainingDots <= 0) {
+        this.showGoalCelebration = false;
+        clearInterval(this.celebrationTimer);
+        console.log('Timer de célébration terminé');
+        this.saveGoalWithAssist();
+      }
+    }, 1000);
   }
 }
