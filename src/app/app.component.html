@@ -429,7 +429,7 @@
       <!-- Liste des joueurs (déplacée avant la liste des buteurs) -->
       <div class="mt-4">
         <div class="row">
-          <div class="col-6">
+          <div class="col-sm-6">
             <h5 class="team-title-1">{{ selectedMatch.equipe1 }}</h5>
             <div class="player-badges player-badges-team1">
               <button *ngFor="let player of getTeamPlayers(1)" 
@@ -444,7 +444,7 @@
               </button>
             </div>
           </div>
-          <div class="col-6">
+          <div class="col-sm-6">
             <h5 class="team-title-2">{{ selectedMatch.equipe2 }}</h5>
             <div class="player-badges player-badges-team2">
               <button *ngFor="let player of getTeamPlayers(2)" 
