@@ -1079,3 +1079,12 @@ body {
   transform: scale(0.95) rotate(4deg);
   box-shadow: 0 2px 8px rgba(52,152,219,0.15);
 }
+
+.list-group.position-absolute {
+  z-index: 1050;
+  background: #fff;
+  border: 1px solid #ddd;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  max-height: 220px;
+  overflow-y: auto;
+}

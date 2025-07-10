@@ -94,6 +94,10 @@ export class AppComponent implements OnInit {
   // newPlayerName déjà présente
   selectedPlayerGoalsIndex: number | null = null;
   selectedPlayerGoalsModal: Player | null = null;
+  team1Search: string = '';
+  team2Search: string = '';
+  filteredTeams1: string[] = [];
+  filteredTeams2: string[] = [];
 
   constructor(
     private fb: FormBuilder,
@@ -140,6 +144,8 @@ export class AppComponent implements OnInit {
     this.loadSavedData();
     this.startAutoSave();
     await this.loadMatchFromUrl();
+    this.updateFilteredTeams1();
+    this.updateFilteredTeams2();
   }
 
   getCurrentDateTime(): string {
@@ -1467,5 +1473,41 @@ ${scorers2.map(b => `- ${b.nom}: ${b.minutes.join(', ')}'${b.assist ? ` (Assist:
 
   closePlayerGoalsModal() {
     this.selectedPlayerGoalsModal = null;
+  }
+
+  updateFilteredTeams1() {
+    const search = this.team1Search.toLowerCase();
+    if (search.length < 3) {
+      this.filteredTeams1 = [];
+      return;
+    }
+    this.filteredTeams1 = TEAMS
+      .map(t => t.name)
+      .filter(name => name.toLowerCase().includes(search))
+      .filter(name => name !== this.matchForm.value.equipe2);
+  }
+
+  updateFilteredTeams2() {
+    const search = this.team2Search.toLowerCase();
+    if (search.length < 3) {
+      this.filteredTeams2 = [];
+      return;
+    }
+    this.filteredTeams2 = TEAMS
+      .map(t => t.name)
+      .filter(name => name.toLowerCase().includes(search))
+      .filter(name => name !== this.matchForm.value.equipe1);
+  }
+
+  selectTeam1(name: string) {
+    this.matchForm.patchValue({ equipe1: name });
+    this.team1Search = name;
+    this.filteredTeams1 = [];
+  }
+
+  selectTeam2(name: string) {
+    this.matchForm.patchValue({ equipe2: name });
+    this.team2Search = name;
+    this.filteredTeams2 = [];
   }
 }

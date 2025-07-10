@@ -141,89 +141,94 @@
 
   </div>
 
-  <!-- Formulaire masqué par défaut -->
-  <form *ngIf="showMatchForm" 
-        [formGroup]="matchForm" 
-        (ngSubmit)="onSubmit()" 
-        class="mt-4">
-    <div class="row" style="width: 95%; margin: 0 auto; padding: 20px; border-radius: 10px; background: linear-gradient(to top, rgba(0,0,0,0.1) 0%, transparent 70%);">
-      <!-- Informations principales -->
-      <div class="col-md-6">
-        <h4 class="mb-4 text-primary text-center fw-bold" style="font-size: 1.8rem; text-shadow: 2px 2px 4px rgba(0,0,0,0.1);">
+  <!-- Modale d’ajout de match -->
+<div class="modal fade show" tabindex="-1" style="display:block; background:rgba(0,0,0,0.5);" *ngIf="showMatchForm">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title mb-0 text-primary fw-bold" style="font-size: 1.8rem; text-shadow: 2px 2px 4px rgba(0,0,0,0.1);">
           <i class="fas fa-futbol me-2"></i>Ajouter un Match!
         </h4>
-        <div class="mb-3">
-          <label for="equipe1" class="form-label">Équipe 1</label>
-          <select class="form-select" id="equipe1" formControlName="equipe1" #equipe1Select
-                  (change)="equipe1Select.value === 'new1' && addNewTeam(equipe1Select)">
-            <option *ngFor="let team of teams" [value]="team.name">{{ team.name }}</option>
-            <option value="new1">+ Ajouter une nouvelle équipe</option>
-          </select>
-        </div>
-
-        <div class="mb-3">
-          <label for="equipe2" class="form-label">Équipe 2</label>
-          <select class="form-select" id="equipe2" formControlName="equipe2" #equipe2Select
-                  (change)="equipe2Select.value === 'new2' && addNewTeam(equipe2Select)">
-            <option value="">Sélectionner une équipe</option>
-            <option *ngFor="let team of teams" [value]="team.name">{{ team.name }}</option>
-            <option value="new2">+ Ajouter une nouvelle équipe</option>
-          </select>
-        </div>
+        <button type="button" class="btn-close" aria-label="Fermer" (click)="showMatchForm = false"></button>
       </div>
-
-      <!-- Informations secondaires -->
-      <div class="col-md-6">
-        <div class="mb-3">
-          <label for="heureDebut" class="form-label text-muted">Heure de début</label>
-          <input 
-            type="datetime-local" step="3600" 
-            class="form-control form-control-sm" 
-            id="heureDebut" 
-            formControlName="heureDebut">
-        </div>
-
-        <div class="mb-3">
-          <label for="lieu" class="form-label text-muted">Lieu du match (optionnel)</label>
-          <input 
-            type="text" 
-            class="form-control form-control-sm" 
-            id="lieu" 
-            formControlName="lieu"
-            placeholder="Stade, ville...">
-        </div>
-
-        <div class="mb-3">
-          <label for="competition" class="form-label text-muted">Compétition (optionnel)</label>
-          <input 
-            type="text" 
-            class="form-control form-control-sm" 
-            id="competition" 
-            formControlName="competition"
-            placeholder="Championnat, tournoi, amical...">
-        </div>
-      </div>
-      <div>
-        <div class="d-flex gap-2 ms-2">
-          <button type="submit" class="btn btn-primary px-4" [disabled]="!matchForm.valid">
-            Créer le match
-          </button>
-          <button type="button" class="btn btn-outline-secondary" (click)="showMatchForm = false">
-            Annuler
-          </button>
-          <button type="button" class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-            🧰
-          </button>
-          <ul class="dropdown-menu">
-            <li><a class="dropdown-item" (click)="exportMatches()">Exporter les matchs</a></li>
-            <li><a class="dropdown-item" (click)="importMatches()">Importer des matchs</a></li>
-          </ul>
-        </div>
+      <div class="modal-body">
+        <form [formGroup]="matchForm" (ngSubmit)="onSubmit()">
+          <div class="row" style="width: 100%; margin: 0 auto; padding: 10px; border-radius: 10px; background: linear-gradient(to top, rgba(0,0,0,0.1) 0%, transparent 70%);">
+            <!-- Informations principales -->
+            <div class="col-md-6">
+              <!-- Équipe 1 -->
+<div class="mb-3 position-relative">
+  <label for="equipe1" class="form-label">Équipe 1</label>
+  <input id="equipe1" type="text" class="form-control" placeholder="Rechercher ou créer une équipe..."
+         [(ngModel)]="team1Search" [ngModelOptions]="{standalone: true}" (input)="updateFilteredTeams1()" name="team1Search"
+         (focus)="updateFilteredTeams1()" autocomplete="off">
+  <input type="hidden" formControlName="equipe1">
+  <div class="list-group position-absolute w-100" *ngIf="filteredTeams1.length > 0 && team1Search">
+    <button type="button" class="list-group-item list-group-item-action"
+            *ngFor="let name of filteredTeams1"
+            (click)="selectTeam1(name)">{{ name }}</button>
+  </div>
+  <div *ngIf="team1Search && filteredTeams1.length === 0" class="mt-1">
+    <button type="button" class="btn btn-link p-0" (click)="selectTeam1(team1Search)">
+      Créer "{{ team1Search }}"
+    </button>
+  </div>
+</div>
+<!-- Équipe 2 -->
+<div class="mb-3 position-relative">
+  <label for="equipe2" class="form-label">Équipe 2</label>
+  <input id="equipe2" type="text" class="form-control" placeholder="Rechercher ou créer une équipe..."
+         [(ngModel)]="team2Search" [ngModelOptions]="{standalone: true}" (input)="updateFilteredTeams2()" name="team2Search"
+         (focus)="updateFilteredTeams2()" autocomplete="off">
+  <input type="hidden" formControlName="equipe2">
+  <div class="list-group position-absolute w-100" *ngIf="filteredTeams2.length > 0 && team2Search">
+    <button type="button" class="list-group-item list-group-item-action"
+            *ngFor="let name of filteredTeams2"
+            (click)="selectTeam2(name)">{{ name }}</button>
+  </div>
+  <div *ngIf="team2Search && filteredTeams2.length === 0" class="mt-1">
+    <button type="button" class="btn btn-link p-0" (click)="selectTeam2(team2Search)">
+      Créer "{{ team2Search }}"
+    </button>
+  </div>
+</div>
+            </div>
+            <!-- Informations secondaires -->
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label for="heureDebut" class="form-label text-muted">Heure de début</label>
+                <input type="datetime-local" step="3600" class="form-control form-control-sm" id="heureDebut" formControlName="heureDebut">
+              </div>
+              <div class="mb-3">
+                <label for="lieu" class="form-label text-muted">Lieu du match (optionnel)</label>
+                <input type="text" class="form-control form-control-sm" id="lieu" formControlName="lieu" placeholder="Stade, ville...">
+              </div>
+              <div class="mb-3">
+                <label for="competition" class="form-label text-muted">Compétition (optionnel)</label>
+                <input type="text" class="form-control form-control-sm" id="competition" formControlName="competition" placeholder="Championnat, tournoi, amical...">
+              </div>
+            </div>
+          </div>
+          <div class="d-flex gap-2 ms-2 mt-3">
+            <button type="submit" class="btn btn-primary px-4" [disabled]="!matchForm.valid">
+              Créer le match
+            </button>
+            <button type="button" class="btn btn-outline-secondary" (click)="showMatchForm = false">
+              Annuler
+            </button>
+            <button type="button" class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+              🧰
+            </button>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" (click)="exportMatches()">Exporter les matchs</a></li>
+              <li><a class="dropdown-item" (click)="importMatches()">Importer des matchs</a></li>
+            </ul>
+          </div>
+        </form>
       </div>
     </div>
-
-
-  </form>
+  </div>
+</div>
 
   <div class="mt-4" *ngIf="filteredMatches.length > 0">
     <h2></h2>
