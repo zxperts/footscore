@@ -53,7 +53,6 @@ export class AppComponent implements OnInit {
   editingButeur: { index: number, buteur: Buteur } | null = null;
   teams = TEAMS;
   selectedTeam: Team | null = null;
-  newTeamName: string = '';
   newPlayerName: string = '';
   showGoalCelebration: boolean = false;
   lastGoalScorer: string = '';
@@ -98,6 +97,11 @@ export class AppComponent implements OnInit {
   team2Search: string = '';
   filteredTeams1: string[] = [];
   filteredTeams2: string[] = [];
+  showNewTeamModal: boolean = false;
+  newTeamName: string = '';
+  newTeamPlayers: { name: string, type: 'attaquant' | 'milieu' | 'defenseur' }[] = [
+    { name: '', type: 'milieu' }
+  ];
 
   constructor(
     private fb: FormBuilder,
@@ -1509,5 +1513,40 @@ ${scorers2.map(b => `- ${b.nom}: ${b.minutes.join(', ')}'${b.assist ? ` (Assist:
     this.matchForm.patchValue({ equipe2: name });
     this.team2Search = name;
     this.filteredTeams2 = [];
+  }
+
+  openNewTeamModal() {
+    this.showNewTeamModal = true;
+    this.newTeamName = '';
+    this.newTeamPlayers = [{ name: '', type: 'milieu' }];
+  }
+
+  closeNewTeamModal() {
+    this.showNewTeamModal = false;
+  }
+
+  addNewTeamPlayer() {
+    this.newTeamPlayers.push({ name: '', type: 'milieu' });
+  }
+
+  removeNewTeamPlayer(i: number) {
+    if (this.newTeamPlayers.length > 1) {
+      this.newTeamPlayers.splice(i, 1);
+    }
+  }
+
+  createNewTeam() {
+    if (!this.newTeamName.trim() || this.newTeamPlayers.every(p => !p.name.trim())) return;
+    const newTeam = {
+      id: Date.now(),
+      name: this.newTeamName.trim(),
+      players: this.newTeamPlayers.filter(p => p.name.trim())
+    };
+    this.teams.push(newTeam);
+    this.closeNewTeamModal();
+  }
+
+  canCreateNewTeam(): boolean {
+    return !this.newTeamName.trim() || this.newTeamPlayers.every(p => !p.name.trim());
   }
 }
