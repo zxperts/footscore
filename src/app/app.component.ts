@@ -3,7 +3,7 @@ import { FormBuilder, FormGroup, Validators, FormArray } from '@angular/forms';
 import { Match, Buteur } from './models/match.model';
 import { ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { Team, TEAMS, ensureDefaultPlayer } from './models/team.model';
+import { Team, TEAMS, ensureDefaultPlayer, Player } from './models/team.model';
 import { FormsModule } from '@angular/forms';
 import { PlayerSelectorComponent } from './player-selector/player-selector.component';
 import { NavbarComponent } from './component/navbar/navbar.component';
@@ -90,6 +90,7 @@ export class AppComponent implements OnInit {
   sharingLogs: string[] = [];
   showEditPlayersModal: boolean = false;
   teamToEdit: Team | null = null;
+  newPlayerType: 'milieu' = 'milieu';
   // newPlayerName déjà présente
 
   constructor(
@@ -232,7 +233,7 @@ export class AppComponent implements OnInit {
       this.teams.push({
         id: this.teams.length + 1,
         name: match.equipe1,
-        players: ['Joueur non listé']
+        players: [{ name: 'Joueur non listé', type: 'milieu' }]
       });
     }
     
@@ -243,7 +244,7 @@ export class AppComponent implements OnInit {
       this.teams.push({
         id: this.teams.length + 1,
         name: match.equipe2,
-        players: ['Joueur non listé']
+        players: [{ name: 'Joueur non listé', type: 'milieu' }]
       });
     }
 
@@ -372,7 +373,7 @@ export class AppComponent implements OnInit {
     this.saveData();
   }
 
-  getPlayersList(): string[] {
+  getPlayersList(): Player[] {
     if (this.selectedMatch && this.buteurForm.get('equipe')?.value) {
       const equipeValue = this.buteurForm.get('equipe')?.value;
       const equipeNom = equipeValue === 1 ? this.selectedMatch.equipe1 : this.selectedMatch.equipe2;
@@ -430,13 +431,15 @@ export class AppComponent implements OnInit {
       );
       
       if (selectedTeam) {
-        selectedTeam.players.push(playerName.trim());
+        if (!selectedTeam.players.some(p => p.name === playerName.trim())) {
+          selectedTeam.players.push({ name: playerName.trim(), type: 'milieu' });
+        }
         this.buteurForm.get('nom')?.setValue(playerName.trim());
       }
     }
   }
 
-  getTeamPlayers(teamNumber: number): string[] {
+  getTeamPlayers(teamNumber: number): Player[] {
     if (!this.selectedMatch) return [];
     
     const teamName = teamNumber === 1 ? this.selectedMatch.equipe1 : this.selectedMatch.equipe2;
@@ -603,12 +606,21 @@ export class AppComponent implements OnInit {
     }
   }
 
-  getPlayerForPosition(team: number, position: string): string {
+  getPlayerForPosition(team: number, position: string): Player | null {
     if (this.selectedMatch?.positions) {
       const key = `${team}_${position}`;
-      return this.selectedMatch.positions[key] || '';
+      const playerName = this.selectedMatch.positions[key];
+      if (playerName) {
+        return this.getPlayerByName(team, playerName);
+      }
     }
-    return '';
+    return null;
+  }
+
+  getPlayerByName(team: number, name: string): Player | null {
+    const teamObj = this.teams.find(t => t.name === (team === 1 ? this.selectedMatch?.equipe1 : this.selectedMatch?.equipe2));
+    if (!teamObj) return null;
+    return teamObj.players.find(p => p.name === name) || null;
   }
 
   openDispositionModal(match: Match) {
@@ -1348,10 +1360,11 @@ ${scorers2.map(b => `- ${b.nom}: ${b.minutes.join(', ')}'${b.assist ? ` (Assist:
 
   addPlayer() {
     if (this.teamToEdit && this.newPlayerName.trim()) {
-      if (!this.teamToEdit.players.includes(this.newPlayerName.trim())) {
-        this.teamToEdit.players.push(this.newPlayerName.trim());
+      if (!this.teamToEdit.players.some(p => p.name === this.newPlayerName.trim())) {
+        this.teamToEdit.players.push({ name: this.newPlayerName.trim(), type: this.newPlayerType });
       }
       this.newPlayerName = '';
+      this.newPlayerType = 'milieu';
     }
   }
 
@@ -1373,23 +1386,23 @@ ${scorers2.map(b => `- ${b.nom}: ${b.minutes.join(', ')}'${b.assist ? ` (Assist:
   }
 
   // Retourne la liste des joueurs de teamToEdit triée par nombre de buts marqués (décroissant)
-  getPlayersSortedByGoals(): string[] {
+  getPlayersSortedByGoals(): Player[] {
     if (!this.teamToEdit) return [];
     // Compter les buts pour chaque joueur de l'équipe (tous matchs confondus)
     const goalCounts: { [player: string]: number } = {};
     for (const player of this.teamToEdit.players) {
-      goalCounts[player] = 0;
+      goalCounts[player.name] = 0;
       for (const match of this.matches) {
         // Vérifier si l'équipe correspond
         if (match.equipe1 === this.teamToEdit.name || match.equipe2 === this.teamToEdit.name) {
           for (const buteur of match.buteurs) {
             // Le buteur doit être dans l'équipe et avoir le même nom
-            if (buteur.nom === player) {
+            if (buteur.nom === player.name) {
               // Vérifier que le buteur est bien dans la bonne équipe (1 ou 2)
               const isTeam1 = match.equipe1 === this.teamToEdit.name && buteur.equipe === 1;
               const isTeam2 = match.equipe2 === this.teamToEdit.name && buteur.equipe === 2;
               if (isTeam1 || isTeam2) {
-                goalCounts[player]++;
+                goalCounts[player.name]++;
               }
             }
           }
@@ -1397,17 +1410,17 @@ ${scorers2.map(b => `- ${b.nom}: ${b.minutes.join(', ')}'${b.assist ? ` (Assist:
       }
     }
     // Retourner les joueurs triés par nombre de buts décroissant
-    return [...this.teamToEdit.players].sort((a, b) => goalCounts[b] - goalCounts[a]);
+    return [...this.teamToEdit.players].sort((a, b) => goalCounts[b.name] - goalCounts[a.name]);
   }
 
   // Retourne le nombre de buts marqués par un joueur pour l'équipe en cours d'édition
-  getGoalsForPlayer(player: string): number {
+  getGoalsForPlayer(playerName: string): number {
     if (!this.teamToEdit) return 0;
     let count = 0;
     for (const match of this.matches) {
       if (match.equipe1 === this.teamToEdit.name || match.equipe2 === this.teamToEdit.name) {
         for (const buteur of match.buteurs) {
-          if (buteur.nom === player) {
+          if (buteur.nom === playerName) {
             const isTeam1 = match.equipe1 === this.teamToEdit.name && buteur.equipe === 1;
             const isTeam2 = match.equipe2 === this.teamToEdit.name && buteur.equipe === 2;
             if (isTeam1 || isTeam2) {

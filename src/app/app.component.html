@@ -432,10 +432,14 @@
           <div class="col-sm-6">
             <h5 class="team-title-1">{{ selectedMatch.equipe1 }}</h5>
             <div class="player-badges player-badges-team1">
+              <!-- Boutons d’ajout de but équipe 1 -->
               <button *ngFor="let player of getTeamPlayers(1)" 
                       class="btn btn-outline-primary btn-sm me-2 mb-2"
-                      (click)="quickAddGoal(player, 1)">
-                ⚽ {{ player }}
+                      (click)="quickAddGoal(player.name, 1)">
+                <i *ngIf="player.type === 'attaquant'" class="fas fa-futbol me-1"></i>
+                <i *ngIf="player.type === 'defenseur'" class="fas fa-shield-alt me-1"></i>
+                <i *ngIf="player.type === 'milieu'" class="fas fa-arrows-alt-h me-1"></i>
+                {{ player.name }}
               </button>
               <button *ngIf="!showButeurForm" 
               class="btn btn-outline-primary btn-sm me-2 mb-2"
@@ -447,10 +451,14 @@
           <div class="col-sm-6">
             <h5 class="team-title-2">{{ selectedMatch.equipe2 }}</h5>
             <div class="player-badges player-badges-team2">
+              <!-- Idem pour équipe 2 -->
               <button *ngFor="let player of getTeamPlayers(2)" 
                       class="btn btn-outline-secondary btn-sm me-2 mb-2"
-                      (click)="quickAddGoal(player, 2)">
-                ⚽ {{ player }}
+                      (click)="quickAddGoal(player.name, 2)">
+                <i *ngIf="player.type === 'attaquant'" class="fas fa-futbol me-1"></i>
+                <i *ngIf="player.type === 'defenseur'" class="fas fa-shield-alt me-1"></i>
+                <i *ngIf="player.type === 'milieu'" class="fas fa-arrows-alt-h me-1"></i>
+                {{ player.name }}
               </button>
               <button *ngIf="!showButeurForm" 
               class="btn btn-outline-secondary btn-sm me-2 mb-2"
@@ -499,8 +507,11 @@
           <div class="player-list">
             <button *ngFor="let player of getTeamPlayers(selectedPosition.team)"
                     class="btn btn-sm btn-outline-primary mb-1 me-1"
-                    (click)="assignPlayerToPosition(player)">
-              {{ player }}
+                    (click)="assignPlayerToPosition(player.name)">
+              <i *ngIf="player.type === 'attaquant'" class="fas fa-futbol me-1"></i>
+              <i *ngIf="player.type === 'defenseur'" class="fas fa-shield-alt me-1"></i>
+              <i *ngIf="player.type === 'milieu'" class="fas fa-arrows-alt-h me-1"></i>
+              {{ player.name }}
             </button>
           </div>
           <button class="btn btn-sm btn-secondary mt-2" (click)="selectedPosition = null">
@@ -594,9 +605,9 @@
         <select class="form-select" [(ngModel)]="lastGoalAssist">
           <option value="">Aucun assist</option>
           <option *ngFor="let player of getTeamPlayers(lastGoalTeam === selectedMatch?.equipe1 ? 1 : 2)" 
-                  [value]="player"
-                  [disabled]="player === lastGoalScorer">
-            {{ player }}
+                  [value]="player.name"
+                  [disabled]="player.name === lastGoalScorer">
+            {{ player.name }}
           </option>
         </select>
         <div class="button-group mt-2">
@@ -631,7 +642,14 @@
                 <div class="player-dot" [class.selected]="selectedPosition?.team === 1 && selectedPosition?.position === 'attaquant'">
                   <span class="position-name">AT</span>
                   <span class="separator" *ngIf="getPlayerForPosition(1, 'attaquant')">-</span>
-                  <span class="player-name">{{ getPlayerForPosition(1, 'attaquant') }}</span>
+                  <span class="player-name">
+                    <ng-container *ngIf="getPlayerForPosition(1, 'attaquant') as player">
+                      <i *ngIf="player.type === 'attaquant'" class="fas fa-futbol me-1"></i>
+                      <i *ngIf="player.type === 'defenseur'" class="fas fa-shield-alt me-1"></i>
+                      <i *ngIf="player.type === 'milieu'" class="fas fa-arrows-alt-h me-1"></i>
+                      {{ player.name }}
+                    </ng-container>
+                  </span>
                 </div>
               </div>
               <!-- Milieux -->
@@ -640,34 +658,69 @@
                 <div class="player-dot" [class.selected]="selectedPosition?.team === 1 && selectedPosition?.position === 'milieu-offensif'">
                   <span class="position-name">MO</span>
                   <span class="separator" *ngIf="getPlayerForPosition(1, 'milieu-offensif')">-</span>
-                  <span class="player-name">{{ getPlayerForPosition(1, 'milieu-offensif') }}</span>
+                  <span class="player-name">
+                    <ng-container *ngIf="getPlayerForPosition(1, 'milieu-offensif') as player">
+                      <i *ngIf="player.type === 'attaquant'" class="fas fa-futbol me-1"></i>
+                      <i *ngIf="player.type === 'defenseur'" class="fas fa-shield-alt me-1"></i>
+                      <i *ngIf="player.type === 'milieu'" class="fas fa-arrows-alt-h me-1"></i>
+                      {{ player.name }}
+                    </ng-container>
+                  </span>
                 </div>
               </div>
               </div>
               <div class="player-position milieu-gauche" (click)="selectPosition(1, 'milieu-gauche')">
                 <div class="player-dot" [class.selected]="selectedPosition?.team === 1 && selectedPosition?.position === 'milieu-gauche'">
                   <span class="position-name">MG</span>
-                  <span class="player-name">{{ getPlayerForPosition(1, 'milieu-gauche') }}</span>
+                  <span class="player-name">
+                    <ng-container *ngIf="getPlayerForPosition(1, 'milieu-gauche') as player">
+                      <i *ngIf="player.type === 'attaquant'" class="fas fa-futbol me-1"></i>
+                      <i *ngIf="player.type === 'defenseur'" class="fas fa-shield-alt me-1"></i>
+                      <i *ngIf="player.type === 'milieu'" class="fas fa-arrows-alt-h me-1"></i>
+                      {{ player.name }}
+                    </ng-container>
+                  </span>
                 </div>
               </div>
               <div class="player-position milieu-droit" (click)="selectPosition(1, 'milieu-droit')">
                 <div class="player-dot" [class.selected]="selectedPosition?.team === 1 && selectedPosition?.position === 'milieu-droit'">
                   <span class="position-name">MD</span>
-                  <span class="player-name">{{ getPlayerForPosition(1, 'milieu-droit') }}</span>
+                  <span class="player-name">
+                    <ng-container *ngIf="getPlayerForPosition(1, 'milieu-droit') as player">
+                      <i *ngIf="player.type === 'attaquant'" class="fas fa-futbol me-1"></i>
+                      <i *ngIf="player.type === 'defenseur'" class="fas fa-shield-alt me-1"></i>
+                      <i *ngIf="player.type === 'milieu'" class="fas fa-arrows-alt-h me-1"></i>
+                      {{ player.name }}
+                    </ng-container>
+                  </span>
                 </div>
               </div>
               <!-- Défenseurs -->
               <div class="player-position defenseur-central" (click)="selectPosition(1, 'defenseur-central')">
                 <div class="player-dot" [class.selected]="selectedPosition?.team === 1 && selectedPosition?.position === 'defenseur-central'">
                   <span class="position-name">DC</span>
-                  <span class="player-name">{{ getPlayerForPosition(1, 'defenseur-central') }}</span>
+                  <span class="player-name">
+                    <ng-container *ngIf="getPlayerForPosition(1, 'defenseur-central') as player">
+                      <i *ngIf="player.type === 'attaquant'" class="fas fa-futbol me-1"></i>
+                      <i *ngIf="player.type === 'defenseur'" class="fas fa-shield-alt me-1"></i>
+                      <i *ngIf="player.type === 'milieu'" class="fas fa-arrows-alt-h me-1"></i>
+                      {{ player.name }}
+                    </ng-container>
+                  </span>
                 </div>
               </div>
               <div *ngIf="showDefendersAndMidfielders">
               <div class="player-position defenseur-gauche" (click)="selectPosition(1, 'defenseur-gauche')">
                 <div class="player-dot" [class.selected]="selectedPosition?.team === 1 && selectedPosition?.position === 'defenseur-gauche'">
                   <span class="position-name">DG</span>
-                  <span class="player-name">{{ getPlayerForPosition(1, 'defenseur-gauche') }}</span>
+                  <span class="player-name">
+                    <ng-container *ngIf="getPlayerForPosition(1, 'defenseur-gauche') as player">
+                      <i *ngIf="player.type === 'attaquant'" class="fas fa-futbol me-1"></i>
+                      <i *ngIf="player.type === 'defenseur'" class="fas fa-shield-alt me-1"></i>
+                      <i *ngIf="player.type === 'milieu'" class="fas fa-arrows-alt-h me-1"></i>
+                      {{ player.name }}
+                    </ng-container>
+                  </span>
                 </div>
               </div>
               </div>
@@ -675,7 +728,14 @@
               <div class="player-position defenseur-droit" (click)="selectPosition(1, 'defenseur-droit')">
                 <div class="player-dot" [class.selected]="selectedPosition?.team === 1 && selectedPosition?.position === 'defenseur-droit'">
                   <span class="position-name">DD</span>
-                  <span class="player-name">{{ getPlayerForPosition(1, 'defenseur-droit') }}</span>
+                  <span class="player-name">
+                    <ng-container *ngIf="getPlayerForPosition(1, 'defenseur-droit') as player">
+                      <i *ngIf="player.type === 'attaquant'" class="fas fa-futbol me-1"></i>
+                      <i *ngIf="player.type === 'defenseur'" class="fas fa-shield-alt me-1"></i>
+                      <i *ngIf="player.type === 'milieu'" class="fas fa-arrows-alt-h me-1"></i>
+                      {{ player.name }}
+                    </ng-container>
+                  </span>
                 </div>
               </div>
               </div>
@@ -683,7 +743,14 @@
               <div class="player-position gardien" (click)="selectPosition(1, 'gardien')">
                 <div class="player-dot" [class.selected]="selectedPosition?.team === 1 && selectedPosition?.position === 'gardien'">
                   <span class="position-name">G</span>
-                  <span class="player-name">{{ getPlayerForPosition(1, 'gardien') }}</span>
+                  <span class="player-name">
+                    <ng-container *ngIf="getPlayerForPosition(1, 'gardien') as player">
+                      <i *ngIf="player.type === 'attaquant'" class="fas fa-futbol me-1"></i>
+                      <i *ngIf="player.type === 'defenseur'" class="fas fa-shield-alt me-1"></i>
+                      <i *ngIf="player.type === 'milieu'" class="fas fa-arrows-alt-h me-1"></i>
+                      {{ player.name }}
+                    </ng-container>
+                  </span>
                 </div>
               </div>
             </div>
@@ -697,7 +764,14 @@
                 <div class="player-dot" [class.selected]="selectedPosition?.team === 2 && selectedPosition?.position === 'attaquant'">
                   <span class="position-name">AT</span>
                   <span class="separator" *ngIf="getPlayerForPosition(2, 'attaquant')">-</span>
-                  <span class="player-name">{{ getPlayerForPosition(2, 'attaquant') }}</span>
+                  <span class="player-name">
+                    <ng-container *ngIf="getPlayerForPosition(2, 'attaquant') as player">
+                      <i *ngIf="player.type === 'attaquant'" class="fas fa-futbol me-1"></i>
+                      <i *ngIf="player.type === 'defenseur'" class="fas fa-shield-alt me-1"></i>
+                      <i *ngIf="player.type === 'milieu'" class="fas fa-arrows-alt-h me-1"></i>
+                      {{ player.name }}
+                    </ng-container>
+                  </span>
                 </div>
               </div>
               <!-- Milieux -->
@@ -705,34 +779,69 @@
               <div class="player-position milieu-offensif" (click)="selectPosition(2, 'milieu-offensif')">
                 <div class="player-dot" [class.selected]="selectedPosition?.team === 2 && selectedPosition?.position === 'milieu-offensif'">
                   <span class="position-name">MO</span>
-                  <span class="player-name">{{ getPlayerForPosition(2, 'milieu-offensif') }}</span>
+                  <span class="player-name">
+                    <ng-container *ngIf="getPlayerForPosition(2, 'milieu-offensif') as player">
+                      <i *ngIf="player.type === 'attaquant'" class="fas fa-futbol me-1"></i>
+                      <i *ngIf="player.type === 'defenseur'" class="fas fa-shield-alt me-1"></i>
+                      <i *ngIf="player.type === 'milieu'" class="fas fa-arrows-alt-h me-1"></i>
+                      {{ player.name }}
+                    </ng-container>
+                  </span>
                 </div>
               </div>
               </div>
               <div class="player-position milieu-gauche" (click)="selectPosition(2, 'milieu-gauche')">
                 <div class="player-dot" [class.selected]="selectedPosition?.team === 2 && selectedPosition?.position === 'milieu-gauche'">
                   <span class="position-name">MG</span>
-                  <span class="player-name">{{ getPlayerForPosition(2, 'milieu-gauche') }}</span>
+                  <span class="player-name">
+                    <ng-container *ngIf="getPlayerForPosition(2, 'milieu-gauche') as player">
+                      <i *ngIf="player.type === 'attaquant'" class="fas fa-futbol me-1"></i>
+                      <i *ngIf="player.type === 'defenseur'" class="fas fa-shield-alt me-1"></i>
+                      <i *ngIf="player.type === 'milieu'" class="fas fa-arrows-alt-h me-1"></i>
+                      {{ player.name }}
+                    </ng-container>
+                  </span>
                 </div>
               </div>
               <div class="player-position milieu-droit" (click)="selectPosition(2, 'milieu-droit')">
                 <div class="player-dot" [class.selected]="selectedPosition?.team === 2 && selectedPosition?.position === 'milieu-droit'">
                   <span class="position-name">MD</span>
-                  <span class="player-name">{{ getPlayerForPosition(2, 'milieu-droit') }}</span>
+                  <span class="player-name">
+                    <ng-container *ngIf="getPlayerForPosition(2, 'milieu-droit') as player">
+                      <i *ngIf="player.type === 'attaquant'" class="fas fa-futbol me-1"></i>
+                      <i *ngIf="player.type === 'defenseur'" class="fas fa-shield-alt me-1"></i>
+                      <i *ngIf="player.type === 'milieu'" class="fas fa-arrows-alt-h me-1"></i>
+                      {{ player.name }}
+                    </ng-container>
+                  </span>
                 </div>
               </div>
               <!-- Défenseurs -->
               <div class="player-position defenseur-central" (click)="selectPosition(2, 'defenseur-central')">
                 <div class="player-dot" [class.selected]="selectedPosition?.team === 2 && selectedPosition?.position === 'defenseur-central'">
                   <span class="position-name">DC</span>
-                  <span class="player-name">{{ getPlayerForPosition(2, 'defenseur-central') }}</span>
+                  <span class="player-name">
+                    <ng-container *ngIf="getPlayerForPosition(2, 'defenseur-central') as player">
+                      <i *ngIf="player.type === 'attaquant'" class="fas fa-futbol me-1"></i>
+                      <i *ngIf="player.type === 'defenseur'" class="fas fa-shield-alt me-1"></i>
+                      <i *ngIf="player.type === 'milieu'" class="fas fa-arrows-alt-h me-1"></i>
+                      {{ player.name }}
+                    </ng-container>
+                  </span>
                 </div>
               </div>
               <div *ngIf="showDefendersAndMidfielders">
               <div class="player-position defenseur-gauche" (click)="selectPosition(2, 'defenseur-gauche')">
                 <div class="player-dot" [class.selected]="selectedPosition?.team === 2 && selectedPosition?.position === 'defenseur-gauche'">
                   <span class="position-name">DG</span>
-                  <span class="player-name">{{ getPlayerForPosition(2, 'defenseur-gauche') }}</span>
+                  <span class="player-name">
+                    <ng-container *ngIf="getPlayerForPosition(2, 'defenseur-gauche') as player">
+                      <i *ngIf="player.type === 'attaquant'" class="fas fa-futbol me-1"></i>
+                      <i *ngIf="player.type === 'defenseur'" class="fas fa-shield-alt me-1"></i>
+                      <i *ngIf="player.type === 'milieu'" class="fas fa-arrows-alt-h me-1"></i>
+                      {{ player.name }}
+                    </ng-container>
+                  </span>
                 </div>
               </div>
               </div>
@@ -740,7 +849,14 @@
               <div class="player-position defenseur-droit" (click)="selectPosition(2, 'defenseur-droit')">
                 <div class="player-dot" [class.selected]="selectedPosition?.team === 2 && selectedPosition?.position === 'defenseur-droit'">
                   <span class="position-name">DD</span>
-                  <span class="player-name">{{ getPlayerForPosition(2, 'defenseur-droit') }}</span>
+                  <span class="player-name">
+                    <ng-container *ngIf="getPlayerForPosition(2, 'defenseur-droit') as player">
+                      <i *ngIf="player.type === 'attaquant'" class="fas fa-futbol me-1"></i>
+                      <i *ngIf="player.type === 'defenseur'" class="fas fa-shield-alt me-1"></i>
+                      <i *ngIf="player.type === 'milieu'" class="fas fa-arrows-alt-h me-1"></i>
+                      {{ player.name }}
+                    </ng-container>
+                  </span>
                 </div>
               </div>
               </div>
@@ -748,7 +864,14 @@
               <div class="player-position gardien" (click)="selectPosition(2, 'gardien')">
                 <div class="player-dot" [class.selected]="selectedPosition?.team === 2 && selectedPosition?.position === 'gardien'">
                   <span class="position-name">G</span>
-                  <span class="player-name">{{ getPlayerForPosition(2, 'gardien') }}</span>
+                  <span class="player-name">
+                    <ng-container *ngIf="getPlayerForPosition(2, 'gardien') as player">
+                      <i *ngIf="player.type === 'attaquant'" class="fas fa-futbol me-1"></i>
+                      <i *ngIf="player.type === 'defenseur'" class="fas fa-shield-alt me-1"></i>
+                      <i *ngIf="player.type === 'milieu'" class="fas fa-arrows-alt-h me-1"></i>
+                      {{ player.name }}
+                    </ng-container>
+                  </span>
                 </div>
               </div>
               <div *ngIf="showDefendersAndMidfielders">
@@ -771,8 +894,11 @@
           <div class="player-list">
             <button *ngFor="let player of getTeamPlayers(selectedPosition.team)"
                     class="btn btn-sm btn-outline-primary mb-1 me-1"
-                    (click)="assignPlayerToPosition(player)">
-              {{ player }}
+                    (click)="assignPlayerToPosition(player.name)">
+              <i *ngIf="player.type === 'attaquant'" class="fas fa-futbol me-1"></i>
+              <i *ngIf="player.type === 'defenseur'" class="fas fa-shield-alt me-1"></i>
+              <i *ngIf="player.type === 'milieu'" class="fas fa-arrows-alt-h me-1"></i>
+              {{ player.name }}
             </button>
           </div>
           <button class="btn btn-sm btn-secondary mt-2" (click)="selectedPosition = null">
@@ -935,19 +1061,31 @@
       </div>
       <div class="modal-body">
         <ul class="list-group mb-3">
-          <li *ngFor="let player of getPlayersSortedByGoals(); let i = index" class="list-group-item d-flex justify-content-between align-items-center">
-            <span>
-              <!-- {{ player }} -->
-              <span class="badge bg-primary ms-2" *ngIf="getGoalsForPlayer(player) > 0">
-                {{ getGoalsForPlayer(player) }} ⚽
+          <li *ngFor="let player of teamToEdit.players; let i = index" class="list-group-item d-flex justify-content-between align-items-center">
+            <span class="d-flex align-items-center">
+              <i *ngIf="player.type === 'attaquant'" class="fas fa-futbol me-2"></i>
+              <i *ngIf="player.type === 'defenseur'" class="fas fa-shield-alt me-2"></i>
+              <i *ngIf="player.type === 'milieu'" class="fas fa-arrows-alt-h me-2"></i>
+              <input class="form-control form-control-sm me-2" style="max-width: 140px; display: inline-block;" [(ngModel)]="player.name" />
+              <select class="form-select form-select-sm me-2" style="width: 110px; display: inline-block;" [(ngModel)]="player.type">
+                <option value="attaquant">Attaquant</option>
+                <option value="milieu">Milieu</option>
+                <option value="defenseur">Défenseur</option>
+              </select>
+              <span class="badge bg-primary ms-2" *ngIf="getGoalsForPlayer(player.name) > 0">
+                {{ getGoalsForPlayer(player.name) }} ⚽
               </span>
             </span>
-            <input class="form-control form-control-sm me-2" style="max-width: 200px; display: inline-block;" value="{{ player }}" />
             <button class="btn btn-danger btn-sm" (click)="removePlayer(i)"><i class="fas fa-trash"></i></button>
           </li>
         </ul>
         <div class="input-group">
           <input [(ngModel)]="newPlayerName" class="form-control" placeholder="Ajouter un joueur..." (keyup.enter)="addPlayer()" />
+          <select class="form-select" style="max-width: 120px;" [(ngModel)]="newPlayerType">
+            <option value="attaquant">Attaquant</option>
+            <option value="milieu">Milieu</option>
+            <option value="defenseur">Défenseur</option>
+          </select>
           <button class="btn btn-success" (click)="addPlayer()">Ajouter</button>
         </div>
       </div>
