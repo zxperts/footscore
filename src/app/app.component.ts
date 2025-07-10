@@ -105,6 +105,9 @@ export class AppComponent implements OnInit {
   competitionSearch: string = '';
   filteredCompetitions: string[] = [];
 
+  // Ajoute ces propriétés pour gérer les buts désactivés
+  disabledGoals: { matchId: number, buteurIndex: number }[] = [];
+
   constructor(
     private fb: FormBuilder,
     private firestoreService: FirestoreService
@@ -276,6 +279,9 @@ export class AppComponent implements OnInit {
       const u10Team = this.teams.find(team => team.name === 'U10 Stand. Flawinne FC');
       this.selectedTeam = u10Team || null;
     }
+    
+    // Vérifier la cohérence au chargement du match
+    this.maintainScoreConsistency();
   }
 
   updateScore() {
@@ -314,6 +320,14 @@ export class AppComponent implements OnInit {
     console.log('Match trouvé:', match);
     console.log('Buteur à modifier:', buteur);
     
+    // Si le but était désactivé, le réactiver
+    if (this.isGoalDisabled(buteurIndex)) {
+      this.disabledGoals = this.disabledGoals.filter(dg => 
+        !(dg.matchId === match.id && dg.buteurIndex === buteurIndex)
+      );
+      console.log('But réactivé pour édition');
+    }
+    
     this.editingButeur = { index: buteurIndex, buteur: { ...buteur } };
     this.buteurForm.patchValue({
       nom: buteur.nom,
@@ -350,23 +364,29 @@ export class AppComponent implements OnInit {
         const matchIndex = this.matches.indexOf(this.selectedMatch);
         this.matches[matchIndex].buteurs[this.editingButeur.index] = newButeur;
         console.log('Buteur modifié dans le match');
+        
+        // Pas de mise à jour du score car on modifie un but existant
       } else {
         // Ajout d'un nouveau buteur
         console.log('Ajout d\'un nouveau buteur');
         this.selectedMatch.buteurs.push(newButeur);
         console.log('Buteur ajouté au match');
-      }
-      
-      // Mise à jour du score
-      if (newButeur.equipe === 1) {
-        this.selectedMatch.score1++;
-        console.log('Score équipe 1 incrémenté:', this.selectedMatch.score1);
-      } else {
-        this.selectedMatch.score2++;
-        console.log('Score équipe 2 incrémenté:', this.selectedMatch.score2);
+        
+        // Mise à jour du score seulement pour les nouveaux buts
+        if (newButeur.equipe === 1) {
+          this.selectedMatch.score1++;
+          console.log('Score équipe 1 incrémenté:', this.selectedMatch.score1);
+        } else {
+          this.selectedMatch.score2++;
+          console.log('Score équipe 2 incrémenté:', this.selectedMatch.score2);
+        }
       }
       
       console.log('Match après ajout/modification:', this.selectedMatch);
+      
+      // Maintenir la cohérence après modification
+      this.maintainScoreConsistency();
+      
       this.saveData();
       this.buteurForm.reset();
       this.showButeurForm = false;
@@ -394,6 +414,14 @@ export class AppComponent implements OnInit {
     console.log('Match:', match);
     console.log('Buteur à supprimer:', buteur);
     
+    // Si le but était désactivé, le retirer de la liste des buts désactivés
+    if (this.isGoalDisabled(buteurIndex)) {
+      this.disabledGoals = this.disabledGoals.filter(dg => 
+        !(dg.matchId === match.id && dg.buteurIndex === buteurIndex)
+      );
+      console.log('But désactivé retiré de la liste');
+    }
+    
     // Mise à jour du score
     if (buteur.equipe === 1) {
       match.score1 = Math.max(0, match.score1 - 1);
@@ -406,6 +434,9 @@ export class AppComponent implements OnInit {
     match.buteurs.splice(buteurIndex, 1);
     console.log('Buteur supprimé du match');
     console.log('Match après suppression:', match);
+    
+    // Maintenir la cohérence après suppression
+    this.maintainScoreConsistency();
     
     this.saveData();
     console.log('Buteur supprimé avec succès');
@@ -525,6 +556,10 @@ export class AppComponent implements OnInit {
     }
     
     console.log('Match après ajout rapide:', this.selectedMatch);
+    
+    // Maintenir la cohérence après ajout rapide
+    this.maintainScoreConsistency();
+    
     this.saveData();
     
     // Célébration du but
@@ -676,6 +711,80 @@ export class AppComponent implements OnInit {
         return acc;
       }, [] as GroupedScorer[]);
 
+    // Trier les buteurs par leur premier but
+    return groupedScorers.sort((a, b) => a.minutes[0] - b.minutes[0]);
+  }
+
+  // Nouvelle méthode qui filtre les buts désactivés
+  getActiveGroupedScorers(match: Match, equipe: 1 | 2): GroupedScorer[] {
+    console.log(`getActiveGroupedScorers() pour équipe ${equipe}, match ${match.id}`);
+    console.log('disabledGoals:', this.disabledGoals);
+    
+    // Regrouper les buteurs actifs par nom (en excluant les désactivés)
+    const groupedScorers = match.buteurs
+      .map((b, index) => ({ buteur: b, index }))
+      .filter(item => 
+        item.buteur.equipe === equipe && 
+        !this.isGoalDisabledForMatch(match, item.index)
+      )
+      .reduce((acc, item) => {
+        const existingScorer = acc.find(s => s.nom === item.buteur.nom);
+        if (existingScorer) {
+          existingScorer.minutes.push(item.buteur.minute);
+          // Trier les minutes dans l'ordre croissant
+          existingScorer.minutes.sort((a, b) => a - b);
+          // Mettre à jour l'assist si présent
+          if (item.buteur.assist) {
+            existingScorer.assist = item.buteur.assist;
+          }
+        } else {
+          acc.push({ 
+            nom: item.buteur.nom, 
+            minutes: [item.buteur.minute],
+            assist: item.buteur.assist 
+          });
+        }
+        return acc;
+      }, [] as GroupedScorer[]);
+
+    console.log(`Buts actifs trouvés pour équipe ${equipe}:`, groupedScorers);
+    // Trier les buteurs par leur premier but
+    return groupedScorers.sort((a, b) => a.minutes[0] - b.minutes[0]);
+  }
+
+  // Méthode pour obtenir les buts désactivés groupés
+  getDisabledGroupedScorers(match: Match, equipe: 1 | 2): GroupedScorer[] {
+    console.log(`getDisabledGroupedScorers() pour équipe ${equipe}, match ${match.id}`);
+    
+    // Regrouper les buteurs désactivés par nom (excluant "Joueur non listé")
+    const groupedScorers = match.buteurs
+      .map((b, index) => ({ buteur: b, index }))
+      .filter(item => 
+        item.buteur.equipe === equipe && 
+        this.isGoalDisabledForMatch(match, item.index) &&
+        item.buteur.nom !== 'Joueur non listé' // Exclure les "Joueur non listé" désactivés
+      )
+      .reduce((acc, item) => {
+        const existingScorer = acc.find(s => s.nom === item.buteur.nom);
+        if (existingScorer) {
+          existingScorer.minutes.push(item.buteur.minute);
+          // Trier les minutes dans l'ordre croissant
+          existingScorer.minutes.sort((a, b) => a - b);
+          // Mettre à jour l'assist si présent
+          if (item.buteur.assist) {
+            existingScorer.assist = item.buteur.assist;
+          }
+        } else {
+          acc.push({ 
+            nom: item.buteur.nom, 
+            minutes: [item.buteur.minute], 
+            assist: item.buteur.assist 
+          });
+        }
+        return acc;
+      }, [] as GroupedScorer[]);
+
+    console.log(`Buts désactivés trouvés pour équipe ${equipe}:`, groupedScorers);
     // Trier les buteurs par leur premier but
     return groupedScorers.sort((a, b) => a.minutes[0] - b.minutes[0]);
   }
@@ -1668,5 +1777,166 @@ ${scorers2.map(b => `- ${b.nom}: ${b.minutes.join(', ')}'${b.assist ? ` (Assist:
         this.saveGoalWithAssist();
       }
     }, 1000);
+  }
+
+  // Méthode pour gérer la modification du score
+  onScoreChange() {
+    console.log('onScoreChange() appelée');
+    
+    if (!this.selectedMatch) {
+      console.log('selectedMatch null - modification annulée');
+      return;
+    }
+    
+    const currentScore1 = this.selectedMatch.score1;
+    const currentScore2 = this.selectedMatch.score2;
+    
+    console.log('Scores actuels:', { score1: currentScore1, score2: currentScore2 });
+    
+    // Calculer les buts actifs par équipe (sans les désactivés)
+    const team1ActiveGoals = this.getActiveGoalsCount(1);
+    const team2ActiveGoals = this.getActiveGoalsCount(2);
+    
+    console.log('Buts actifs:', { team1: team1ActiveGoals, team2: team2ActiveGoals });
+    
+    // Gérer équipe 1
+    this.handleTeamScoreChange(1, currentScore1, team1ActiveGoals);
+    
+    // Gérer équipe 2
+    this.handleTeamScoreChange(2, currentScore2, team2ActiveGoals);
+    
+    console.log('Match après modification:', this.selectedMatch);
+    this.saveData();
+  }
+
+  handleTeamScoreChange(teamNumber: 1 | 2, newScore: number, currentGoals: number) {
+    console.log(`handleTeamScoreChange() pour équipe ${teamNumber}:`, { newScore, currentGoals });
+    
+    const matchId = this.selectedMatch!.id;
+    
+    if (newScore > currentGoals) {
+      // Score augmenté - d'abord réactiver les buts désactivés, puis ajouter si nécessaire
+      const disabledTeamGoals = this.disabledGoals.filter(dg => 
+        dg.matchId === matchId && 
+        this.selectedMatch!.buteurs[dg.buteurIndex].equipe === teamNumber
+      );
+      
+      console.log(`Buts désactivés pour équipe ${teamNumber}:`, disabledTeamGoals.length);
+      
+      // Réactiver d'abord tous les buts désactivés disponibles
+      const goalsToReactivate = Math.min(newScore - currentGoals, disabledTeamGoals.length);
+      console.log(`Réactivation de ${goalsToReactivate} buts désactivés`);
+      
+      for (let i = 0; i < goalsToReactivate; i++) {
+        const disabledGoal = disabledTeamGoals[i];
+        this.disabledGoals = this.disabledGoals.filter(dg => 
+          !(dg.matchId === disabledGoal.matchId && dg.buteurIndex === disabledGoal.buteurIndex)
+        );
+        console.log(`But réactivé à l'index:`, disabledGoal.buteurIndex);
+      }
+      
+      // Si il faut encore des buts après réactivation, ajouter des "Joueur non listé"
+      const remainingGoalsNeeded = newScore - currentGoals - goalsToReactivate;
+      if (remainingGoalsNeeded > 0) {
+        console.log(`Ajout de ${remainingGoalsNeeded} buts "Joueur non listé"`);
+        
+        for (let i = 0; i < remainingGoalsNeeded; i++) {
+          const newButeur: Buteur = {
+            nom: 'Joueur non listé',
+            minute: 1,
+            equipe: teamNumber
+          };
+          this.selectedMatch!.buteurs.push(newButeur);
+          console.log(`But ajouté:`, newButeur);
+        }
+      }
+    } else if (newScore < currentGoals) {
+      // Score diminué - désactiver les derniers buts (tous types de joueurs)
+      const goalsToDisable = currentGoals - newScore;
+      console.log(`Désactivation de ${goalsToDisable} buts de l'équipe ${teamNumber}`);
+      
+      // Trouver les derniers buts actifs de cette équipe (non désactivés)
+      const activeTeamGoals = this.selectedMatch!.buteurs
+        .map((b, index) => ({ buteur: b, index }))
+        .filter(item => 
+          item.buteur.equipe === teamNumber && 
+          !this.isGoalDisabled(item.index)
+        )
+        .slice(-goalsToDisable);
+      
+      // Désactiver ces buts
+      activeTeamGoals.forEach(item => {
+        if (matchId !== undefined) {
+          if (item.buteur.nom === 'Joueur non listé') {
+            // Supprimer directement les "Joueur non listé" désactivés
+            this.selectedMatch!.buteurs.splice(item.index, 1);
+            console.log(`"Joueur non listé" supprimé:`, item.buteur);
+          } else {
+            // Désactiver les autres buts
+            this.disabledGoals.push({ matchId, buteurIndex: item.index });
+            console.log(`But désactivé:`, item.buteur);
+          }
+        }
+      });
+    }
+  }
+
+  // Méthode pour vérifier si un but est désactivé
+  isGoalDisabled(buteurIndex: number): boolean {
+    if (!this.selectedMatch) return false;
+    
+    return this.disabledGoals.some(dg => 
+      dg.matchId === this.selectedMatch!.id && dg.buteurIndex === buteurIndex
+    );
+  }
+
+  // Méthode pour vérifier si un but est désactivé pour un match spécifique
+  isGoalDisabledForMatch(match: Match, buteurIndex: number): boolean {
+    const isDisabled = this.disabledGoals.some(dg => 
+      dg.matchId === match.id && dg.buteurIndex === buteurIndex
+    );
+    console.log(`isGoalDisabledForMatch(match ${match.id}, index ${buteurIndex}): ${isDisabled}`);
+    return isDisabled;
+  }
+
+  // Méthode pour maintenir la cohérence entre score et buts actifs
+  maintainScoreConsistency() {
+    if (!this.selectedMatch) return;
+    
+    console.log('maintainScoreConsistency() appelée');
+    
+    const team1ActiveGoals = this.getActiveGoalsCount(1);
+    const team2ActiveGoals = this.getActiveGoalsCount(2);
+    
+    console.log('Buts actifs actuels:', { team1: team1ActiveGoals, team2: team2ActiveGoals });
+    console.log('Scores actuels:', { score1: this.selectedMatch.score1, score2: this.selectedMatch.score2 });
+    
+    // Vérifier et corriger l'équipe 1
+    if (this.selectedMatch.score1 !== team1ActiveGoals) {
+      console.log(`Incohérence équipe 1: score=${this.selectedMatch.score1}, buts actifs=${team1ActiveGoals}`);
+      this.handleTeamScoreChange(1, this.selectedMatch.score1, team1ActiveGoals);
+    }
+    
+    // Vérifier et corriger l'équipe 2
+    if (this.selectedMatch.score2 !== team2ActiveGoals) {
+      console.log(`Incohérence équipe 2: score=${this.selectedMatch.score2}, buts actifs=${team2ActiveGoals}`);
+      this.handleTeamScoreChange(2, this.selectedMatch.score2, team2ActiveGoals);
+    }
+  }
+
+  // Méthode pour obtenir le nombre de buts actifs par équipe
+  getActiveGoalsCount(teamNumber: 1 | 2): number {
+    if (!this.selectedMatch) return 0;
+    
+    return this.selectedMatch.buteurs.filter((b, index) => 
+      b.equipe === teamNumber && !this.isGoalDisabled(index)
+    ).length;
+  }
+
+  // Méthode pour obtenir le nombre de buts actifs par équipe pour un match spécifique
+  getActiveGoalsCountForMatch(match: Match, teamNumber: 1 | 2): number {
+    return match.buteurs.filter((b, index) => 
+      b.equipe === teamNumber && !this.isGoalDisabledForMatch(match, index)
+    ).length;
   }
 }

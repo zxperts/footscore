@@ -1088,3 +1088,30 @@ body {
   max-height: 220px;
   overflow-y: auto;
 }
+
+/* Style pour les buts désactivés */
+.disabled-goal {
+  opacity: 0.5;
+  background-color: #f8f9fa;
+  border-color: #dee2e6 !important;
+}
+
+.disabled-goal strong {
+  text-decoration: line-through;
+  color: #6c757d !important;
+}
+
+.disabled-goal .btn {
+  opacity: 0.8;
+}
+
+/* Style pour les buteurs désactivés dans la liste des matchs */
+.disabled-scorer {
+  opacity: 0.5;
+  text-decoration: line-through;
+  color: #6c757d !important;
+}
+
+.disabled-scorer span {
+  text-decoration: line-through;
+}
