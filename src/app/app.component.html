@@ -1037,7 +1037,12 @@
           </ul>
         </div>
         <div class="modal-footer">
+          <button type="button" class="btn btn-info me-auto" *ngIf="!showingLocalStorageData" (click)="showLocalStorageData()">Afficher les données sauvegardées</button>
+          <button type="button" class="btn btn-warning me-auto" *ngIf="showingLocalStorageData" (click)="hideLocalStorageData()">Cacher les données sauvegardées</button>
           <button type="button" class="btn btn-secondary" (click)="showHelpModal = false">Fermer</button>
+        </div>
+        <div *ngIf="showingLocalStorageData" class="p-3 bg-light border mt-2" style="max-height: 300px; overflow: auto; font-size: 0.95em;">
+          <pre>{{ localStorageData | json }}</pre>
         </div>
       </div>
     </div>

@@ -108,6 +108,9 @@ export class AppComponent implements OnInit {
   // Ajoute ces propriétés pour gérer les buts désactivés
   disabledGoals: { matchId: number, buteurIndex: number }[] = [];
 
+  showingLocalStorageData = false;
+  localStorageData: any = null;
+
   constructor(
     private fb: FormBuilder,
     private firestoreService: FirestoreService
@@ -1937,5 +1940,15 @@ ${scorers2.map(b => `- ${b.nom}: ${b.minutes.join(', ')}'${b.assist ? ` (Assist:
     return match.buteurs.filter((b, index) => 
       b.equipe === teamNumber && !this.isGoalDisabledForMatch(match, index)
     ).length;
+  }
+
+  showLocalStorageData() {
+    const data = localStorage.getItem('footballMatches');
+    this.localStorageData = data ? JSON.parse(data) : 'Aucune donnée trouvée.';
+    this.showingLocalStorageData = true;
+  }
+
+  hideLocalStorageData() {
+    this.showingLocalStorageData = false;
   }
 }
