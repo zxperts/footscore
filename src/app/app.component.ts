@@ -409,10 +409,12 @@ export class AppComponent implements OnInit {
   }
 
   supprimerButeur(matchIndex: number, buteurIndex: number) {
-    console.log('supprimerButeur() appelée avec matchIndex:', matchIndex, 'buteurIndex:', buteurIndex);
-    
     const match = this.matches[matchIndex];
     const buteur = match.buteurs[buteurIndex];
+    if (!confirm(`Êtes-vous sûr de vouloir supprimer le but de ${buteur.nom} à la minute ${buteur.minute} ?`)) {
+      return;
+    }
+    console.log('supprimerButeur() appelée avec matchIndex:', matchIndex, 'buteurIndex:', buteurIndex);
     
     console.log('Match:', match);
     console.log('Buteur à supprimer:', buteur);
@@ -640,12 +642,13 @@ export class AppComponent implements OnInit {
   }
 
   supprimerMatch(match: Match) {
-    if (confirm('Êtes-vous sûr de vouloir supprimer ce match ?')) {
-      const index = this.matches.findIndex(m => m.id === match.id);
-      if (index !== -1) {
-        this.matches.splice(index, 1);
-        this.saveData();
-      }
+    if (!confirm('Êtes-vous sûr de vouloir supprimer ce match ?')) {
+      return;
+    }
+    const matchIndex = this.matches.findIndex(m => m.id === match.id);
+    if (matchIndex !== -1) {
+      this.matches.splice(matchIndex, 1);
+      this.saveData();
     }
   }
 
@@ -1585,6 +1588,10 @@ ${scorers2.map(b => `- ${b.nom}: ${b.minutes.join(', ')}'${b.assist ? ` (Assist:
 
   removePlayer(index: number) {
     if (this.teamToEdit) {
+      const player = this.teamToEdit.players[index];
+      if (!confirm(`Êtes-vous sûr de vouloir supprimer le joueur ${player.name} ?`)) {
+        return;
+      }
       this.teamToEdit.players.splice(index, 1);
       this.saveData(); // Sauvegarder après suppression
     }
