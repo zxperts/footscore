@@ -1115,3 +1115,15 @@ body {
 .disabled-scorer span {
   text-decoration: line-through;
 }
+
+/* Overlay grisé pour toutes les modales */
+.score-modal,
+.match-edit-modal,
+.disposition-modal,
+.modal.fade.show,
+.modal[style*='display:block'] {
+
+  background: rgba(0,0,0,0.5) !important;
+
+}
+
