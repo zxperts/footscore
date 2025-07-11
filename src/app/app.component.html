@@ -91,16 +91,16 @@
               </div>
             </div>
             <div class="modal-footer d-flex">
+              <button type="button" class="btn btn-primary ms-2" 
+              [disabled]="!selectedTeamFilter || selectedTeamFilter === ''" 
+              (click)="openEditPlayersModal(selectedTeamFilter)">
+                Éditer
+              </button>
               <button type="button" class="btn btn-success me-auto" (click)="openNewTeamModal()">
                 <i class="fas fa-plus-circle text-white"></i>
                 Équipe
               </button>
               <button type="button" class="btn btn-secondary" (click)="closeTeamFilterModal()">Fermer</button>
-              <button type="button" class="btn btn-primary ms-2" 
-                      [disabled]="!selectedTeamFilter || selectedTeamFilter === ''" 
-                      (click)="openEditPlayersModal(selectedTeamFilter)">
-                Éditer
-              </button>
             </div>
           </div>
         </div>
@@ -230,11 +230,12 @@
             <button type="submit" class="btn btn-primary px-4" [disabled]="!matchForm.valid">
               Créer le match
             </button>
-            <button type="button" class="btn btn-outline-secondary" (click)="showMatchForm = false">
-              Annuler
-            </button>
-            <button type="button" class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+            
+            <button type="button" class="btn btn-secondary dropdown-toggle me-auto" data-bs-toggle="dropdown" aria-expanded="false">
               🧰
+            </button>
+            <button type="button" class="btn btn-outline-secondary ms-2" (click)="showMatchForm = false">
+              Annuler
             </button>
             <ul class="dropdown-menu">
               <li><a class="dropdown-item" (click)="exportMatches()">Exporter les matchs</a></li>
