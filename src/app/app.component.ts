@@ -659,6 +659,9 @@ export class AppComponent implements OnInit {
           ...match,
           heureDebut: new Date(match.heureDebut)
         }));
+        if (data.teams) {
+          this.teams = data.teams;
+        }
       } else {
         // Supprimer les données expirées
         localStorage.removeItem('footballMatches');
@@ -674,6 +677,7 @@ export class AppComponent implements OnInit {
 
     const dataToSave = {
       matches: this.matches,
+      teams: this.teams,
       expirationDate: expirationDate.toISOString()
     };
 
@@ -1569,28 +1573,22 @@ ${scorers2.map(b => `- ${b.nom}: ${b.minutes.join(', ')}'${b.assist ? ` (Assist:
 
   addPlayer() {
     if (this.teamToEdit && this.newPlayerName.trim()) {
-      if (!this.teamToEdit.players.some(p => p.name === this.newPlayerName.trim())) {
-        this.teamToEdit.players.push({ name: this.newPlayerName.trim(), type: this.newPlayerType });
-      }
+      this.teamToEdit.players.push({ name: this.newPlayerName.trim(), type: this.newPlayerType });
       this.newPlayerName = '';
       this.newPlayerType = 'milieu';
+      this.saveData(); // Sauvegarder après ajout
     }
   }
 
   removePlayer(index: number) {
     if (this.teamToEdit) {
       this.teamToEdit.players.splice(index, 1);
+      this.saveData(); // Sauvegarder après suppression
     }
   }
 
   savePlayersEdit() {
-    if (this.teamToEdit) {
-      const idx = this.teams.findIndex(t => t.name === this.teamToEdit!.name);
-      if (idx !== -1) {
-        this.teams[idx].players = [...this.teamToEdit.players];
-        this.saveData();
-      }
-    }
+    this.saveData(); // Sauvegarder après édition
     this.closeEditPlayersModal();
   }
 
@@ -1740,6 +1738,7 @@ ${scorers2.map(b => `- ${b.nom}: ${b.minutes.join(', ')}'${b.assist ? ` (Assist:
       players: this.newTeamPlayers.filter(p => p.name.trim())
     };
     this.teams.push(newTeam);
+    this.saveData(); // Sauvegarder après création
     this.closeNewTeamModal();
   }
 
