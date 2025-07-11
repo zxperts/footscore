@@ -111,6 +111,14 @@ export class AppComponent implements OnInit {
   showingLocalStorageData = false;
   localStorageData: any = null;
 
+  // Champs d'autocomplétion pour la modale d'édition de match
+  editTeam1Search: string = '';
+  editTeam2Search: string = '';
+  editFilteredTeams1: string[] = [];
+  editFilteredTeams2: string[] = [];
+  editCompetitionSearch: string = '';
+  editFilteredCompetitions: string[] = [];
+
   constructor(
     private fb: FormBuilder,
     private firestoreService: FirestoreService
@@ -867,6 +875,12 @@ export class AppComponent implements OnInit {
       lieu: match.lieu,
       competition: match.competition
     });
+    this.editTeam1Search = match.equipe1;
+    this.editTeam2Search = match.equipe2;
+    this.editCompetitionSearch = match.competition || '';
+    this.editFilteredTeams1 = [];
+    this.editFilteredTeams2 = [];
+    this.editFilteredCompetitions = [];
     this.showMatchEditForm = !this.showMatchEditForm;
   }
 
@@ -1957,5 +1971,68 @@ ${scorers2.map(b => `- ${b.nom}: ${b.minutes.join(', ')}'${b.assist ? ` (Assist:
 
   hideLocalStorageData() {
     this.showingLocalStorageData = false;
+  }
+
+  updateEditFilteredTeams1() {
+    const search = this.editTeam1Search.toLowerCase();
+    if (search.length < 3) {
+      this.editFilteredTeams1 = [];
+      return;
+    }
+    this.editFilteredTeams1 = this.teams
+      .map(t => t.name)
+      .filter(name => name.toLowerCase().includes(search))
+      .filter(name => name !== this.matchEditForm.value.equipe2);
+  }
+
+  updateEditFilteredTeams2() {
+    const search = this.editTeam2Search.toLowerCase();
+    if (search.length < 3) {
+      this.editFilteredTeams2 = [];
+      return;
+    }
+    this.editFilteredTeams2 = this.teams
+      .map(t => t.name)
+      .filter(name => name.toLowerCase().includes(search))
+      .filter(name => name !== this.matchEditForm.value.equipe1);
+  }
+
+  selectEditTeam1(name: string) {
+    this.matchEditForm.patchValue({ equipe1: name });
+    this.editTeam1Search = name;
+    this.editFilteredTeams1 = [];
+  }
+
+  selectEditTeam2(name: string) {
+    this.matchEditForm.patchValue({ equipe2: name });
+    this.editTeam2Search = name;
+    this.editFilteredTeams2 = [];
+  }
+
+  updateEditFilteredCompetitions() {
+    const search = this.editCompetitionSearch.toLowerCase();
+    if (search.length < 3) {
+      this.editFilteredCompetitions = [];
+      return;
+    }
+    // Récupère toutes les compétitions uniques des matchs
+    const competitions = Array.from(new Set(this.matches.map(m => m.competition).filter((c): c is string => !!c)));
+    this.editFilteredCompetitions = competitions
+      .filter(name => typeof name === 'string' && name.toLowerCase().includes(search));
+  }
+
+  selectEditCompetition(name: string) {
+    this.matchEditForm.patchValue({ competition: name });
+    this.editCompetitionSearch = name;
+    this.editFilteredCompetitions = [];
+  }
+
+  getTeamNames(): string[] {
+    return this.teams.map(t => t.name);
+  }
+
+  getCompetitionNames(): string[] {
+    // Récupère toutes les compétitions uniques des matchs
+    return Array.from(new Set(this.matches.map(m => m.competition).filter((c): c is string => !!c)));
   }
 }

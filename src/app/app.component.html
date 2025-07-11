@@ -145,7 +145,7 @@
 
   </div>
 
-  <!-- Modale d’ajout de match -->
+  <!-- Modale d'ajout de match -->
 <div class="modal fade show" tabindex="-1" style="display:block; background:rgba(0,0,0,0.5);" *ngIf="showMatchForm">
   <div class="modal-dialog">
     <div class="modal-content">
@@ -485,7 +485,7 @@
           <div class="col-sm-6">
             <h5 class="team-title-1">{{ selectedMatch.equipe1 }}</h5>
             <div class="player-badges player-badges-team1">
-              <!-- Boutons d’ajout de but équipe 1 -->
+              <!-- Boutons d'ajout de but équipe 1 -->
               <button *ngFor="let player of getTeamPlayers(1)" 
                       class="btn btn-outline-primary btn-sm me-2 mb-2"
                       (click)="quickAddGoal(player.name, 1)">
@@ -596,20 +596,42 @@
         </div>
         <div class="form-group">
           <label for="equipe1">Équipe 1:</label>
-          <select class="form-select" id="equipe1" formControlName="equipe1" required #equipe1Select
-            (change)="equipe1Select.value === 'new' && editNewTeam(equipe1Select)">
-            <option *ngFor="let team of teams" [value]="team.name">{{ team.name }}</option>
-            <option value="new">+ Ajouter une nouvelle équipe</option>
-          </select>
+          <div class="position-relative">
+            <input id="editEquipe1" type="text" class="form-control" placeholder="Rechercher ou créer une équipe..."
+                   [(ngModel)]="editTeam1Search" [ngModelOptions]="{standalone: true}" (input)="updateEditFilteredTeams1()" name="editTeam1Search"
+                   (focus)="updateEditFilteredTeams1()" autocomplete="off">
+            <input type="hidden" formControlName="equipe1">
+            <div class="list-group position-absolute w-100" *ngIf="editFilteredTeams1.length > 0 && editTeam1Search">
+              <button type="button" class="list-group-item list-group-item-action"
+                      *ngFor="let name of editFilteredTeams1"
+                      (click)="selectEditTeam1(name)">{{ name }}</button>
+            </div>
+            <div *ngIf="editTeam1Search && editFilteredTeams1.length === 0 && !getTeamNames().includes(editTeam1Search)" class="mt-1">
+              <button type="button" class="btn btn-link p-0" (click)="selectEditTeam1(editTeam1Search)">
+                Créer "{{ editTeam1Search }}"
+              </button>
+            </div>
+          </div>
         </div>
         
         <div class="form-group">
           <label for="equipe2">Équipe 2:</label>
-          <select class="form-select" id="equipe2" formControlName="equipe2" required #equipe2Select
-            (change)="equipe2Select.value === 'new' && editNewTeam(equipe2Select)">
-            <option *ngFor="let team of teams" [value]="team.name">{{ team.name }}</option>
-            <option value="new">+ Ajouter une nouvelle équipe</option>
-          </select>
+          <div class="position-relative">
+            <input id="editEquipe2" type="text" class="form-control" placeholder="Rechercher ou créer une équipe..."
+                   [(ngModel)]="editTeam2Search" [ngModelOptions]="{standalone: true}" (input)="updateEditFilteredTeams2()" name="editTeam2Search"
+                   (focus)="updateEditFilteredTeams2()" autocomplete="off">
+            <input type="hidden" formControlName="equipe2">
+            <div class="list-group position-absolute w-100" *ngIf="editFilteredTeams2.length > 0 && editTeam2Search">
+              <button type="button" class="list-group-item list-group-item-action"
+                      *ngFor="let name of editFilteredTeams2"
+                      (click)="selectEditTeam2(name)">{{ name }}</button>
+            </div>
+            <div *ngIf="editTeam2Search && editFilteredTeams2.length === 0 && !getTeamNames().includes(editTeam2Search)" class="mt-1">
+              <button type="button" class="btn btn-link p-0" (click)="selectEditTeam2(editTeam2Search)">
+                Créer "{{ editTeam2Search }}"
+              </button>
+            </div>
+          </div>
         </div>
         
         <div class="form-group">
@@ -624,7 +646,22 @@
         
         <div class="form-group">
           <label for="competition" class="form-label">Compétition:</label>
-          <input id="competition" class="form-control" formControlName="competition" placeholder="Championnat, tournoi, amical...">
+          <div class="position-relative">
+            <input id="editCompetition" type="text" class="form-control" placeholder="Championnat, tournoi, amical..."
+                   [(ngModel)]="editCompetitionSearch" [ngModelOptions]="{standalone: true}" (input)="updateEditFilteredCompetitions()" name="editCompetitionSearch"
+                   (focus)="updateEditFilteredCompetitions()" autocomplete="off">
+            <input type="hidden" formControlName="competition">
+            <div class="list-group position-absolute w-100" *ngIf="editFilteredCompetitions.length > 0 && editCompetitionSearch">
+              <button type="button" class="list-group-item list-group-item-action"
+                      *ngFor="let name of editFilteredCompetitions"
+                      (click)="selectEditCompetition(name)">{{ name }}</button>
+            </div>
+            <div *ngIf="editCompetitionSearch && editFilteredCompetitions.length === 0 && !getCompetitionNames().includes(editCompetitionSearch)" class="mt-1">
+              <button type="button" class="btn btn-link p-0" (click)="selectEditCompetition(editCompetitionSearch)">
+                Créer "{{ editCompetitionSearch }}"
+              </button>
+            </div>
+          </div>
         </div>
         
         <div class="button-group mt-3">
@@ -1178,7 +1215,7 @@
   </div>
 </div>
 
-<!-- Déplace la modale de création d’équipe ici, tout en bas du template -->
+<!-- Déplace la modale de création d'équipe ici, tout en bas du template -->
 <div class="modal fade show" tabindex="-1" style="display:block; background:rgba(0,0,0,0.5);" *ngIf="showNewTeamModal">
   <div class="modal-dialog">
     <div class="modal-content">
@@ -1188,8 +1225,8 @@
       </div>
       <div class="modal-body">
         <div class="mb-3">
-          <label class="form-label">Nom de l’équipe</label>
-          <input class="form-control" [(ngModel)]="newTeamName" [ngModelOptions]="{standalone: true}" placeholder="Nom de l’équipe">
+          <label class="form-label">Nom de l'équipe</label>
+          <input class="form-control" [(ngModel)]="newTeamName" [ngModelOptions]="{standalone: true}" placeholder="Nom de l'équipe">
         </div>
         <div class="mb-2 fw-bold">Joueurs</div>
         <div *ngFor="let player of newTeamPlayers; let i = index" class="d-flex align-items-center mb-2 gap-2">
@@ -1205,7 +1242,7 @@
       </div>
       <div class="modal-footer">
         <button class="btn btn-secondary" (click)="closeNewTeamModal()">Annuler</button>
-        <button class="btn btn-success" (click)="createNewTeam()" [disabled]="canCreateNewTeam()">Créer l’équipe</button>
+        <button class="btn btn-success" (click)="createNewTeam()" [disabled]="canCreateNewTeam()">Créer l'équipe</button>
       </div>
     </div>
   </div>
