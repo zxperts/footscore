@@ -429,9 +429,22 @@
             <div class="modal-body">
               <form [formGroup]="buteurForm" (ngSubmit)="ajouterButeur()">
                 <div class="row g-3">
-                  <div class="col-md-5">
+                  <div class="col-md-5 position-relative">
                     <label class="form-label small">Nom du buteur</label>
-                    <input type="text" class="form-control" placeholder="Nom du buteur" formControlName="nom">
+                    <input type="text" class="form-control" placeholder="Nom du buteur"
+                           [(ngModel)]="buteurNameSearch" [ngModelOptions]="{standalone: true}"
+                           (input)="updateFilteredButeurNames()" (focus)="updateFilteredButeurNames()" autocomplete="off">
+                    <input type="hidden" formControlName="nom">
+                    <div class="list-group position-absolute w-100" *ngIf="filteredButeurNames.length > 0 && buteurNameSearch">
+                      <button type="button" class="list-group-item list-group-item-action"
+                              *ngFor="let name of filteredButeurNames"
+                              (click)="selectButeurName(name)">{{ name }}</button>
+                    </div>
+                    <div *ngIf="shouldShowCreateButeur()" class="mt-1">
+                      <button type="button" class="btn btn-link p-0" (click)="selectButeurName(buteurNameSearch)">
+                        Créer "{{ buteurNameSearch }}"
+                      </button>
+                    </div>
                   </div>
                   <div class="col-md-3">
                     <label class="form-label small">Minute</label>
@@ -444,20 +457,27 @@
                   </div>
                   <div class="col-md-4">
                     <label class="form-label small">Équipe</label>
-                    <select class="form-select" formControlName="equipe">
+                    <select class="form-select" formControlName="equipe" (change)="onButeurEquipeChange()">
                       <option [value]="1">{{ selectedMatch.equipe1 }}</option>
                       <option [value]="2">{{ selectedMatch.equipe2 }}</option>
                     </select>
                   </div>
-                  <div class="col-md-12">
+                  <div class="col-md-12 position-relative">
                     <label class="form-label small">Assist (optionnel)</label>
-                    <select class="form-select" formControlName="assist">
-                      <option value="">Aucun assist</option>
-                      <option *ngFor="let player of getTeamPlayers(buteurForm.get('equipe')?.value)" 
-                              [value]="player">
-                        {{ player }}
-                      </option>
-                    </select>
+                    <input type="text" class="form-control" placeholder="Nom du passeur (optionnel)"
+                           [(ngModel)]="assistSearch" [ngModelOptions]="{standalone: true}"
+                           (input)="updateFilteredAssistNames()" (focus)="updateFilteredAssistNames()" autocomplete="off">
+                    <input type="hidden" formControlName="assist">
+                    <div class="list-group position-absolute w-100" *ngIf="filteredAssistNames.length > 0 && assistSearch">
+                      <button type="button" class="list-group-item list-group-item-action"
+                              *ngFor="let name of filteredAssistNames"
+                              (click)="selectAssistName(name)">{{ name }}</button>
+                    </div>
+                    <div *ngIf="shouldShowCreateAssist()" class="mt-1">
+                      <button type="button" class="btn btn-link p-0" (click)="selectAssistName(assistSearch)">
+                        Créer "{{ assistSearch }}"
+                      </button>
+                    </div>
                   </div>
                 </div>
                 <div class="mt-2">

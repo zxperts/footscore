@@ -119,6 +119,12 @@ export class AppComponent implements OnInit {
   editCompetitionSearch: string = '';
   editFilteredCompetitions: string[] = [];
 
+  // === AUTOCOMPLETE BUTEUR & ASSIST ===
+  buteurNameSearch: string = '';
+  filteredButeurNames: string[] = [];
+  assistSearch: string = '';
+  filteredAssistNames: string[] = [];
+
   constructor(
     private fb: FormBuilder,
     private firestoreService: FirestoreService
@@ -346,6 +352,7 @@ export class AppComponent implements OnInit {
       equipe: buteur.equipe,
       assist: buteur.assist || ''
     });
+    this.gererOuvertureFermetureButeurForm(true);
     
     console.log('editingButeur défini:', this.editingButeur);
     this.showButeurForm = true;
@@ -402,6 +409,7 @@ export class AppComponent implements OnInit {
       this.buteurForm.reset();
       this.showButeurForm = false;
       this.editingButeur = null;
+      this.gererOuvertureFermetureButeurForm(false);
       console.log('Buteur ajouté/modifié avec succès');
     } else {
       console.log('ButeurForm invalide ou selectedMatch null - ajout annulé');
@@ -413,6 +421,7 @@ export class AppComponent implements OnInit {
     this.buteurForm.reset();
     this.showButeurForm = false;
     this.editingButeur = null;
+    this.gererOuvertureFermetureButeurForm(false);
     console.log('Édition de buteur annulée');
   }
 
@@ -2034,5 +2043,82 @@ ${scorers2.map(b => `- ${b.nom}: ${b.minutes.join(', ')}'${b.assist ? ` (Assist:
   getCompetitionNames(): string[] {
     // Récupère toutes les compétitions uniques des matchs
     return Array.from(new Set(this.matches.map(m => m.competition).filter((c): c is string => !!c)));
+  }
+
+  updateFilteredButeurNames() {
+    const equipe = this.buteurForm.get('equipe')?.value;
+    const search = (this.buteurNameSearch || '').toLowerCase();
+    if (!equipe || search.length < 3) {
+      this.filteredButeurNames = [];
+      return;
+    }
+    this.filteredButeurNames = this.getTeamPlayers(equipe)
+      .map(p => p.name)
+      .filter(name => name.toLowerCase().includes(search));
+  }
+
+  selectButeurName(name: string) {
+    this.buteurNameSearch = name;
+    this.buteurForm.get('nom')?.setValue(name);
+    this.filteredButeurNames = [];
+  }
+
+  updateFilteredAssistNames() {
+    const equipe = this.buteurForm.get('equipe')?.value;
+    const buteur = this.buteurForm.get('nom')?.value;
+    const search = (this.assistSearch || '').toLowerCase();
+    if (!equipe || search.length < 3) {
+      this.filteredAssistNames = [];
+      return;
+    }
+    this.filteredAssistNames = this.getTeamPlayers(equipe)
+      .map(p => p.name)
+      .filter(name => name !== buteur)
+      .filter(name => name.toLowerCase().includes(search));
+  }
+
+  selectAssistName(name: string) {
+    this.assistSearch = name;
+    this.buteurForm.get('assist')?.setValue(name);
+    this.filteredAssistNames = [];
+  }
+
+  onButeurEquipeChange() {
+    // Réinitialiser les champs d'autocomplete quand l'équipe change
+    this.buteurNameSearch = '';
+    this.filteredButeurNames = [];
+    this.assistSearch = '';
+    this.filteredAssistNames = [];
+    this.buteurForm.get('nom')?.setValue('');
+    this.buteurForm.get('assist')?.setValue('');
+  }
+
+  // Réinitialiser les champs d'autocomplete à l'ouverture/fermeture de la modale
+  gererOuvertureFermetureButeurForm(ouvert: boolean) {
+    if (ouvert) {
+      this.buteurNameSearch = this.buteurForm.get('nom')?.value || '';
+      this.assistSearch = this.buteurForm.get('assist')?.value || '';
+    } else {
+      this.buteurNameSearch = '';
+      this.filteredButeurNames = [];
+      this.assistSearch = '';
+      this.filteredAssistNames = [];
+    }
+  }
+
+  shouldShowCreateButeur(): boolean {
+    const equipe = this.buteurForm.get('equipe')?.value;
+    const search = this.buteurNameSearch;
+    if (!equipe || !search || search.length < 3) return false;
+    const names = this.getTeamPlayers(equipe).map(p => p.name);
+    return this.filteredButeurNames.length === 0 && !names.includes(search);
+  }
+
+  shouldShowCreateAssist(): boolean {
+    const equipe = this.buteurForm.get('equipe')?.value;
+    const search = this.assistSearch;
+    if (!equipe || !search || search.length < 3) return false;
+    const names = this.getTeamPlayers(equipe).map(p => p.name);
+    return this.filteredAssistNames.length === 0 && !names.includes(search);
   }
 }
