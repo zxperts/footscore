@@ -2121,4 +2121,25 @@ ${scorers2.map(b => `- ${b.nom}: ${b.minutes.join(', ')}'${b.assist ? ` (Assist:
     const names = this.getTeamPlayers(equipe).map(p => p.name);
     return this.filteredAssistNames.length === 0 && !names.includes(search);
   }
+
+  shouldShowCreateTeam1(): boolean {
+    const search = this.team1Search;
+    if (!search || search.length < 3) return false;
+    const names = this.getTeamNames();
+    return this.filteredTeams1.length === 0 && !names.includes(search);
+  }
+
+  shouldShowCreateTeam2(): boolean {
+    const search = this.team2Search;
+    if (!search || search.length < 3) return false;
+    const names = this.getTeamNames();
+    return this.filteredTeams2.length === 0 && !names.includes(search);
+  }
+
+  shouldShowCreateCompetition(): boolean {
+    const search = this.competitionSearch;
+    if (!search || search.length < 3) return false;
+    const names = this.getCompetitionNames();
+    return this.filteredCompetitions.length === 0 && !names.includes(search);
+  }
 }

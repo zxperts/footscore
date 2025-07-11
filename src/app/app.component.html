@@ -172,7 +172,7 @@
             *ngFor="let name of filteredTeams1"
             (click)="selectTeam1(name)">{{ name }}</button>
   </div>
-  <div *ngIf="team1Search && filteredTeams1.length === 0" class="mt-1">
+  <div *ngIf="shouldShowCreateTeam1()" class="mt-1">
     <button type="button" class="btn btn-link p-0" (click)="selectTeam1(team1Search)">
       Créer "{{ team1Search }}"
     </button>
@@ -190,7 +190,7 @@
             *ngFor="let name of filteredTeams2"
             (click)="selectTeam2(name)">{{ name }}</button>
   </div>
-  <div *ngIf="team2Search && filteredTeams2.length === 0" class="mt-1">
+  <div *ngIf="shouldShowCreateTeam2()" class="mt-1">
     <button type="button" class="btn btn-link p-0" (click)="selectTeam2(team2Search)">
       Créer "{{ team2Search }}"
     </button>
@@ -218,7 +218,7 @@
                           *ngFor="let name of filteredCompetitions"
                           (click)="selectCompetition(name)">{{ name }}</button>
                 </div>
-                <div *ngIf="competitionSearch && filteredCompetitions.length === 0" class="mt-1">
+                <div *ngIf="shouldShowCreateCompetition()" class="mt-1">
                   <button type="button" class="btn btn-link p-0" (click)="selectCompetition(competitionSearch)">
                     Créer "{{ competitionSearch }}"
                   </button>
