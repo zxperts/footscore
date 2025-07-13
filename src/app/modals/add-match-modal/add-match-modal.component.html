@@ -1,0 +1,101 @@
+<div class="modal fade show" tabindex="-1" style="display:block; background:rgba(0,0,0,0.5);">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title mb-0 text-primary fw-bold" style="font-size: 1.8rem; text-shadow: 2px 2px 4px rgba(0,0,0,0.1);">
+          <i class="fas fa-futbol me-2"></i>Ajouter un Match!
+        </h4>
+        <button type="button" class="btn-close" aria-label="Fermer" (click)="close.emit()"></button>
+      </div>
+      <div class="modal-body">
+        <form [formGroup]="matchForm" (ngSubmit)="onSubmit()">
+          <div class="row" style="width: 100%; margin: 0 auto; padding: 10px; border-radius: 10px; background: linear-gradient(to top, rgba(0,0,0,0.1) 0%, transparent 70%);">
+            <!-- Informations principales -->
+            <div class="col-md-6">
+              <!-- Équipe 1 -->
+<div class="mb-3 position-relative">
+  <label for="equipe1" class="form-label">Équipe 1</label>
+  <input id="equipe1" type="text" class="form-control" placeholder="Rechercher ou créer une équipe..."
+         [(ngModel)]="team1Search" [ngModelOptions]="{standalone: true}" (input)="updateFilteredTeams1()" name="team1Search"
+         (focus)="updateFilteredTeams1()" autocomplete="off">
+  <input type="hidden" formControlName="equipe1">
+  <div class="list-group position-absolute w-100" *ngIf="filteredTeams1.length > 0 && team1Search">
+    <button type="button" class="list-group-item list-group-item-action"
+            *ngFor="let name of filteredTeams1"
+            (click)="selectTeam1(name)">{{ name }}</button>
+  </div>
+  <div *ngIf="shouldShowCreateTeam1()" class="mt-1">
+    <button type="button" class="btn btn-link p-0" (click)="selectTeam1(team1Search)">
+      Créer "{{ team1Search }}"
+    </button>
+  </div>
+</div>
+<!-- Équipe 2 -->
+<div class="mb-3 position-relative">
+  <label for="equipe2" class="form-label">Équipe 2</label>
+  <input id="equipe2" type="text" class="form-control" placeholder="Rechercher ou créer une équipe..."
+         [(ngModel)]="team2Search" [ngModelOptions]="{standalone: true}" (input)="updateFilteredTeams2()" name="team2Search"
+         (focus)="updateFilteredTeams2()" autocomplete="off">
+  <input type="hidden" formControlName="equipe2">
+  <div class="list-group position-absolute w-100" *ngIf="filteredTeams2.length > 0 && team2Search">
+    <button type="button" class="list-group-item list-group-item-action"
+            *ngFor="let name of filteredTeams2"
+            (click)="selectTeam2(name)">{{ name }}</button>
+  </div>
+  <div *ngIf="shouldShowCreateTeam2()" class="mt-1">
+    <button type="button" class="btn btn-link p-0" (click)="selectTeam2(team2Search)">
+      Créer "{{ team2Search }}"
+    </button>
+  </div>
+</div>
+            </div>
+            <!-- Informations secondaires -->
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label for="heureDebut" class="form-label text-muted">Heure de début</label>
+                <input type="datetime-local" step="3600" class="form-control form-control-sm" id="heureDebut" formControlName="heureDebut">
+              </div>
+              <div class="mb-3">
+                <label for="lieu" class="form-label text-muted">Lieu du match (optionnel)</label>
+                <input type="text" class="form-control form-control-sm" id="lieu" formControlName="lieu" placeholder="Stade, ville...">
+              </div>
+              <div class="mb-3 position-relative">
+                <label for="competition" class="form-label text-muted">Compétition (optionnel)</label>
+                <input id="competition" type="text" class="form-control form-control-sm" placeholder="Rechercher ou créer une compétition..."
+                       [(ngModel)]="competitionSearch" [ngModelOptions]="{standalone: true}" (input)="updateFilteredCompetitions()" name="competitionSearch"
+                       (focus)="updateFilteredCompetitions()" autocomplete="off">
+                <input type="hidden" formControlName="competition">
+                <div class="list-group position-absolute w-100" *ngIf="filteredCompetitions.length > 0 && competitionSearch">
+                  <button type="button" class="list-group-item list-group-item-action"
+                          *ngFor="let name of filteredCompetitions"
+                          (click)="selectCompetition(name)">{{ name }}</button>
+                </div>
+                <div *ngIf="shouldShowCreateCompetition()" class="mt-1">
+                  <button type="button" class="btn btn-link p-0" (click)="selectCompetition(competitionSearch)">
+                    Créer "{{ competitionSearch }}"
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="d-flex gap-2 ms-2 mt-3">
+            <button type="submit" class="btn btn-primary px-4" [disabled]="!matchForm.valid">
+              Créer le match
+            </button>
+            
+            <button type="button" class="btn btn-secondary dropdown-toggle me-auto" data-bs-toggle="dropdown" aria-expanded="false">
+              🧰
+            </button>
+            <button type="button" class="btn btn-outline-secondary ms-2" (click)="close.emit()">
+              Annuler
+            </button>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" (click)="exportMatches.emit()">Exporter les matchs</a></li>
+              <li><a class="dropdown-item" (click)="importMatches.emit()">Importer des matchs</a></li>
+            </ul>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
