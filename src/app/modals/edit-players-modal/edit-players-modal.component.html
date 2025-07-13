@@ -14,7 +14,7 @@
               <span class="d-flex align-items-center">
                 <i *ngIf="player.type === 'attaquant'" class="fas fa-bolt me-2 type-icon type-icon-clickable" (click)="cyclePlayerType.emit(player)" title="Changer le type (Attaquant)"></i>
                 <i *ngIf="player.type === 'milieu'" class="fas fa-arrows-alt-h me-2 type-icon type-icon-clickable" (click)="cyclePlayerType.emit(player)" title="Changer le type (Milieu)"></i>
-                <i *ngIf="player.type === 'defenseur'" class="fas fa-shield-alt me-2 type-icon type-icon-clickable" (click)="cyclePlayerType.emit(player)" title="Changer le type (Défenseur)"></i>
+                <i *ngIf="player.type === 'defenseur'" class="fas fa-shield me-2 type-icon type-icon-clickable" (click)="cyclePlayerType.emit(player)" title="Changer le type (Défenseur)"></i>
                 <input class="form-control form-control-sm me-2" style="max-width: 140px; display: inline-block;" [(ngModel)]="player.name" />
                 <span class="badge bg-primary ms-2" style="cursor:pointer;" *ngIf="getGoalsForPlayer(player.name) > 0" (click)="openPlayerGoalsModal.emit(player)">
                   {{ getGoalsForPlayer(player.name) }} ⚽
@@ -28,7 +28,7 @@
           <input [(ngModel)]="newPlayerName" class="form-control" placeholder="Ajouter un joueur..." (keyup.enter)="addPlayer.emit()" />
           <i *ngIf="newPlayerType === 'attaquant'" class="fas fa-bolt type-icon type-icon-clickable" (click)="cycleNewPlayerType.emit()" title="Changer le type (Attaquant)"></i>
           <i *ngIf="newPlayerType === 'milieu'" class="fas fa-arrows-alt-h type-icon type-icon-clickable" (click)="cycleNewPlayerType.emit()" title="Changer le type (Milieu)"></i>
-          <i *ngIf="newPlayerType === 'defenseur'" class="fas fa-shield-alt type-icon type-icon-clickable" (click)="cycleNewPlayerType.emit()" title="Changer le type (Défenseur)"></i>
+          <i *ngIf="newPlayerType === 'defenseur'" class="fas fa-shield type-icon type-icon-clickable" (click)="cycleNewPlayerType.emit()" title="Changer le type (Défenseur)"></i>
           <button class="btn btn-success" (click)="addPlayer.emit()">Ajouter</button>
         </div>
       </div>

@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Firestore, collection, addDoc, getDocs, doc, getDoc, query, where, updateDoc, deleteDoc } from '@angular/fire/firestore';
-import { Match, Buteur } from './models/match.model';
+import { Match, Buteur, DuelGagne } from './models/match.model';
 import { Competition } from './models/competition.model';
 
 @Injectable({
@@ -36,7 +36,8 @@ export class FirestoreService {
         lieu: data['lieu'] || '',
         positions: data['positions'] || {},
         showElements: data['showElements'] !== undefined ? data['showElements'] : true,
-        updatedAt: data['updatedAt'] ? new Date(data['updatedAt']) : new Date()
+        updatedAt: data['updatedAt'] ? new Date(data['updatedAt']) : new Date(),
+        duelsGagnes: data['duelsGagnes'] || []
       };
     });
   }
@@ -57,7 +58,8 @@ export class FirestoreService {
         positions: data['positions'] || {},
         showElements: data['showElements'] !== undefined ? data['showElements'] : true,
         competition: data['competition'] || undefined,
-        updatedAt: data['updatedAt'] ? new Date(data['updatedAt']) : new Date()
+        updatedAt: data['updatedAt'] ? new Date(data['updatedAt']) : new Date(),
+        duelsGagnes: data['duelsGagnes'] || []
       };
       return match;
     }

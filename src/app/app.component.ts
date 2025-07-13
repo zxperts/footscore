@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, FormArray } from '@angular/forms';
-import { Match, Buteur } from './models/match.model';
+import { Match, Buteur, DuelGagne } from './models/match.model';
 import { ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Team, TEAMS, ensureDefaultPlayer, Player } from './models/team.model';
@@ -125,6 +125,15 @@ export class AppComponent implements OnInit {
   assistSearch: string = '';
   filteredAssistNames: string[] = [];
 
+  // === GESTION DES DUELS GAGNÉS ===
+  showDuelCelebration: boolean = false;
+  lastDuelWinner: string = '';
+  lastDuelTeam: string = '';
+  
+  // Contrôles pour l'encodage dans la disposition tactique
+  encodingGoalsEnabled: boolean = false;
+  encodingDuelsEnabled: boolean = false;
+
   constructor(
     private fb: FormBuilder,
     private firestoreService: FirestoreService
@@ -183,9 +192,6 @@ export class AppComponent implements OnInit {
   }
 
   onSubmit() {
-    console.log('onSubmit() appelée');
-    console.log('matchForm valid:', this.matchForm.valid);
-    console.log('matchForm value:', this.matchForm.value);
     
     if (this.matchForm.valid) {
       const matchStartTime = new Date(this.matchForm.value.heureDebut);
@@ -198,17 +204,17 @@ export class AppComponent implements OnInit {
         score1: 0,
         score2: 0,
         buteurs: [],
-        showElements: true // Initialiser la visibilité
+        duelsGagnes: [], // Initialiser le tableau des duels gagnés
+        showElements: true, // Initialiser la visibilité
+        updatedAt: new Date()
       };
       console.log('Nouveau match créé:', newMatch);
       this.matches.push(newMatch);
-      console.log('matches après ajout:', this.matches);
       this.saveData();
       this.matchForm.reset({
         heureDebut: this.getCurrentDateTime()
       });
       this.showMatchForm = false;
-      console.log('Match ajouté avec succès');
     } else {
       console.log('MatchForm invalide - soumission annulée');
     }
@@ -224,9 +230,6 @@ export class AppComponent implements OnInit {
     
     // Calculer la différence en minutes
     const diffInMinutes = Math.floor((now.getTime() - localMatchStart.getTime()) / (1000 * 60));
-    console.log("diffInMinutes", diffInMinutes);
-    console.log("now", now);
-    console.log("localMatchStart", localMatchStart);
     
     // Si le match a commencé il y a plus de 90 minutes, retourner la dernière minute saisie
     if (diffInMinutes > 90) {
@@ -302,17 +305,11 @@ export class AppComponent implements OnInit {
   }
 
   updateScore() {
-    console.log('updateScore() appelée');
     
     if (!this.selectedMatch) {
       console.log('selectedMatch null - mise à jour annulée');
       return;
     }
-    
-    console.log('Score avant mise à jour:', {
-      score1: this.selectedMatch.score1,
-      score2: this.selectedMatch.score2
-    });
     
     this.selectedMatch.score1 = 0;
     this.selectedMatch.score2 = 0;
@@ -325,12 +322,9 @@ export class AppComponent implements OnInit {
     });
     
     this.saveData();
-    console.log('Score mis à zéro avec succès');
   }
 
-  modifierButeur(matchIndex: number, buteurIndex: number) {
-    console.log('modifierButeur() appelée avec matchIndex:', matchIndex, 'buteurIndex:', buteurIndex);
-    
+  modifierButeur(matchIndex: number, buteurIndex: number) {    
     const match = this.matches[matchIndex];
     const buteur = match.buteurs[buteurIndex];
     
@@ -354,14 +348,10 @@ export class AppComponent implements OnInit {
     });
     this.gererOuvertureFermetureButeurForm(true);
     
-    console.log('editingButeur défini:', this.editingButeur);
     this.showButeurForm = true;
   }
 
   ajouterButeur() {
-    console.log('ajouterButeur() appelée');
-    console.log('buteurForm valid:', this.buteurForm.valid);
-    console.log('buteurForm value:', this.buteurForm.value);
     
     if (this.buteurForm.valid && this.selectedMatch) {
       const buteurData = this.buteurForm.value;
@@ -378,7 +368,6 @@ export class AppComponent implements OnInit {
       
       if (this.editingButeur) {
         // Modification d'un buteur existant
-        console.log('Modification du buteur existant');
         const matchIndex = this.matches.indexOf(this.selectedMatch);
         this.matches[matchIndex].buteurs[this.editingButeur.index] = newButeur;
         console.log('Buteur modifié dans le match');
@@ -386,7 +375,6 @@ export class AppComponent implements OnInit {
         // Pas de mise à jour du score car on modifie un but existant
       } else {
         // Ajout d'un nouveau buteur
-        console.log('Ajout d\'un nouveau buteur');
         this.selectedMatch.buteurs.push(newButeur);
         console.log('Buteur ajouté au match');
         
@@ -410,14 +398,12 @@ export class AppComponent implements OnInit {
       this.showButeurForm = false;
       this.editingButeur = null;
       this.gererOuvertureFermetureButeurForm(false);
-      console.log('Buteur ajouté/modifié avec succès');
     } else {
       console.log('ButeurForm invalide ou selectedMatch null - ajout annulé');
     }
   }
 
   annulerEditionButeur() {
-    console.log('annulerEditionButeur() appelée');
     this.buteurForm.reset();
     this.showButeurForm = false;
     this.editingButeur = null;
@@ -431,7 +417,6 @@ export class AppComponent implements OnInit {
     if (!confirm(`Êtes-vous sûr de vouloir supprimer le but de ${buteur.nom} à la minute ${buteur.minute} ?`)) {
       return;
     }
-    console.log('supprimerButeur() appelée avec matchIndex:', matchIndex, 'buteurIndex:', buteurIndex);
     
     console.log('Match:', match);
     console.log('Buteur à supprimer:', buteur);
@@ -461,7 +446,6 @@ export class AppComponent implements OnInit {
     this.maintainScoreConsistency();
     
     this.saveData();
-    console.log('Buteur supprimé avec succès');
   }
 
   getPlayersList(): Player[] {
@@ -600,11 +584,94 @@ export class AppComponent implements OnInit {
     console.log('But ajouté rapidement avec succès');
   }
 
+  quickAddDuel(playerName: string, teamNumber: 1 | 2) {
+    console.log('quickAddDuel() appelée avec playerName:', playerName, 'teamNumber:', teamNumber);
+    
+    if (!this.selectedMatch) {
+      console.log('selectedMatch null - ajout rapide annulé');
+      return;
+    }
+    
+    console.log('Match sélectionné:', this.selectedMatch);
+    
+    // Calculer la minute actuelle
+    const elapsedMinutes = this.calculateElapsedMinutes(this.selectedMatch.heureDebut);
+    console.log('Minutes écoulées:', elapsedMinutes);
+    
+    if (elapsedMinutes < 0) {
+      console.log('Match pas encore commencé - ajout rapide annulé');
+      return;
+    }
+    
+    // Initialiser le tableau des duels gagnés s'il n'existe pas
+    if (!this.selectedMatch.duelsGagnes) {
+      this.selectedMatch.duelsGagnes = [];
+    }
+    
+    const newDuel: DuelGagne = {
+      nom: playerName,
+      minute: elapsedMinutes,
+      equipe: teamNumber
+    };
+    
+    console.log('Nouveau duel gagné créé:', newDuel);
+    
+    this.selectedMatch.duelsGagnes.push(newDuel);
+    console.log('Duel gagné ajouté au match');
+    
+    console.log('Match après ajout rapide:', this.selectedMatch);
+    
+    this.saveData();
+    
+    // Célébration du duel gagné
+    this.lastDuelWinner = playerName;
+    this.lastDuelTeam = teamNumber === 1 ? this.selectedMatch.equipe1 : this.selectedMatch.equipe2;
+    this.showDuelCelebration = true;
+    this.remainingDots = 5;
+    
+    console.log('Célébration du duel gagné:', {
+      winner: this.lastDuelWinner,
+      team: this.lastDuelTeam,
+      showCelebration: this.showDuelCelebration
+    });
+    
+    this.startCelebrationTimer();
+    console.log('Duel gagné ajouté rapidement avec succès');
+  }
+
+  // Nouvelle méthode qui combine la logique de selectPosition et quickAddGoal/quickAddDuel
+  quickAddAction(playerName: string, teamNumber: 1 | 2) {
+    console.log('quickAddAction() appelée avec playerName:', playerName, 'teamNumber:', teamNumber);
+    
+    if (!this.selectedMatch) {
+      console.log('selectedMatch null - action rapide annulée');
+      return;
+    }
+    
+    // Trouver le joueur pour déterminer son type
+    const player = this.getPlayerByName(teamNumber, playerName);
+    if (!player) {
+      console.log('Joueur non trouvé - action rapide annulée');
+      return;
+    }
+    
+    console.log('Type du joueur:', player.type);
+    
+    // Déterminer si c'est un joueur défensif
+    const isDefensivePlayer = player.type === 'defenseur';
+    console.log('isDefensivePlayer:', isDefensivePlayer);
+    
+    if (isDefensivePlayer) {
+      // Pour les défenseurs, enregistrer un duel gagné
+      this.quickAddDuel(playerName, teamNumber);
+    } else {
+      // Pour les attaquants et milieux, enregistrer un but
+      this.quickAddGoal(playerName, teamNumber);
+    }
+  }
+
   saveGoalWithAssist() {
     console.log('saveGoalWithAssist() appelée');
-    console.log('lastGoalScorer:', this.lastGoalScorer);
-    console.log('lastGoalTeam:', this.lastGoalTeam);
-    console.log('lastGoalAssist:', this.lastGoalAssist);
     
     if (!this.selectedMatch || !this.lastGoalScorer) {
       console.log('selectedMatch ou lastGoalScorer null - sauvegarde annulée');
@@ -655,7 +722,63 @@ export class AppComponent implements OnInit {
     this.lastGoalTeam = '';
     this.lastGoalAssist = '';
     
-    console.log('But annulé avec succès');
+  }
+
+  saveDuel() {
+    console.log('saveDuel() appelée');
+    
+    this.saveData();
+    this.showDuelCelebration = false;
+    this.lastDuelWinner = '';
+    this.lastDuelTeam = '';
+    
+    console.log('Duel gagné sauvegardé avec succès');
+  }
+
+  cancelDuel() {
+    console.log('cancelDuel() appelée');
+    
+    if (!this.selectedMatch) {
+      console.log('selectedMatch null - annulation annulée');
+      return;
+    }
+    
+    // Supprimer le dernier duel ajouté
+    if (this.selectedMatch.duelsGagnes && this.selectedMatch.duelsGagnes.length > 0) {
+      const lastDuel = this.selectedMatch.duelsGagnes[this.selectedMatch.duelsGagnes.length - 1];
+      console.log('Dernier duel à supprimer:', lastDuel);
+      
+      this.selectedMatch.duelsGagnes.pop();
+      console.log('Dernier duel supprimé');
+    }
+    
+    this.showDuelCelebration = false;
+  }
+
+  supprimerDuel(matchIndex: number, duelIndex: number) {
+    console.log('supprimerDuel() appelée avec matchIndex:', matchIndex, 'duelIndex:', duelIndex);
+    
+    if (matchIndex < 0 || matchIndex >= this.matches.length) {
+      console.log('Index de match invalide - suppression annulée');
+      return;
+    }
+    
+    const match = this.matches[matchIndex];
+    
+    if (!match.duelsGagnes || duelIndex < 0 || duelIndex >= match.duelsGagnes.length) {
+      console.log('Index de duel invalide - suppression annulée');
+      return;
+    }
+    
+    console.log('Match:', match);
+    console.log('Duel à supprimer:', match.duelsGagnes[duelIndex]);
+    
+    // Supprimer le duel
+    match.duelsGagnes.splice(duelIndex, 1);
+    console.log('Duel supprimé');
+    
+    this.saveData();
+    console.log('Duel supprimé avec succès');
   }
 
   supprimerMatch(match: Match) {
@@ -680,7 +803,8 @@ export class AppComponent implements OnInit {
       if (expirationDate > new Date()) {
         this.matches = data.matches.map((match: any) => ({
           ...match,
-          heureDebut: new Date(match.heureDebut)
+          heureDebut: new Date(match.heureDebut),
+          duelsGagnes: match.duelsGagnes || [] // Initialiser les duels gagnés pour les anciens matchs
         }));
         if (data.teams) {
           this.teams = data.teams;
@@ -738,14 +862,39 @@ export class AppComponent implements OnInit {
         return acc;
       }, [] as GroupedScorer[]);
 
-    // Trier les buteurs par leur premier but
-    return groupedScorers.sort((a, b) => a.minutes[0] - b.minutes[0]);
+    // Trier par nom
+    return groupedScorers.sort((a, b) => a.nom.localeCompare(b.nom));
+  }
+
+  getGroupedDuels(match: Match, equipe: 1 | 2): GroupedScorer[] {
+    // Regrouper les duels gagnés par nom
+    if (!match.duelsGagnes) {
+      return [];
+    }
+    
+    const groupedDuels = match.duelsGagnes
+      .filter(d => d.equipe === equipe)
+      .reduce((acc, duel) => {
+        const existingDuel = acc.find(s => s.nom === duel.nom);
+        if (existingDuel) {
+          existingDuel.minutes.push(duel.minute);
+          // Trier les minutes dans l'ordre croissant
+          existingDuel.minutes.sort((a, b) => a - b);
+        } else {
+          acc.push({ 
+            nom: duel.nom, 
+            minutes: [duel.minute]
+          });
+        }
+        return acc;
+      }, [] as GroupedScorer[]);
+
+    // Trier par nom
+    return groupedDuels.sort((a, b) => a.nom.localeCompare(b.nom));
   }
 
   // Nouvelle méthode qui filtre les buts désactivés
   getActiveGroupedScorers(match: Match, equipe: 1 | 2): GroupedScorer[] {
-    console.log(`getActiveGroupedScorers() pour équipe ${equipe}, match ${match.id}`);
-    console.log('disabledGoals:', this.disabledGoals);
     
     // Regrouper les buteurs actifs par nom (en excluant les désactivés)
     const groupedScorers = match.buteurs
@@ -774,14 +923,12 @@ export class AppComponent implements OnInit {
         return acc;
       }, [] as GroupedScorer[]);
 
-    console.log(`Buts actifs trouvés pour équipe ${equipe}:`, groupedScorers);
     // Trier les buteurs par leur premier but
     return groupedScorers.sort((a, b) => a.minutes[0] - b.minutes[0]);
   }
 
   // Méthode pour obtenir les buts désactivés groupés
   getDisabledGroupedScorers(match: Match, equipe: 1 | 2): GroupedScorer[] {
-    console.log(`getDisabledGroupedScorers() pour équipe ${equipe}, match ${match.id}`);
     
     // Regrouper les buteurs désactivés par nom (excluant "Joueur non listé")
     const groupedScorers = match.buteurs
@@ -811,7 +958,6 @@ export class AppComponent implements OnInit {
         return acc;
       }, [] as GroupedScorer[]);
 
-    console.log(`Buts désactivés trouvés pour équipe ${equipe}:`, groupedScorers);
     // Trier les buteurs par leur premier but
     return groupedScorers.sort((a, b) => a.minutes[0] - b.minutes[0]);
   }
@@ -826,6 +972,26 @@ export class AppComponent implements OnInit {
 
   selectPosition(team: number, position: string) {
     this.selectedPosition = { team, position };
+    
+    // Si un joueur est assigné à cette position, gérer l'action selon le type de joueur
+    const player = this.getPlayerForPosition(team, position);
+    if (player && this.selectedMatch) {
+      // Déterminer si c'est une position défensive
+      const isDefensivePosition = position.includes('defenseur') || position === 'gardien';
+      console.log("isDefensivePosition"+isDefensivePosition);
+      
+      if (isDefensivePosition) {
+        // Pour les défenseurs, enregistrer un duel gagné (si activé)
+        if (this.encodingDuelsEnabled) {
+          this.quickAddDuel(player.name, team as 1 | 2);
+        }
+      } else {
+        // Pour les attaquants et milieux, enregistrer un but (si activé)
+        if (this.encodingGoalsEnabled) {
+          this.quickAddGoal(player.name, team as 1 | 2);
+        }
+      }
+    }
   }
 
   assignPlayerToPosition(playerName: string) {
@@ -963,6 +1129,13 @@ ${this.getGroupedScorers(match, 1).map(b => `- ${b.nom}: ${b.minutes.join(', ')}
 
 ${match.equipe2}:
 ${this.getGroupedScorers(match, 2).map(b => `- ${b.nom}: ${b.minutes.join(', ')}'${b.assist ? ` (Assist: ${b.assist})` : ''}`).join('\n')}
+
+Duels gagnés :
+${match.equipe1}:
+${this.getGroupedDuels(match, 1).map(d => `- ${d.nom}: ${d.minutes.join(', ')}'`).join('\n')}
+
+${match.equipe2}:
+${this.getGroupedDuels(match, 2).map(d => `- ${d.nom}: ${d.minutes.join(', ')}'`).join('\n')}
 
 Lien direct vers le match : ${matchUrl}
       `.trim();
@@ -1148,66 +1321,98 @@ Lien direct vers le match : ${matchUrl}
   }
 
   private exportToTxt(): string {
-    return this.matches.map(match => {
-      const scorers1 = this.getGroupedScorers(match, 1);
-      const scorers2 = this.getGroupedScorers(match, 2);
+    let content = 'FOOTBALL MATCHES EXPORT\n';
+    content += '========================\n\n';
+    
+    for (const match of this.getSortedMatches()) {
+      content += `Match: ${match.equipe1} vs ${match.equipe2}\n`;
+      content += `Score: ${match.score1} - ${match.score2}\n`;
+      content += `Date: ${match.heureDebut.toLocaleString('fr-FR')}\n`;
+      if (match.lieu) content += `Lieu: ${match.lieu}\n`;
+      if (match.competition) content += `Compétition: ${match.competition}\n`;
       
-      return `
-Match : ${match.equipe1} vs ${match.equipe2}
-Score : ${match.score1} - ${match.score2}
-Date : ${match.heureDebut.toLocaleString('fr-FR', { 
-  weekday: 'long', 
-  day: 'numeric', 
-  month: 'long', 
-  year: 'numeric',
-  hour: '2-digit',
-  minute: '2-digit'
-})}
-Lieu : ${match.lieu || 'Non spécifié'}
-Compétition : ${match.competition || 'Non spécifiée'}
-
-Buteurs :
-${match.equipe1}:
-${scorers1.map(b => `- ${b.nom}: ${b.minutes.join(', ')}'${b.assist ? ` (Assist: ${b.assist})` : ''}`).join('\n')}
-
-${match.equipe2}:
-${scorers2.map(b => `- ${b.nom}: ${b.minutes.join(', ')}'${b.assist ? ` (Assist: ${b.assist})` : ''}`).join('\n')}
-----------------------------------------
-`.trim();
-    }).join('\n\n');
+      // Buteurs
+      if (match.buteurs.length > 0) {
+        content += '\nButeurs:\n';
+        const groupedScorers1 = this.getGroupedScorers(match, 1);
+        const groupedScorers2 = this.getGroupedScorers(match, 2);
+        
+        if (groupedScorers1.length > 0) {
+          content += `${match.equipe1}:\n`;
+          for (const scorer of groupedScorers1) {
+            content += `  - ${scorer.nom}: ${scorer.minutes.join(', ')}'${scorer.assist ? ` (Assist: ${scorer.assist})` : ''}\n`;
+          }
+        }
+        
+        if (groupedScorers2.length > 0) {
+          content += `${match.equipe2}:\n`;
+          for (const scorer of groupedScorers2) {
+            content += `  - ${scorer.nom}: ${scorer.minutes.join(', ')}'${scorer.assist ? ` (Assist: ${scorer.assist})` : ''}\n`;
+          }
+        }
+      }
+      
+      // Duels gagnés
+      if (match.duelsGagnes && match.duelsGagnes.length > 0) {
+        content += '\nDuels gagnés:\n';
+        const groupedDuels1 = this.getGroupedDuels(match, 1);
+        const groupedDuels2 = this.getGroupedDuels(match, 2);
+        
+        if (groupedDuels1.length > 0) {
+          content += `${match.equipe1}:\n`;
+          for (const duel of groupedDuels1) {
+            content += `  - ${duel.nom}: ${duel.minutes.join(', ')}'\n`;
+          }
+        }
+        
+        if (groupedDuels2.length > 0) {
+          content += `${match.equipe2}:\n`;
+          for (const duel of groupedDuels2) {
+            content += `  - ${duel.nom}: ${duel.minutes.join(', ')}'\n`;
+          }
+        }
+      }
+      
+      content += '\n' + '='.repeat(50) + '\n\n';
+    }
+    
+    return content;
   }
 
   private exportToCsv(): string {
-    const headers = ['Équipe 1', 'Équipe 2', 'Score 1', 'Score 2', 'Date', 'Lieu', 'Compétition', 'Buteurs Équipe 1', 'Buteurs Équipe 2'];
-    const rows = this.matches.map(match => {
+    let content = 'Équipe 1,Équipe 2,Score 1,Score 2,Date,Lieu,Compétition,Buteurs Équipe 1,Buteurs Équipe 2,Duels Équipe 1,Duels Équipe 2\n';
+    
+    for (const match of this.getSortedMatches()) {
       const scorers1 = this.getGroupedScorers(match, 1);
       const scorers2 = this.getGroupedScorers(match, 2);
+      const duels1 = this.getGroupedDuels(match, 1);
+      const duels2 = this.getGroupedDuels(match, 2);
       
-      return [
-        match.equipe1,
-        match.equipe2,
-        match.score1,
-        match.score2,
-        match.heureDebut.toLocaleString('fr-FR'),
-        match.lieu || '',
-        match.competition || '',
-        scorers1.map(b => `${b.nom} (${b.minutes.join(', ')}'${b.assist ? `, Assist: ${b.assist}` : ''})`).join('; '),
-        scorers2.map(b => `${b.nom} (${b.minutes.join(', ')}'${b.assist ? `, Assist: ${b.assist}` : ''})`).join('; ')
-      ].map(field => `"${field}"`).join(',');
-    });
-
-    return [headers.map(h => `"${h}"`).join(','), ...rows].join('\n');
+      const scorers1Str = scorers1.map(s => `${s.nom}(${s.minutes.join(',')}')`).join('; ');
+      const scorers2Str = scorers2.map(s => `${s.nom}(${s.minutes.join(',')}')`).join('; ');
+      const duels1Str = duels1.map(d => `${d.nom}(${d.minutes.join(',')}')`).join('; ');
+      const duels2Str = duels2.map(d => `${d.nom}(${d.minutes.join(',')}')`).join('; ');
+      
+      content += `"${match.equipe1}","${match.equipe2}",${match.score1},${match.score2},"${match.heureDebut.toLocaleString('fr-FR')}","${match.lieu || ''}","${match.competition || ''}","${scorers1Str}","${scorers2Str}","${duels1Str}","${duels2Str}"\n`;
+    }
+    
+    return content;
   }
 
   private exportToJson(): string {
-    return JSON.stringify(this.matches.map(match => ({
-      ...match,
-      heureDebut: match.heureDebut instanceof Date ? match.heureDebut.toISOString() : new Date().toISOString(),
-      buteurs: match.buteurs.map(b => ({
-        ...b,
-        assist: b.assist || null
-      }))
-    })), null, 2);
+    const exportData = this.getSortedMatches().map(match => ({
+      equipe1: match.equipe1,
+      equipe2: match.equipe2,
+      score1: match.score1,
+      score2: match.score2,
+      heureDebut: match.heureDebut.toISOString(),
+      lieu: match.lieu,
+      competition: match.competition,
+      buteurs: match.buteurs,
+      duelsGagnes: match.duelsGagnes || []
+    }));
+    
+    return JSON.stringify(exportData, null, 2);
   }
 
   private downloadFile(content: string, filename: string) {
@@ -1329,85 +1534,155 @@ ${scorers2.map(b => `- ${b.nom}: ${b.minutes.join(', ')}'${b.assist ? ` (Assist:
   }
 
   private parseCsvImport(content: string): Match[] {
-    const matches: Match[] = [];
-    const lines = content.split('\n');
+    const lines = content.trim().split('\n');
+    if (lines.length < 2) throw new Error('Fichier CSV vide ou invalide');
+    
     const headers = lines[0].split(',').map(h => h.replace(/"/g, '').trim());
+    const matches: Match[] = [];
     
     for (let i = 1; i < lines.length; i++) {
-      if (!lines[i].trim()) continue;
+      const line = lines[i];
+      const values = this.parseCsvLine(line);
       
-      const values = lines[i].split(',').map(v => v.replace(/"/g, '').trim());
-      const match: Partial<Match> = {
-        id: this.matches.length + matches.length + 1,
-        score1: 0,
-        score2: 0,
-        buteurs: []
+      if (values.length < 8) continue; // Minimum requis
+      
+      const match: Match = {
+        id: this.matches.length + i,
+        equipe1: values[0]?.replace(/"/g, '') || '',
+        equipe2: values[1]?.replace(/"/g, '') || '',
+        score1: parseInt(values[2]) || 0,
+        score2: parseInt(values[3]) || 0,
+        heureDebut: new Date(values[4] || new Date()),
+        lieu: values[5]?.replace(/"/g, '') || '',
+        competition: values[6]?.replace(/"/g, '') || '',
+        buteurs: [],
+        duelsGagnes: [],
+        updatedAt: new Date()
       };
       
-      headers.forEach((header, index) => {
-        const value = values[index];
-        switch (header) {
-          case 'Équipe 1':
-            match.equipe1 = value;
-            break;
-          case 'Équipe 2':
-            match.equipe2 = value;
-            break;
-          case 'Score 1':
-            match.score1 = parseInt(value);
-            break;
-          case 'Score 2':
-            match.score2 = parseInt(value);
-            break;
-          case 'Date':
-            match.heureDebut = new Date(value);
-            break;
-          case 'Lieu':
-            match.lieu = value;
-            break;
-          case 'Compétition':
-            match.competition = value;
-            break;
-          case 'Buteurs Équipe 1':
-          case 'Buteurs Équipe 2':
-            const team = header === 'Buteurs Équipe 1' ? 1 : 2;
-            const scorers = value.split(';').map(s => s.trim());
-            scorers.forEach(scorer => {
-              const [name, rest] = scorer.split('(');
-              const minutes = rest.match(/\d+/g);
-              const assistMatch = rest.match(/Assist: (.*?)\)/);
-              
-              if (minutes) {
-                minutes.forEach(minute => {
-                  match.buteurs?.push({
-                    nom: name.trim(),
-                    minute: parseInt(minute),
-                    equipe: team,
-                    assist: assistMatch ? assistMatch[1] : undefined
-                  });
-                });
-              }
-            });
-            break;
+      // Parser les buteurs équipe 1
+      if (values[7]) {
+        const buteurs1Str = values[7].replace(/"/g, '');
+        if (buteurs1Str) {
+          const buteurs1 = this.parseScorersString(buteurs1Str, 1);
+          match.buteurs.push(...buteurs1);
         }
-      });
-      
-      if (match.equipe1 && match.equipe2) {
-        matches.push(match as Match);
       }
+      
+      // Parser les buteurs équipe 2
+      if (values[8]) {
+        const buteurs2Str = values[8].replace(/"/g, '');
+        if (buteurs2Str) {
+          const buteurs2 = this.parseScorersString(buteurs2Str, 2);
+          match.buteurs.push(...buteurs2);
+        }
+      }
+      
+      // Parser les duels équipe 1
+      if (values[9]) {
+        const duels1Str = values[9].replace(/"/g, '');
+        if (duels1Str) {
+          const duels1 = this.parseDuelsString(duels1Str, 1);
+          match.duelsGagnes.push(...duels1);
+        }
+      }
+      
+      // Parser les duels équipe 2
+      if (values[10]) {
+        const duels2Str = values[10].replace(/"/g, '');
+        if (duels2Str) {
+          const duels2 = this.parseDuelsString(duels2Str, 2);
+          match.duelsGagnes.push(...duels2);
+        }
+      }
+      
+      matches.push(match);
     }
     
     return matches;
   }
 
   private parseJsonImport(content: string): Match[] {
-    const data = JSON.parse(content);
-    return Array.isArray(data) ? data.map((match: any, index: number) => ({
-      ...match,
-      id: this.matches.length + index + 1,
-      heureDebut: match.heureDebut ? new Date(match.heureDebut) : new Date(),
-      buteurs: match.buteurs || []
-    })) : [];
+    try {
+      const data = JSON.parse(content);
+      return data.map((match: any) => ({
+        ...match,
+        heureDebut: new Date(match.heureDebut),
+        duelsGagnes: match.duelsGagnes || []
+      }));
+    } catch (error) {
+      throw new Error('Format JSON invalide');
+    }
+  }
+
+  private parseCsvLine(line: string): string[] {
+    const values: string[] = [];
+    let current = '';
+    let inQuotes = false;
+    
+    for (let i = 0; i < line.length; i++) {
+      const char = line[i];
+      
+      if (char === '"') {
+        inQuotes = !inQuotes;
+      } else if (char === ',' && !inQuotes) {
+        values.push(current.trim());
+        current = '';
+      } else {
+        current += char;
+      }
+    }
+    
+    values.push(current.trim());
+    return values;
+  }
+
+  private parseScorersString(scorersStr: string, equipe: 1 | 2): Buteur[] {
+    const buteurs: Buteur[] = [];
+    const scorerEntries = scorersStr.split(';').map(s => s.trim()).filter(s => s);
+    
+    for (const entry of scorerEntries) {
+      const match = entry.match(/(.+)\(([^)]+)\)/);
+      if (match) {
+        const nom = match[1].trim();
+        const minutesStr = match[2];
+        const minutes = minutesStr.split(',').map(m => parseInt(m.trim())).filter(m => !isNaN(m));
+        
+        for (const minute of minutes) {
+          buteurs.push({
+            nom,
+            minute,
+            equipe
+          });
+        }
+      }
+    }
+    
+    return buteurs;
+  }
+
+  private parseDuelsString(duelsStr: string, equipe: 1 | 2): DuelGagne[] {
+    const duels: DuelGagne[] = [];
+    const duelEntries = duelsStr.split(';').map(s => s.trim()).filter(s => s);
+    
+    for (const entry of duelEntries) {
+      const match = entry.match(/(.+)\(([^)]+)\)/);
+      if (match) {
+        const nom = match[1].trim();
+        const minutesStr = match[2];
+        const minutes = minutesStr.split(',').map(m => parseInt(m.trim())).filter(m => !isNaN(m));
+        
+        for (const minute of minutes) {
+          duels.push({
+            nom,
+            minute,
+            equipe
+          });
+        }
+      }
+    }
+    
+    return duels;
   }
 
   getSortedMatches(): Match[] {
@@ -1803,10 +2078,15 @@ ${scorers2.map(b => `- ${b.nom}: ${b.minutes.join(', ')}'${b.assist ? ` (Assist:
       this.remainingDots--;
       console.log('Dots restants:', this.remainingDots);
       if (this.remainingDots <= 0) {
-        this.showGoalCelebration = false;
+        // Gérer la fin de célébration selon le type
+        if (this.showGoalCelebration) {
+          this.showGoalCelebration = false;
+          this.saveGoalWithAssist();
+        } else if (this.showDuelCelebration) {
+          this.showDuelCelebration = false;
+          this.saveDuel();
+        }
         clearInterval(this.celebrationTimer);
-        console.log('Timer de célébration terminé');
-        this.saveGoalWithAssist();
       }
     }, 1000);
   }
@@ -1927,7 +2207,6 @@ ${scorers2.map(b => `- ${b.nom}: ${b.minutes.join(', ')}'${b.assist ? ` (Assist:
     const isDisabled = this.disabledGoals.some(dg => 
       dg.matchId === match.id && dg.buteurIndex === buteurIndex
     );
-    console.log(`isGoalDisabledForMatch(match ${match.id}, index ${buteurIndex}): ${isDisabled}`);
     return isDisabled;
   }
 
