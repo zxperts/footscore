@@ -1995,7 +1995,7 @@ Lien direct vers le match : ${matchUrl}
       this.filteredTeams1 = [];
       return;
     }
-    this.filteredTeams1 = TEAMS
+    this.filteredTeams1 = this.teams
       .map(t => t.name)
       .filter(name => name.toLowerCase().includes(search))
       .filter(name => name !== this.matchForm.value.equipe2);
@@ -2007,7 +2007,7 @@ Lien direct vers le match : ${matchUrl}
       this.filteredTeams2 = [];
       return;
     }
-    this.filteredTeams2 = TEAMS
+    this.filteredTeams2 = this.teams
       .map(t => t.name)
       .filter(name => name.toLowerCase().includes(search))
       .filter(name => name !== this.matchForm.value.equipe1);
