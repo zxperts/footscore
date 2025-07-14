@@ -2447,4 +2447,32 @@ Lien direct vers le match : ${matchUrl}
     const names = this.getCompetitionNames();
     return this.filteredCompetitions.length === 0 && !names.includes(search);
   }
+
+  deleteTeam(teamName: string) {
+    const matchesWithTeam = this.matches.filter(
+      m => m.equipe1 === teamName || m.equipe2 === teamName
+    );
+    if (matchesWithTeam.length > 0) {
+      const confirmCascade = confirm(
+        `L'équipe "${teamName}" est impliquée dans ${matchesWithTeam.length} match(s).\nSupprimer aussi ces matchs ?`
+      );
+      if (!confirmCascade) return;
+      // Supprimer les matchs associés
+      this.matches = this.matches.filter(
+        m => m.equipe1 !== teamName && m.equipe2 !== teamName
+      );
+    } else {
+      const confirmDelete = confirm(
+        `Supprimer définitivement l'équipe "${teamName}" ?`
+      );
+      if (!confirmDelete) return;
+    }
+    // Supprimer l'équipe
+    this.teams = this.teams.filter(t => t.name !== teamName);
+    this.saveData();
+    // Si l'équipe était sélectionnée, la désélectionner
+    if (this.selectedTeamFilter === teamName) {
+      this.selectedTeamFilter = '';
+    }
+  }
 }
