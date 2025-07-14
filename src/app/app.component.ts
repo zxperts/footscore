@@ -1896,7 +1896,14 @@ Lien direct vers le match : ${matchUrl}
   }
 
   savePlayersEdit() {
-    this.saveData(); // Sauvegarder après édition
+    if (this.teamToEdit) {
+      // Remplacer l'équipe dans le tableau principal
+      const idx = this.teams.findIndex(t => t.name === this.teamToEdit!.name);
+      if (idx !== -1) {
+        this.teams[idx] = { ...this.teamToEdit, players: [...this.teamToEdit.players] };
+      }
+    }
+    this.saveData();
     this.closeEditPlayersModal();
   }
 
