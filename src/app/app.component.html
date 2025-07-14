@@ -74,17 +74,22 @@
             </div>
             <div class="modal-body">
               <div *ngFor="let team of teams" class="form-check d-flex align-items-center justify-content-between">
-                <div>
+                <div class="d-flex align-items-center">
                   <input type="radio" 
                          class="form-check-input" 
                          [value]="team.name" 
                          [(ngModel)]="selectedTeamFilter" 
                          id="{{team.name}}">
-                  <label class="form-check-label" for="{{team.name}}">{{ team.name }}</label>
+                  <label class="form-check-label ms-2" for="{{team.name}}">{{ team.name }}</label>
                 </div>
-                <button class="btn btn-danger btn-sm ms-2" (click)="deleteTeam(team.name)">
-                  <i class="fas fa-trash"></i>
-                </button>
+                <div class="d-flex align-items-center gap-1">
+                  <button class="btn btn-primary btn-sm" (click)="openEditPlayersModal(team.name)">
+                    <i class="fas fa-edit"></i>
+                  </button>
+                  <button class="btn btn-danger btn-sm" (click)="deleteTeam(team.name)">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </div>
               </div>
               <div class="form-check">
                 <input type="radio" 
@@ -96,11 +101,6 @@
               </div>
             </div>
             <div class="modal-footer d-flex">
-              <button type="button" class="btn btn-primary ms-2" 
-              [disabled]="!selectedTeamFilter || selectedTeamFilter === ''" 
-              (click)="openEditPlayersModal(selectedTeamFilter)">
-                Éditer
-              </button>
               <button type="button" class="btn btn-success me-auto" (click)="openNewTeamModal()">
                 <i class="fas fa-plus-circle text-white"></i>
                 Équipe
