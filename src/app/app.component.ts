@@ -134,6 +134,9 @@ export class AppComponent implements OnInit {
   encodingGoalsEnabled: boolean = false;
   encodingDuelsEnabled: boolean = false;
 
+  // Ajout d'un état pour savoir quel champ doit être rempli après création
+  newTeamTargetField: 'equipe1' | 'equipe2' | null = null;
+
   constructor(
     private fb: FormBuilder,
     private firestoreService: FirestoreService
@@ -2045,6 +2048,13 @@ Lien direct vers le match : ${matchUrl}
     }
   }
 
+  openNewTeamModalFor(field: 'equipe1' | 'equipe2') {
+    this.newTeamTargetField = field;
+    this.showNewTeamModal = true;
+    this.newTeamName = field === 'equipe1' ? this.team1Search : this.team2Search;
+    this.newTeamPlayers = [{ name: '', type: 'milieu' }];
+  }
+
   createNewTeam() {
     if (!this.newTeamName.trim() || this.newTeamPlayers.every(p => !p.name.trim())) return;
     const newTeam = {
@@ -2053,8 +2063,17 @@ Lien direct vers le match : ${matchUrl}
       players: this.newTeamPlayers.filter(p => p.name.trim())
     };
     this.teams.push(newTeam);
-    this.saveData(); // Sauvegarder après création
+    this.saveData();
+    // Remplir le champ concerné
+    if (this.newTeamTargetField === 'equipe1') {
+      this.matchForm.patchValue({ equipe1: newTeam.name });
+      this.team1Search = newTeam.name;
+    } else if (this.newTeamTargetField === 'equipe2') {
+      this.matchForm.patchValue({ equipe2: newTeam.name });
+      this.team2Search = newTeam.name;
+    }
     this.closeNewTeamModal();
+    this.newTeamTargetField = null;
   }
 
   canCreateNewTeam(): boolean {

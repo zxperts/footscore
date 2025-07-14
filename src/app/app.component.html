@@ -173,7 +173,7 @@
             (click)="selectTeam1(name)">{{ name }}</button>
   </div>
   <div *ngIf="shouldShowCreateTeam1()" class="mt-1">
-    <button type="button" class="btn btn-link p-0" (click)="selectTeam1(team1Search)">
+    <button type="button" class="btn btn-link p-0" (click)="openNewTeamModalFor('equipe1')">
       Créer "{{ team1Search }}"
     </button>
   </div>
@@ -191,7 +191,7 @@
             (click)="selectTeam2(name)">{{ name }}</button>
   </div>
   <div *ngIf="shouldShowCreateTeam2()" class="mt-1">
-    <button type="button" class="btn btn-link p-0" (click)="selectTeam2(team2Search)">
+    <button type="button" class="btn btn-link p-0" (click)="openNewTeamModalFor('equipe2')">
       Créer "{{ team2Search }}"
     </button>
   </div>
