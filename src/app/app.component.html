@@ -121,6 +121,14 @@
               </button>
             </div>
             <div class="modal-body">
+              <div class="mb-3">
+                <label for="seasonSelect" class="form-label">Saison :</label>
+                <select id="seasonSelect" class="form-select" [(ngModel)]="selectedSeason">
+                  <option *ngFor="let season of getAvailableSeasons()" [value]="season">
+                    {{ season }}
+                  </option>
+                </select>
+              </div>
               <div *ngFor="let competition of uniqueCompetitions" class="form-check">
                 <input type="radio" 
                        class="form-check-input" 

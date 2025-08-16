@@ -137,6 +137,8 @@ export class AppComponent implements OnInit {
   // Ajout d'un état pour savoir quel champ doit être rempli après création
   newTeamTargetField: 'equipe1' | 'equipe2' | null = null;
 
+  selectedSeason: string = ''; // Sera initialisée dans ngOnInit avec la saison la plus récente
+
   constructor(
     private fb: FormBuilder,
     private firestoreService: FirestoreService
@@ -184,6 +186,7 @@ export class AppComponent implements OnInit {
     await this.loadMatchFromUrl();
     this.updateFilteredTeams1();
     this.updateFilteredTeams2();
+    this.selectedSeason = this.getAvailableSeasons()[0] || this.getCurrentSeason();
   }
 
   getCurrentDateTime(): string {
@@ -1247,12 +1250,57 @@ Lien direct vers le match : ${matchUrl}
     this.showCompetitionFilterModal = false;
   }
 
-  get uniqueCompetitions(): string[] {
+  getCurrentSeason(): string {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = now.getMonth() + 1; // getMonth() retourne 0-11
+    
+    // Si on est entre août (8) et décembre (12), c'est la saison année-année+1
+    // Si on est entre janvier (1) et juillet (7), c'est la saison année-1-année
+    if (month >= 8) {
+      return `${year}-${year + 1}`;
+    } else {
+      return `${year - 1}-${year}`;
+    }
+  }
+
+  getSeasonFromDate(date: Date): string {
+    const year = date.getFullYear();
+    const month = date.getMonth() + 1; // getMonth() retourne 0-11
+    
+    if (month >= 8) {
+      return `${year}-${year + 1}`;
+    } else {
+      return `${year - 1}-${year}`;
+    }
+  }
+
+  getCompetitionsBySeason(season: string): string[] {
     const competitions = this.matches
+      .filter(match => {
+        const matchSeason = this.getSeasonFromDate(match.heureDebut);
+        return matchSeason === season;
+      })
       .map(match => match.competition)
       .filter((competition): competition is string => 
         competition !== undefined && competition !== '');
     return [...new Set(competitions)];
+  }
+
+  getAvailableSeasons(): string[] {
+    const seasons = this.matches
+      .map(match => this.getSeasonFromDate(match.heureDebut))
+      .filter((season, index, array) => array.indexOf(season) === index)
+      .sort((a, b) => {
+        const yearA = parseInt(a.split('-')[0]);
+        const yearB = parseInt(b.split('-')[0]);
+        return yearB - yearA; // Ordre décroissant (plus récent en premier)
+      });
+    return seasons;
+  }
+
+  get uniqueCompetitions(): string[] {
+    return this.getCompetitionsBySeason(this.selectedSeason);
   }
 
   getCompetitionBadgeColor(competition: string): string {
