@@ -73,6 +73,14 @@
               </button>
             </div>
             <div class="modal-body">
+              <div class="form-check">
+                <input type="radio" 
+                       class="form-check-input" 
+                       [value]="''" 
+                       [(ngModel)]="selectedTeamFilter" 
+                       id="allTeams">
+                <label class="form-check-label" for="allTeams">Toutes les équipes</label>
+              </div>
               <div *ngFor="let team of teams" class="form-check d-flex align-items-center justify-content-between">
                 <div class="d-flex align-items-center">
                   <input type="radio" 
@@ -90,14 +98,6 @@
                     <i class="fas fa-trash"></i>
                   </button>
                 </div>
-              </div>
-              <div class="form-check">
-                <input type="radio" 
-                       class="form-check-input" 
-                       [value]="''" 
-                       [(ngModel)]="selectedTeamFilter" 
-                       id="allTeams">
-                <label class="form-check-label" for="allTeams">Toutes les équipes</label>
               </div>
             </div>
             <div class="modal-footer d-flex">
@@ -129,6 +129,14 @@
                   </option>
                 </select>
               </div>
+              <div class="form-check">
+                <input type="radio" 
+                       class="form-check-input" 
+                       [value]="''" 
+                       [(ngModel)]="selectedCompetitionFilter" 
+                       id="allCompetitions">
+                <label class="form-check-label" for="allCompetitions">Toutes les compétitions</label>
+              </div>
               <div *ngFor="let competition of uniqueCompetitions" class="form-check">
                 <input type="radio" 
                        class="form-check-input" 
@@ -138,14 +146,6 @@
                 <label class="form-check-label" for="{{competition}}">
                   <span class="badge" [ngClass]="getCompetitionBadgeColor(competition)">{{ competition }}</span>
                 </label>
-              </div>
-              <div class="form-check">
-                <input type="radio" 
-                       class="form-check-input" 
-                       [value]="''" 
-                       [(ngModel)]="selectedCompetitionFilter" 
-                       id="allCompetitions">
-                <label class="form-check-label" for="allCompetitions">Toutes les compétitions</label>
               </div>
             </div>
             <div class="modal-footer">
