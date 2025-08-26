@@ -1,1 +1,219 @@
-<p>competition-filter-modal works!</p>
+<div class="modal-overlay">
+  <div class="competition-modal">
+  <div class="modal-header">
+    <h5 class="modal-title">
+      <i class="fas fa-trophy me-2"></i>
+      Gestion des Compétitions
+    </h5>
+    <button type="button" class="close-button" (click)="close()" aria-label="Fermer">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+
+  <div class="modal-body">
+    <!-- Sélection de saison -->
+    <div class="season-selector mb-4">
+      <label for="seasonSelect" class="form-label fw-bold">
+        <i class="fas fa-calendar-alt me-2"></i>Saison :
+      </label>
+      <select id="seasonSelect" class="form-select" [(ngModel)]="selectedSeason" (ngModelChange)="seasonChanged.emit($event)">
+        <option [value]="''">Toutes les saisons</option>
+        <option *ngFor="let season of availableSeasons" [value]="season">
+          {{ season }}
+        </option>
+      </select>
+    </div>
+
+
+
+    <!-- Formulaire d'ajout de compétition -->
+    <div class="competition-form mb-4" *ngIf="showAddForm">
+      <div class="card">
+        <div class="card-header bg-success text-white">
+          <h6 class="mb-0">
+            <i class="fas fa-plus me-2"></i>Nouvelle Compétition
+          </h6>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label for="compName" class="form-label">Nom de la compétition *</label>
+              <input type="text" class="form-control" id="compName" 
+                     [(ngModel)]="competitionForm.name" 
+                     placeholder="Ex: Ligue 1, Coupe de France...">
+            </div>
+            <div class="col-md-6 mb-3">
+              <label for="compType" class="form-label">Type</label>
+              <select class="form-select" id="compType" [(ngModel)]="competitionForm.type">
+                <option *ngFor="let type of competitionTypes" [value]="type">
+                  {{ type }}
+                </option>
+              </select>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label for="compSeason" class="form-label">Saison (lecture seule)</label>
+              <input type="text" class="form-control" id="compSeason" 
+                     [(ngModel)]="competitionForm.season" readonly>
+            </div>
+          </div>
+          <div class="mb-3">
+            <label for="compDescription" class="form-label">Description</label>
+            <textarea class="form-control" id="compDescription" rows="2"
+                      [(ngModel)]="competitionForm.description"
+                      placeholder="Description optionnelle de la compétition..."></textarea>
+          </div>
+          <div class="d-flex gap-2">
+            <button type="button" class="btn btn-success" (click)="submitForm()">
+              <i class="fas fa-save me-2"></i>Créer
+            </button>
+            <button type="button" class="btn btn-secondary" (click)="cancelForm()">
+              <i class="fas fa-times me-2"></i>Annuler
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Formulaire d'édition de compétition -->
+    <div class="competition-form mb-4" *ngIf="showEditForm">
+      <div class="card">
+        <div class="card-header bg-primary text-white">
+          <h6 class="mb-0">
+            <i class="fas fa-edit me-2"></i>Modifier la Compétition
+          </h6>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label for="editCompName" class="form-label">Nom de la compétition *</label>
+              <input type="text" class="form-control" id="editCompName" 
+                     [(ngModel)]="competitionForm.name" 
+                     placeholder="Ex: Ligue 1, Coupe de France...">
+            </div>
+            <div class="col-md-6 mb-3">
+              <label for="editCompType" class="form-label">Type</label>
+              <select class="form-select" id="editCompType" [(ngModel)]="competitionForm.type">
+                <option *ngFor="let type of competitionTypes" [value]="type">
+                  {{ type }}
+                </option>
+              </select>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label for="editCompSeason" class="form-label">Saison (lecture seule)</label>
+              <input type="text" class="form-control" id="editCompSeason" 
+                     [(ngModel)]="competitionForm.season" readonly>
+            </div>
+          </div>
+          <div class="mb-3">
+            <label for="editCompDescription" class="form-label">Description</label>
+            <textarea class="form-control" id="editCompDescription" rows="2"
+                      [(ngModel)]="competitionForm.description"
+                      placeholder="Description optionnelle de la compétition..."></textarea>
+          </div>
+          <div class="d-flex gap-2">
+            <button type="button" class="btn btn-primary" (click)="submitForm()">
+              <i class="fas fa-save me-2"></i>Mettre à jour
+            </button>
+            <button type="button" class="btn btn-secondary" (click)="cancelForm()">
+              <i class="fas fa-times me-2"></i>Annuler
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Liste des compétitions existantes -->
+    <div class="competitions-list" *ngIf="!showAddForm && !showEditForm">
+      <h6 class="mb-3">
+        <i class="fas fa-list me-2"></i>
+        Compétitions disponibles pour 
+        <ng-container *ngIf="selectedSeason; else allSeasons">la saison {{ selectedSeason }}</ng-container>
+        <ng-template #allSeasons>toutes les saisons</ng-template>
+      </h6>
+      
+      <!-- Option "Toutes les compétitions" -->
+      <div class="competition-item mb-2">
+        <div class="form-check">
+          <input type="radio" 
+                 class="form-check-input" 
+                 [value]="''" 
+                 [checked]="selectedCompetition === ''"
+                 (change)="selectCompetition('')"
+                 id="allCompetitions">
+          <label class="form-check-label" for="allCompetitions">
+            <span class="badge bg-secondary">Toutes les compétitions</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Compétitions existantes -->
+      <div class="competition-item mb-2" *ngFor="let competition of competitions">
+        <div class="competition-card">
+          <div class="competition-info">
+            <div class="form-check">
+              <input type="radio" 
+                     class="form-check-input" 
+                     [value]="competition" 
+                     [checked]="selectedCompetition === competition"
+                     (change)="selectCompetition(competition)"
+                     [id]="'comp-' + competition">
+              <label class="form-check-label" for="'comp-' + competition">
+                <span class="badge competition-badge">{{ competition }}</span>
+                <!-- Indicateur pour les compétitions sans saison -->
+                <span class="badge bg-warning ms-2" *ngIf="isCompetitionWithoutSeason(competition)">
+                  <i class="fas fa-exclamation-triangle me-1"></i>Sans saison
+                  <span class="badge bg-info ms-1" *ngIf="getSuggestedSeason(competition)">
+                    <i class="fas fa-lightbulb me-1"></i>{{ getSuggestedSeason(competition) }}
+                  </span>
+                </span>
+              </label>
+            </div>
+          </div>
+          <div class="competition-actions">
+            <!-- Bouton d'attribution de saison pour les compétitions sans saison -->
+            <button type="button" class="btn btn-sm btn-outline-warning" 
+                    (click)="openSeasonAssignment(competition)"
+                    title="Attribuer une saison"
+                    *ngIf="isCompetitionWithoutSeason(competition)">
+              <i class="fas fa-calendar-plus"></i>
+            </button>
+            <button type="button" class="btn btn-sm btn-outline-primary" 
+                    (click)="openEditForm(competition)" 
+                    title="Modifier la compétition">
+              <i class="fas fa-edit"></i>
+            </button>
+            <button type="button" class="btn btn-sm btn-outline-danger" 
+                    (click)="deleteCompetition(competition)"
+                    title="Supprimer la compétition">
+              <i class="fas fa-trash"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Message si aucune compétition -->
+      <div class="no-competitions" *ngIf="competitions.length === 0">
+        <div class="text-center text-muted py-4">
+          <i class="fas fa-trophy fa-3x mb-3"></i>
+          <p>Aucune compétition trouvée pour cette saison.</p>
+          <p>Créez votre première compétition !</p>
+        </div>
+      </div>
+
+      <!-- Bouton d'ajout de compétition -->
+      <div class="add-competition-section mt-4">
+        <button type="button" class="btn btn-success w-100" (click)="openAddForm()" *ngIf="!showAddForm && !showEditForm">
+          <i class="fas fa-plus me-2"></i>
+          Ajouter une nouvelle compétition
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" (click)="close()">
+      <i class="fas fa-times me-2"></i>Fermer
+    </button>
+  </div>
+</div>
+</div>

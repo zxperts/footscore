@@ -9,6 +9,7 @@ import { PlayerSelectorComponent } from './player-selector/player-selector.compo
 import { NavbarComponent } from './component/navbar/navbar.component';
 import { FirestoreService } from './firestore.service';
 import { RouterModule } from '@angular/router';
+import { CompetitionFilterModalComponent, Competition, CompetitionUpdate } from './modals/competition-filter-modal/competition-filter-modal.component';
 // Déplacer l'interface en dehors de la classe, au début du fichier
 interface GroupedScorer {
   nom: string;
@@ -37,7 +38,8 @@ interface TeamStats {
     FormsModule, 
     PlayerSelectorComponent, 
     NavbarComponent,
-    RouterModule
+    RouterModule,
+    CompetitionFilterModalComponent
   ],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
@@ -98,6 +100,7 @@ export class AppComponent implements OnInit {
   filteredTeams1: string[] = [];
   filteredTeams2: string[] = [];
   showNewTeamModal: boolean = false;
+  editingCompetitionName: string = ''; // Pour stocker l'ancien nom lors de l'édition
   newTeamName: string = '';
   newTeamPlayers: { name: string, type: 'attaquant' | 'milieu' | 'defenseur' }[] = [
     { name: '', type: 'milieu' }
@@ -186,7 +189,7 @@ export class AppComponent implements OnInit {
     await this.loadMatchFromUrl();
     this.updateFilteredTeams1();
     this.updateFilteredTeams2();
-    this.selectedSeason = this.getAvailableSeasons()[0] || this.getCurrentSeason();
+    this.selectedSeason = this.getCurrentSeason();
   }
 
   getCurrentDateTime(): string {
@@ -1250,6 +1253,231 @@ Lien direct vers le match : ${matchUrl}
     this.showCompetitionFilterModal = false;
   }
 
+  // Ouvrir la modale de gestion des compétitions avec la saison actuelle par défaut
+  openCompetitionFilterModal() {
+    this.selectedSeason = this.getCurrentSeason();
+    this.showCompetitionFilterModal = true;
+  }
+
+  // Nouvelles méthodes pour la gestion des compétitions
+  onCompetitionSelected(competition: string) {
+    this.selectedCompetitionFilter = competition;
+    this.showCompetitionFilterModal = false;
+  }
+
+  async onCompetitionAdded(competition: Competition) {
+    try {
+      console.log('Ajout de la compétition:', competition);
+      
+      // Créer un match temporaire pour cette compétition
+      const tempMatch: Match = {
+        equipe1: 'Équipe temporaire',
+        equipe2: 'Équipe temporaire',
+        score1: 0,
+        score2: 0,
+        buteurs: [],
+        heureDebut: new Date(),
+        lieu: '',
+        positions: {},
+        showElements: true,
+        competition: competition.name,
+        updatedAt: new Date(),
+        duelsGagnes: []
+      };
+
+      // Ajouter le match temporaire pour créer la compétition
+      this.matches.push(tempMatch);
+      
+      // Sauvegarder les données
+      this.saveData();
+      
+      // Fermer le modal
+      this.showCompetitionFilterModal = false;
+      
+      // Afficher un message de succès
+      alert(`Compétition "${competition.name}" ajoutée avec succès !`);
+      
+    } catch (error) {
+      console.error('Erreur lors de l\'ajout de la compétition:', error);
+      alert('Erreur lors de l\'ajout de la compétition.');
+    }
+  }
+
+  async onCompetitionUpdated(competitionUpdate: CompetitionUpdate) {
+    try {
+      console.log('Mise à jour de la compétition:', competitionUpdate);
+      
+      const { oldName, newCompetition } = competitionUpdate;
+      
+      if (oldName !== newCompetition.name) {
+        // Mettre à jour le nom de la compétition dans tous les matchs
+        this.matches.forEach(match => {
+          if (match.competition === oldName) {
+            match.competition = newCompetition.name;
+            match.updatedAt = new Date();
+          }
+        });
+        
+        // Mettre à jour la sélection si nécessaire
+        if (this.selectedCompetitionFilter === oldName) {
+          this.selectedCompetitionFilter = newCompetition.name;
+        }
+        
+        // Sauvegarder les données
+        this.saveData();
+        
+        // Afficher un message de succès
+        alert(`Compétition "${oldName}" mise à jour vers "${newCompetition.name}" avec succès !`);
+      }
+      
+      // Fermer le modal
+      this.showCompetitionFilterModal = false;
+      
+    } catch (error) {
+      console.error('Erreur lors de la mise à jour de la compétition:', error);
+      alert('Erreur lors de la mise à jour de la compétition.');
+    }
+  }
+
+  async onCompetitionDeleted(competition: string) {
+    try {
+      console.log('Suppression de la compétition:', competition);
+      
+      // Demander confirmation
+      if (!confirm(`Êtes-vous sûr de vouloir supprimer la compétition "${competition}" ?\n\nCette action supprimera également tous les matchs associés.`)) {
+        return;
+      }
+      
+      // Supprimer tous les matchs de cette compétition
+      this.matches = this.matches.filter(match => match.competition !== competition);
+      
+      // Mettre à jour la sélection si nécessaire
+      if (this.selectedCompetitionFilter === competition) {
+        this.selectedCompetitionFilter = '';
+      }
+      
+      // Sauvegarder les données
+      this.saveData();
+      
+      // Fermer le modal
+      this.showCompetitionFilterModal = false;
+      
+      // Afficher un message de succès
+      alert(`Compétition "${competition}" supprimée avec succès !`);
+      
+    } catch (error) {
+      console.error('Erreur lors de la suppression de la compétition:', error);
+      alert('Erreur lors de la suppression de la compétition.');
+    }
+  }
+
+  // Attribuer une saison à une compétition
+  async assignSeasonToCompetition(competition: string, season: string) {
+    try {
+      console.log(`Attribution de la saison ${season} à la compétition ${competition}`);
+      
+      // Trouver tous les matchs de cette compétition
+      const competitionMatches = this.matches.filter(match => match.competition === competition);
+      
+      if (competitionMatches.length === 0) {
+        alert(`Aucun match trouvé pour la compétition "${competition}"`);
+        return;
+      }
+      
+      // Calculer une nouvelle date pour chaque match basée sur la saison
+      competitionMatches.forEach(match => {
+        const [startYear] = season.split('-');
+        const newDate = new Date(parseInt(startYear), 7, 1); // 1er août de l'année de début
+        match.heureDebut = newDate;
+        match.updatedAt = new Date();
+      });
+      
+      // Sauvegarder les données
+      this.saveData();
+      
+      // Afficher un message de succès
+      alert(`Saison "${season}" attribuée à la compétition "${competition}" avec succès !`);
+      
+    } catch (error) {
+      console.error('Erreur lors de l\'attribution de la saison:', error);
+      alert('Une erreur est survenue lors de l\'attribution de la saison.');
+    }
+  }
+
+  // Attribuer automatiquement la saison basée sur le premier match (sans modifier les dates)
+  private assignSeasonAutomatically(competition: string, season: string) {
+    try {
+      console.log(`Attribution automatique de la saison ${season} à la compétition ${competition}`);
+      
+      // Trouver tous les matchs de cette compétition
+      const competitionMatches = this.matches.filter(match => match.competition === competition);
+      
+      if (competitionMatches.length === 0) return;
+      
+      // Marquer les matchs comme appartenant à cette saison (sans changer les dates)
+      // La saison sera calculée automatiquement via getSeasonFromDate()
+      competitionMatches.forEach(match => {
+        match.updatedAt = new Date();
+      });
+      
+      // Sauvegarder les données
+      this.saveData();
+      
+    } catch (error) {
+      console.error('Erreur lors de l\'attribution automatique de la saison:', error);
+    }
+  }
+
+  // Vérifier si une compétition n'a vraiment pas de saison
+  isCompetitionWithoutSeason(competition: string): boolean {
+    // Trouver tous les matchs de cette compétition
+    const competitionMatches = this.matches.filter(match => match.competition === competition);
+    
+    if (competitionMatches.length === 0) return false;
+    
+    // Vérifier si tous les matchs n'ont pas de saison calculable
+    const hasValidSeason = competitionMatches.some(match => {
+      if (!match.heureDebut) return false;
+      
+      try {
+        const season = this.getSeasonFromDate(match.heureDebut);
+        return season && season !== '';
+      } catch {
+        return false;
+      }
+    });
+    
+    return !hasValidSeason;
+  }
+
+  // Obtenir la saison suggérée pour une compétition (basée sur le premier match)
+  getSuggestedSeasonForCompetition(competition: string): string | null {
+    // Trouver tous les matchs de cette compétition
+    const competitionMatches = this.matches.filter(match => match.competition === competition);
+    
+    if (competitionMatches.length === 0) return null;
+    
+    // Trier par date pour trouver le premier match
+    const sortedMatches = competitionMatches.sort((a, b) => {
+      if (!a.heureDebut || !b.heureDebut) return 0;
+      return a.heureDebut.getTime() - b.heureDebut.getTime();
+    });
+    
+    const firstMatch = sortedMatches[0];
+    if (!firstMatch.heureDebut) return null;
+    
+    try {
+      return this.getSeasonFromDate(firstMatch.heureDebut);
+    } catch {
+      return null;
+    }
+  }
+
+  // Gérer l'attribution de saison depuis le modal
+  onAssignSeason(data: {competition: string, season: string}) {
+    this.assignSeasonToCompetition(data.competition, data.season);
+  }
+
   getCurrentSeason(): string {
     const now = new Date();
     const year = now.getFullYear();
@@ -1276,7 +1504,17 @@ Lien direct vers le match : ${matchUrl}
   }
 
   getCompetitionsBySeason(season: string): string[] {
-    const competitions = this.matches
+    // Si "Toutes les saisons" est sélectionné, retourner toutes les compétitions uniques
+    if (!season || season === '') {
+      return [...new Set(
+        this.matches
+          .map(match => match.competition)
+          .filter((competition): competition is string => competition !== undefined && competition !== '')
+      )];
+    }
+
+    // Récupérer les compétitions de la saison sélectionnée
+    const seasonCompetitions = this.matches
       .filter(match => {
         const matchSeason = this.getSeasonFromDate(match.heureDebut);
         return matchSeason === season;
@@ -1284,7 +1522,33 @@ Lien direct vers le match : ${matchUrl}
       .map(match => match.competition)
       .filter((competition): competition is string => 
         competition !== undefined && competition !== '');
-    return [...new Set(competitions)];
+    
+    // Récupérer et attribuer automatiquement la saison aux compétitions sans saison
+    const competitionsWithoutSeason = this.matches
+      .filter(match => {
+        if (!match.competition || match.competition === '') return false;
+        
+        // Vérifier si c'est le premier match de cette compétition
+        const competitionMatches = this.matches.filter(m => m.competition === match.competition);
+        const firstMatch = competitionMatches.reduce((earliest, current) => 
+          current.heureDebut < earliest.heureDebut ? current : earliest
+        );
+        
+        // Si c'est le premier match et qu'il appartient à la saison sélectionnée
+        if (match.id === firstMatch.id && this.getSeasonFromDate(match.heureDebut) === season) {
+          // Attribuer automatiquement la saison à cette compétition
+          this.assignSeasonAutomatically(match.competition, season);
+          return true;
+        }
+        return false;
+      })
+      .map(match => match.competition)
+      .filter((competition): competition is string => 
+        competition !== undefined && competition !== '');
+    
+    // Combiner et dédupliquer
+    const allCompetitions = [...seasonCompetitions, ...competitionsWithoutSeason];
+    return [...new Set(allCompetitions)];
   }
 
   getAvailableSeasons(): string[] {
@@ -2522,5 +2786,29 @@ Lien direct vers le match : ${matchUrl}
     if (this.selectedTeamFilter === teamName) {
       this.selectedTeamFilter = '';
     }
+  }
+
+  // Saisons à afficher dans la modale: seulement celles ayant des compétitions, + saison actuelle
+  get filteredSeasonsForModal(): string[] {
+    const seasonsSet = new Set<string>();
+
+    // Ajouter saisons pour lesquelles il existe au moins un match associé à une compétition
+    for (const match of this.matches) {
+      if (match.competition && match.competition.trim() !== '') {
+        const season = this.getSeasonFromDate(match.heureDebut);
+        if (season) seasonsSet.add(season);
+      }
+    }
+
+    // Forcer l'inclusion de la saison actuelle
+    const current = this.getCurrentSeason();
+    seasonsSet.add(current);
+
+    // Retourner trié (année de début décroissante)
+    return Array.from(seasonsSet).sort((a, b) => {
+      const aYear = parseInt(a.split('-')[0]);
+      const bYear = parseInt(b.split('-')[0]);
+      return bYear - aYear;
+    });
   }
 }
