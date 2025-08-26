@@ -12,11 +12,11 @@
 
   <div class="modal-body">
     <!-- Sélection de saison -->
-    <div class="season-selector mb-4">
-      <label for="seasonSelect" class="form-label fw-bold">
+    <div class="season-selector mb-4 d-flex align-items-center">
+      <label for="seasonSelect" class="form-label fw-bold mb-0 me-3">
         <i class="fas fa-calendar-alt me-2"></i>Saison :
       </label>
-      <select id="seasonSelect" class="form-select" [(ngModel)]="selectedSeason" (ngModelChange)="seasonChanged.emit($event)">
+      <select id="seasonSelect" class="form-select" style="width: auto;" [(ngModel)]="selectedSeason" (ngModelChange)="seasonChanged.emit($event)">
         <option [value]="''">Toutes les saisons</option>
         <option *ngFor="let season of availableSeasons" [value]="season">
           {{ season }}
@@ -124,25 +124,32 @@
 
     <!-- Liste des compétitions existantes -->
     <div class="competitions-list" *ngIf="!showAddForm && !showEditForm">
-      <h6 class="mb-3">
+      <!-- <h6 class="mb-3">
         <i class="fas fa-list me-2"></i>
         Compétitions disponibles pour 
         <ng-container *ngIf="selectedSeason; else allSeasons">la saison {{ selectedSeason }}</ng-container>
         <ng-template #allSeasons>toutes les saisons</ng-template>
-      </h6>
+      </h6>-->
       
       <!-- Option "Toutes les compétitions" -->
       <div class="competition-item mb-2">
-        <div class="form-check">
-          <input type="radio" 
-                 class="form-check-input" 
-                 [value]="''" 
-                 [checked]="selectedCompetition === ''"
-                 (change)="selectCompetition('')"
-                 id="allCompetitions">
-          <label class="form-check-label" for="allCompetitions">
-            <span class="badge bg-secondary">Toutes les compétitions</span>
-          </label>
+        <div class="competition-card">
+          <div class="competition-info">
+            <div class="form-check">
+              <input type="radio" 
+                     class="form-check-input" 
+                     [value]="''" 
+                     [checked]="selectedCompetition === ''"
+                     (change)="selectCompetition('')"
+                     id="allCompetitions">
+              <label class="form-check-label" for="allCompetitions">
+                <span class="badge bg-secondary">Toutes les compétitions</span>
+              </label>
+            </div>
+          </div>
+          <div class="competition-actions">
+            <!-- Pas d'actions pour "Toutes les compétitions" -->
+          </div>
         </div>
       </div>
 
