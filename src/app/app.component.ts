@@ -1602,6 +1602,30 @@ Lien direct vers le match : ${matchUrl}
     return selectedColor;
   }
 
+  getScoreColor(match: Match): string {
+    // Vérifier si une des équipes contient "flawinne" (insensible à la casse)
+    const hasFlawinneTeam = [match.equipe1, match.equipe2].some(teamName => 
+      teamName.toLowerCase().includes('flawinne')
+    );
+    
+    if (!hasFlawinneTeam) {
+      return 'btn-light'; // Gris clair par défaut si pas d'équipe Flawinne
+    }
+    
+    // Déterminer le résultat pour l'équipe Flawinne
+    const flawinneTeam = match.equipe1.toLowerCase().includes('flawinne') ? match.equipe1 : match.equipe2;
+    const flawinneScore = match.equipe1.toLowerCase().includes('flawinne') ? match.score1 : match.score2;
+    const opponentScore = match.equipe1.toLowerCase().includes('flawinne') ? match.score2 : match.score1;
+    
+    if (flawinneScore > opponentScore) {
+      return 'btn-success'; // Vert si victoire
+    } else if (flawinneScore < opponentScore) {
+      return 'btn-danger'; // Rouge si défaite
+    } else {
+      return 'btn-light'; // Gris clair si match nul
+    }
+  }
+
   exportMatches() {
     this.showExportModal = true;
   }

@@ -287,7 +287,7 @@
           <div class="match-score">
             <div class="team-name" style="flex: 1; text-align: center;">{{ match.equipe1 }}</div>
 
-            <button class="btn btn-primary" (click)="selectMatch(match)" >
+            <button class="btn" [ngClass]="getScoreColor(match)" (click)="selectMatch(match)" >
               {{ match.score1 }} - {{ match.score2 }}
             </button>
             
@@ -442,7 +442,7 @@
       <div class="match-score-display mb-4">
         <div class="match-score">
           <div class="team-name" style="flex: 1; text-align: center;">{{ selectedMatch.equipe1 }}</div>
-          <div class="score" style="text-align: center;" (click)="showScoreForm = true">
+          <div class="score" [ngClass]="getScoreColor(selectedMatch)" style="text-align: center;" (click)="showScoreForm = true">
             <ng-container *ngIf="!showScoreForm">
               {{ selectedMatch.score1 }} - {{ selectedMatch.score2 }}
               <div class="score-info" style="font-size: 0.7em; opacity: 0.8;">
