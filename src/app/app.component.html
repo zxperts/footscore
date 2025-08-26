@@ -63,50 +63,73 @@
     
 
 
-      <div class="score-modal" tabindex="-1" aria-labelledby="teamFilterModalLabel" aria-hidden="true" *ngIf="showTeamFilterModal">
-        <div class="modal-dialog modal-body" role="document">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h5 class="modal-title" id="teamFilterModalLabel">Sélectionner une Équipe</h5>
-              <button type="button" class="close-button" (click)="closeTeamFilterModal()" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-              </button>
-            </div>
-            <div class="modal-body">
-              <div class="form-check">
-                <input type="radio" 
-                       class="form-check-input" 
-                       [value]="''" 
-                       [(ngModel)]="selectedTeamFilter" 
-                       id="allTeams">
-                <label class="form-check-label" for="allTeams">Toutes les équipes</label>
-              </div>
-              <div *ngFor="let team of teams" class="form-check d-flex align-items-center justify-content-between">
-                <div class="d-flex align-items-center">
-                  <input type="radio" 
-                         class="form-check-input" 
-                         [value]="team.name" 
-                         [(ngModel)]="selectedTeamFilter" 
-                         id="{{team.name}}">
-                  <label class="form-check-label ms-2" for="{{team.name}}">{{ team.name }}</label>
+      <div class="modal-overlay" *ngIf="showTeamFilterModal">
+        <div class="team-modal">
+          <div class="modal-header">
+            <h5 class="modal-title">
+              <i class="fas fa-users me-2"></i>
+              Sélectionner une Équipe
+            </h5>
+            <button type="button" class="close-button" (click)="closeTeamFilterModal()" aria-label="Fermer">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <!-- Option "Toutes les équipes" -->
+            <div class="team-item mb-2">
+              <div class="team-card">
+                <div class="team-info">
+                  <div class="form-check">
+                    <input type="radio" 
+                           class="form-check-input" 
+                           [value]="''" 
+                           [(ngModel)]="selectedTeamFilter" 
+                           id="allTeams">
+                    <label class="form-check-label" for="allTeams">
+                      <span class="badge bg-secondary">Toutes les équipes</span>
+                    </label>
+                  </div>
                 </div>
-                <div class="d-flex align-items-center gap-1">
-                  <button class="btn btn-primary btn-sm" (click)="openEditPlayersModal(team.name)">
+                <div class="team-actions">
+                  <!-- Pas d'actions pour "Toutes les équipes" -->
+                </div>
+              </div>
+            </div>
+            
+            <!-- Équipes existantes -->
+            <div class="team-item mb-2" *ngFor="let team of teams">
+              <div class="team-card">
+                <div class="team-info">
+                  <div class="form-check">
+                    <input type="radio" 
+                           class="form-check-input" 
+                           [value]="team.name" 
+                           [(ngModel)]="selectedTeamFilter" 
+                           [id]="'team-' + team.name">
+                    <label class="form-check-label" for="'team-' + team.name">
+                      <span class="badge team-badge">{{ team.name }}</span>
+                    </label>
+                  </div>
+                </div>
+                <div class="team-actions">
+                  <button class="btn btn-sm btn-outline-primary" (click)="openEditPlayersModal(team.name)" title="Modifier l'équipe">
                     <i class="fas fa-edit"></i>
                   </button>
-                  <button class="btn btn-danger btn-sm" (click)="deleteTeam(team.name)">
+                  <button class="btn btn-sm btn-outline-danger" (click)="deleteTeam(team.name)" title="Supprimer l'équipe">
                     <i class="fas fa-trash"></i>
                   </button>
                 </div>
               </div>
             </div>
-            <div class="modal-footer d-flex">
-              <button type="button" class="btn btn-success me-auto" (click)="openNewTeamModal()">
-                <i class="fas fa-plus-circle text-white"></i>
-                Équipe
-              </button>
-              <button type="button" class="btn btn-secondary" (click)="closeTeamFilterModal()">Fermer</button>
-            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-success me-auto" (click)="openNewTeamModal()">
+              <i class="fas fa-plus-circle me-2"></i>
+              Nouvelle Équipe
+            </button>
+            <button type="button" class="btn btn-secondary" (click)="closeTeamFilterModal()">
+              <i class="fas fa-times me-2"></i>Fermer
+            </button>
           </div>
         </div>
       </div>
@@ -132,15 +155,16 @@
   </div>
 
   <!-- Modale d'ajout de match -->
-<div class="modal fade show" tabindex="-1" style="display:block; background:rgba(0,0,0,0.5);" *ngIf="showMatchForm">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h4 class="modal-title mb-0 text-primary fw-bold" style="font-size: 1.8rem; text-shadow: 2px 2px 4px rgba(0,0,0,0.1);">
-          <i class="fas fa-futbol me-2"></i>Ajouter un Match!
-        </h4>
-        <button type="button" class="btn-close" aria-label="Fermer" (click)="showMatchForm = false"></button>
-      </div>
+<div class="modal-overlay" *ngIf="showMatchForm">
+  <div class="match-modal">
+    <div class="modal-header">
+      <h4 class="modal-title">
+        <i class="fas fa-futbol me-2"></i>Ajouter un Match!
+      </h4>
+      <button type="button" class="close-button" aria-label="Fermer" (click)="showMatchForm = false">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
       <div class="modal-body">
         <form [formGroup]="matchForm" (ngSubmit)="onSubmit()">
           <div class="row" style="width: 100%; margin: 0 auto; padding: 10px; border-radius: 10px; background: linear-gradient(to top, rgba(0,0,0,0.1) 0%, transparent 70%);">
@@ -230,9 +254,13 @@
           </div>
         </form>
       </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="showMatchForm = false">
+          <i class="fas fa-times me-2"></i>Annuler
+        </button>
+      </div>
     </div>
   </div>
-</div>
 
   <div class="mt-4" *ngIf="filteredMatches.length > 0">
     <h2></h2>
@@ -1221,52 +1249,57 @@
   </div>
 
   <!-- Modal de classement -->
-  <div *ngIf="showRankingModal" class="score-modal">
-    <div class="modal-dialog modal-xl" style="min-width: 100%; margin-right: 0;">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title">Classement - {{ selectedCompetitionFilter }}</h5>
-          <button type="button" class="btn-close" (click)="closeRankingModal()"></button>
+  <div class="modal-overlay" *ngIf="showRankingModal">
+    <div class="ranking-modal">
+      <div class="modal-header">
+        <h5 class="modal-title">
+          <i class="fas fa-list-ol me-2"></i>
+          Classement - {{ selectedCompetitionFilter }}
+        </h5>
+        <button type="button" class="close-button" (click)="closeRankingModal()" aria-label="Fermer">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="table-responsive">
+          <table class="table table-striped mb-0">
+            <thead>
+              <tr>
+                <th class="px-1">Pos</th>
+                <th class="px-1">Équipe</th>
+                <th class="px-1">Pts</th>
+                <th class="px-1">J</th>
+                <th class="px-1">G</th>
+                <th class="px-1">N</th>
+                <th class="px-1">P</th>
+                <th class="px-1">BP</th>
+                <th class="px-1">BC</th>
+                <th class="px-1">Diff</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let team of currentRanking; let i = index">
+                <td class="px-1">{{ i + 1 }}</td>
+                <td class="px-1">{{ team.name }}</td>
+                <td class="px-1"><strong>{{ team.points }}</strong></td>
+                <td class="px-1">{{ team.matches }}</td>
+                <td class="px-1">{{ team.wins }}</td>
+                <td class="px-1">{{ team.draws }}</td>
+                <td class="px-1">{{ team.losses }}</td>
+                <td class="px-1">{{ team.goalsFor }}</td>
+                <td class="px-1">{{ team.goalsAgainst }}</td>
+                <td class="px-1" [ngClass]="{'text-success': team.goalDifference > 0, 'text-danger': team.goalDifference < 0}">
+                  {{ team.goalDifference > 0 ? '+' : '' }}{{ team.goalDifference }}
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
-        <div class="modal-body p-0">
-          <div class="table-responsive">
-            <table class="table table-striped mb-0">
-              <thead>
-                <tr>
-                  <th class="px-1">Pos</th>
-                  <th class="px-1">Équipe</th>
-                  <th class="px-1">Pts</th>
-                  <th class="px-1">J</th>
-                  <th class="px-1">G</th>
-                  <th class="px-1">N</th>
-                  <th class="px-1">P</th>
-                  <th class="px-1">BP</th>
-                  <th class="px-1">BC</th>
-                  <th class="px-1">Diff</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr *ngFor="let team of currentRanking; let i = index">
-                  <td class="px-1">{{ i + 1 }}</td>
-                  <td class="px-1">{{ team.name }}</td>
-                  <td class="px-1"><strong>{{ team.points }}</strong></td>
-                  <td class="px-1">{{ team.matches }}</td>
-                  <td class="px-1">{{ team.wins }}</td>
-                  <td class="px-1">{{ team.draws }}</td>
-                  <td class="px-1">{{ team.losses }}</td>
-                  <td class="px-1">{{ team.goalsFor }}</td>
-                  <td class="px-1">{{ team.goalsAgainst }}</td>
-                  <td class="px-1" [ngClass]="{'text-success': team.goalDifference > 0, 'text-danger': team.goalDifference < 0}">
-                    {{ team.goalDifference > 0 ? '+' : '' }}{{ team.goalDifference }}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" (click)="closeRankingModal()">Fermer</button>
-        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="closeRankingModal()">
+          <i class="fas fa-times me-2"></i>Fermer
+        </button>
       </div>
     </div>
   </div>
@@ -1281,44 +1314,74 @@
 <router-outlet></router-outlet>
 
 <!-- Ajout de la modale d'édition des joueurs -->
-<div class="score-modal" *ngIf="showEditPlayersModal && teamToEdit && teamToEdit.players">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Éditer les joueurs de {{ teamToEdit.name }}</h5>
-        <button type="button" class="close-button" (click)="closeEditPlayersModal()" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-        <ul class="list-group mb-3">
-          <li *ngFor="let player of teamToEdit.players; let i = index" class="list-group-item d-flex flex-column align-items-start">
-            <div class="d-flex w-100 align-items-center justify-content-between">
-              <span class="d-flex align-items-center">
-                <i *ngIf="player.type === 'attaquant'" class="fas fa-futbol me-2 type-icon type-icon-clickable" (click)="cyclePlayerType(player)" title="Changer le type (Attaquant)"></i>
-                <i *ngIf="player.type === 'milieu'" class="fas fa-arrows-alt-h me-2 type-icon type-icon-clickable" (click)="cyclePlayerType(player)" title="Changer le type (Milieu)"></i>
-                <i *ngIf="player.type === 'defenseur'" class="fas fa-shield me-2 type-icon type-icon-clickable" (click)="cyclePlayerType(player)" title="Changer le type (Défenseur)"></i>
-                <input class="form-control form-control-sm me-2" style="max-width: 140px; display: inline-block;" [(ngModel)]="player.name" />
-                <span class="badge bg-primary ms-2" style="cursor:pointer;" *ngIf="getGoalsForPlayer(player.name) > 0" (click)="openPlayerGoalsModal(player)">
-                  {{ getGoalsForPlayer(player.name) }} ⚽
-                </span>
+<div class="modal-overlay edit-players-overlay" *ngIf="showEditPlayersModal && teamToEdit && teamToEdit.players">
+  <div class="edit-players-modal">
+    <div class="modal-header">
+      <h5 class="modal-title">
+        <i class="fas fa-users-cog me-2"></i>
+        Éditer les joueurs de {{ teamToEdit.name }}
+      </h5>
+      <button type="button" class="close-button" (click)="closeEditPlayersModal()" aria-label="Fermer">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <div class="modal-body">
+      <!-- Liste des joueurs existants -->
+      <div class="players-list mb-4">
+        <h6 class="mb-3">
+          <i class="fas fa-list me-2"></i>
+          Joueurs actuels
+        </h6>
+        <div class="player-item mb-2" *ngFor="let player of teamToEdit.players; let i = index">
+          <div class="player-card">
+            <div class="player-info">
+              <div class="player-type-icon">
+                <i *ngIf="player.type === 'attaquant'" class="fas fa-futbol type-icon type-icon-clickable" (click)="cyclePlayerType(player)" title="Changer le type (Attaquant)"></i>
+                <i *ngIf="player.type === 'milieu'" class="fas fa-arrows-alt-h type-icon type-icon-clickable" (click)="cyclePlayerType(player)" title="Changer le type (Milieu)"></i>
+                <i *ngIf="player.type === 'defenseur'" class="fas fa-shield type-icon type-icon-clickable" (click)="cyclePlayerType(player)" title="Changer le type (Défenseur)"></i>
+              </div>
+              <input class="form-control player-name-input" [(ngModel)]="player.name" placeholder="Nom du joueur" />
+              <span class="badge bg-primary ms-2 goals-badge" *ngIf="getGoalsForPlayer(player.name) > 0" (click)="openPlayerGoalsModal(player)">
+                {{ getGoalsForPlayer(player.name) }} ⚽
               </span>
-              <button class="btn btn-danger btn-sm" (click)="removePlayer(i)"><i class="fas fa-trash"></i></button>
             </div>
-          </li>
-        </ul>
-        <div class="input-group">
-          <input [(ngModel)]="newPlayerName" class="form-control" placeholder="Ajouter un joueur..." (keyup.enter)="addPlayer()" />
-          <i *ngIf="newPlayerType === 'attaquant'" class="fas fa-futbol type-icon type-icon-clickable" (click)="cycleNewPlayerType()" title="Changer le type (Attaquant)"></i>
-          <i *ngIf="newPlayerType === 'milieu'" class="fas fa-arrows-alt-h type-icon type-icon-clickable" (click)="cycleNewPlayerType()" title="Changer le type (Milieu)"></i>
-          <i *ngIf="newPlayerType === 'defenseur'" class="fas fa-shield type-icon type-icon-clickable" (click)="cycleNewPlayerType()" title="Changer le type (Défenseur)"></i>
-          <button class="btn btn-success" (click)="addPlayer()">Ajouter</button>
+            <div class="player-actions">
+              <button class="btn btn-sm btn-outline-danger" (click)="removePlayer(i)" title="Supprimer le joueur">
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" (click)="closeEditPlayersModal()">Fermer</button>
-        <button type="button" class="btn btn-primary" (click)="savePlayersEdit()">Enregistrer</button>
+      
+      <!-- Formulaire d'ajout de joueur -->
+      <div class="add-player-section">
+        <h6 class="mb-3">
+          <i class="fas fa-plus-circle me-2"></i>
+          Ajouter un nouveau joueur
+        </h6>
+        <div class="add-player-form">
+          <div class="input-group">
+            <input [(ngModel)]="newPlayerName" class="form-control" placeholder="Nom du nouveau joueur..." (keyup.enter)="addPlayer()" />
+            <div class="type-selector">
+              <i *ngIf="newPlayerType === 'attaquant'" class="fas fa-futbol type-icon type-icon-clickable" (click)="cycleNewPlayerType()" title="Changer le type (Attaquant)"></i>
+              <i *ngIf="newPlayerType === 'milieu'" class="fas fa-arrows-alt-h type-icon type-icon-clickable" (click)="cycleNewPlayerType()" title="Changer le type (Milieu)"></i>
+              <i *ngIf="newPlayerType === 'defenseur'" class="fas fa-shield type-icon type-icon-clickable" (click)="cycleNewPlayerType()" title="Changer le type (Défenseur)"></i>
+            </div>
+            <button class="btn btn-success" (click)="addPlayer()">
+              <i class="fas fa-plus me-2"></i>Ajouter
+            </button>
+          </div>
+        </div>
       </div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" (click)="closeEditPlayersModal()">
+        <i class="fas fa-times me-2"></i>Fermer
+      </button>
+      <button type="button" class="btn btn-primary" (click)="savePlayersEdit()">
+        <i class="fas fa-save me-2"></i>Enregistrer
+      </button>
     </div>
   </div>
 </div>
