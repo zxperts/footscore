@@ -1618,11 +1618,11 @@ Lien direct vers le match : ${matchUrl}
     const opponentScore = match.equipe1.toLowerCase().includes('flawinne') ? match.score2 : match.score1;
     
     if (flawinneScore > opponentScore) {
-      return 'btn-success'; // Vert si victoire
+      return 'btn-score-success'; // Vert moderne si victoire
     } else if (flawinneScore < opponentScore) {
-      return 'btn-danger'; // Rouge si défaite
+      return 'btn-score-danger'; // Rouge moderne si défaite
     } else {
-      return 'btn-light'; // Gris clair si match nul
+      return 'btn-score-light'; // Gris moderne si match nul
     }
   }
 
