@@ -270,7 +270,7 @@
            [attr.data-match-id]="match.id">
         <div class="match-details">
           <div class="match-info text-muted small text-center">
-            <span>{{ match.heureDebut | date:'EEEE d MMMM yyyy HH:mm' }}</span>
+            <span>{{ match.heureDebut | date:'EEEE dd/MM/yy HH:mm' }}</span>
             <span class="mx-2" *ngIf="match.lieu">•</span>
             <span *ngIf="match.lieu">{{ match.lieu }}</span>
             <span class="mx-2" *ngIf="match.competition">•</span>
