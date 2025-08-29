@@ -190,6 +190,75 @@ export class AppComponent implements OnInit {
     this.updateFilteredTeams1();
     this.updateFilteredTeams2();
     this.selectedSeason = this.getCurrentSeason();
+    
+    // Créer les compétitions U10 et U11 si elles n'existent pas
+    this.createU10U11CompetitionsIfNeeded();
+  }
+
+  // Méthode pour créer les compétitions U10 et U11 pour la saison 2025-2026
+  private createU10U11CompetitionsIfNeeded() {
+    // Vérifier si les compétitions existent déjà
+    const existingCompetitions = this.matches
+      .map(match => match.competition)
+      .filter((comp): comp is string => comp !== undefined && comp !== '');
+    
+    const u10Exists = existingCompetitions.includes('Championnat U10');
+    const u11Exists = existingCompetitions.includes('Championnat U11');
+    
+    // Si les deux compétitions existent déjà, ne rien faire
+    if (u10Exists && u11Exists) {
+      return;
+    }
+    
+    // Créer les matchs temporaires pour les nouvelles compétitions
+    const newMatches: Match[] = [];
+    
+    if (!u10Exists) {
+      // Match pour Championnat U10 - 1er août 2025 (début de saison)
+      const u10Match: Match = {
+        id: this.matches.length + 1,
+        equipe1: 'U10 Stand. Flawinne FC',
+        equipe2: 'U10A Stand. Flawinne FC',
+        score1: 0,
+        score2: 0,
+        buteurs: [],
+        heureDebut: new Date(2025, 7, 1, 18, 0), // 1er août 2025 à 18h00
+        lieu: 'Terrain Flawinne',
+        positions: {},
+        showElements: true,
+        competition: 'Championnat U10',
+        updatedAt: new Date(),
+        duelsGagnes: []
+      };
+      newMatches.push(u10Match);
+    }
+    
+    if (!u11Exists) {
+      // Match pour Championnat U11 - 1er août 2025 (début de saison)
+      const u11Match: Match = {
+        id: this.matches.length + newMatches.length + 1,
+        equipe1: 'U11B Stand. Flawinne FC',
+        equipe2: 'U10 Stand. Flawinne FC',
+        score1: 0,
+        score2: 0,
+        buteurs: [],
+        heureDebut: new Date(2025, 7, 1, 19, 30), // 1er août 2025 à 19h30
+        lieu: 'Terrain Flawinne',
+        positions: {},
+        showElements: true,
+        competition: 'Championnat U11',
+        updatedAt: new Date(),
+        duelsGagnes: []
+      };
+      newMatches.push(u11Match);
+    }
+    
+    // Ajouter les nouveaux matchs s'il y en a
+    if (newMatches.length > 0) {
+      this.matches.push(...newMatches);
+      this.saveData();
+      console.log(`Compétitions créées : ${newMatches.map(m => m.competition).join(', ')}`);
+    }
   }
 
   getCurrentDateTime(): string {
