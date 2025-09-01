@@ -2398,26 +2398,32 @@ Lien direct vers le match : ${matchUrl}
   }
 
   updateFilteredTeams1() {
-    const search = this.team1Search.toLowerCase();
+    const search = this.team1Search;
+    // Mettre à jour la valeur du formulaire avec ce qui est tapé
+    this.matchForm.patchValue({ equipe1: search });
+    
     if (search.length < 3) {
       this.filteredTeams1 = [];
       return;
     }
     this.filteredTeams1 = this.teams
       .map(t => t.name)
-      .filter(name => name.toLowerCase().includes(search))
+      .filter(name => name.toLowerCase().includes(search.toLowerCase()))
       .filter(name => name !== this.matchForm.value.equipe2);
   }
 
   updateFilteredTeams2() {
-    const search = this.team2Search.toLowerCase();
+    const search = this.team2Search;
+    // Mettre à jour la valeur du formulaire avec ce qui est tapé
+    this.matchForm.patchValue({ equipe2: search });
+    
     if (search.length < 3) {
       this.filteredTeams2 = [];
       return;
     }
     this.filteredTeams2 = this.teams
       .map(t => t.name)
-      .filter(name => name.toLowerCase().includes(search))
+      .filter(name => name.toLowerCase().includes(search.toLowerCase()))
       .filter(name => name !== this.matchForm.value.equipe1);
   }
 
