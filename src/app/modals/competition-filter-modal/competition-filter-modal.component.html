@@ -139,11 +139,11 @@
               <input type="radio" 
                      class="form-check-input" 
                      [value]="''" 
-                     [checked]="selectedCompetition === ''"
+                     [checked]="selectedCompetition === '' || selectedCompetition === selectedSeason"
                      (change)="selectCompetition('')"
                      id="allCompetitions">
               <label class="form-check-label" for="allCompetitions">
-                <span class="badge bg-secondary">Toutes les compétitions</span>
+                <span class="badge bg-secondary">Toutes les compétitions de {{ selectedSeason || 'toutes les saisons' }}</span>
               </label>
             </div>
           </div>

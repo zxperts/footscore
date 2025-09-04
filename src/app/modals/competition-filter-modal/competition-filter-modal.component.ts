@@ -93,7 +93,14 @@ export class CompetitionFilterModalComponent {
   // Sélectionner une compétition
   selectCompetition(competition: string) {
     this.selectedCompetition = competition;
-    this.competitionSelected.emit(competition);
+    
+    // Si "Toutes les compétitions" est sélectionné, émettre la saison courante
+    if (competition === '') {
+      this.competitionSelected.emit(this.selectedSeason);
+    } else {
+      this.competitionSelected.emit(competition);
+    }
+    
     this.closeModal.emit();
   }
 

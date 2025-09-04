@@ -191,6 +191,9 @@ export class AppComponent implements OnInit {
     this.updateFilteredTeams2();
     this.selectedSeason = this.getCurrentSeason();
     
+    // Initialiser le filtre de compétition avec la saison courante
+    this.selectedCompetitionFilter = this.getCurrentSeason();
+    
     // Créer les compétitions U10 et U11 si elles n'existent pas
     this.createU10U11CompetitionsIfNeeded();
   }
@@ -1167,8 +1170,22 @@ export class AppComponent implements OnInit {
       const teamFilter = !this.selectedTeamFilter || 
                         match.equipe1 === this.selectedTeamFilter || 
                         match.equipe2 === this.selectedTeamFilter;
-      const competitionFilter = !this.selectedCompetitionFilter || 
-                              match.competition === this.selectedCompetitionFilter;
+      
+      // Vérifier si selectedCompetitionFilter est une saison (format "YYYY-YYYY")
+      const isSeason = this.selectedCompetitionFilter && this.selectedCompetitionFilter.includes('-');
+      
+      let competitionFilter = true;
+      if (this.selectedCompetitionFilter) {
+        if (isSeason) {
+          // Si c'est une saison, filtrer par saison
+          const matchSeason = this.getSeasonFromDate(match.heureDebut);
+          competitionFilter = matchSeason === this.selectedCompetitionFilter;
+        } else {
+          // Si c'est une compétition spécifique, filtrer par compétition
+          competitionFilter = match.competition === this.selectedCompetitionFilter;
+        }
+      }
+      
       return teamFilter && competitionFilter;
     });
   }
@@ -1329,6 +1346,12 @@ Lien direct vers le match : ${matchUrl}
   }
 
   // Nouvelles méthodes pour la gestion des compétitions
+  onSeasonChanged(season: string) {
+    this.selectedSeason = season;
+    // Mettre à jour le filtre de compétition avec la saison sélectionnée
+    this.selectedCompetitionFilter = season;
+  }
+
   onCompetitionSelected(competition: string) {
     this.selectedCompetitionFilter = competition;
     this.showCompetitionFilterModal = false;
@@ -1573,13 +1596,9 @@ Lien direct vers le match : ${matchUrl}
   }
 
   getCompetitionsBySeason(season: string): string[] {
-    // Si "Toutes les saisons" est sélectionné, retourner toutes les compétitions uniques
+    // Si aucune saison n'est spécifiée, utiliser la saison courante par défaut
     if (!season || season === '') {
-      return [...new Set(
-        this.matches
-          .map(match => match.competition)
-          .filter((competition): competition is string => competition !== undefined && competition !== '')
-      )];
+      season = this.getCurrentSeason();
     }
 
     // Récupérer les compétitions de la saison sélectionnée

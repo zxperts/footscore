@@ -35,7 +35,7 @@
             [ngClass]="selectedCompetitionFilter ? getCompetitionBadgeColor(selectedCompetitionFilter) : 'btn-info'"
             (click)="openCompetitionFilterModal()">
               <i class="fas fa-trophy text-white"></i>
-              <span class="text-white"> {{ selectedCompetitionFilter || 'Compétitions' }}</span>
+              <span class="text-white"> {{ selectedCompetitionFilter || getCurrentSeason() }}</span>
     </button>
 
     <button 
@@ -142,7 +142,7 @@
         [selectedCompetition]="selectedCompetitionFilter"
         [isCompetitionWithoutSeason]="isCompetitionWithoutSeason.bind(this)"
         [getSuggestedSeason]="getSuggestedSeasonForCompetition.bind(this)"
-        (seasonChanged)="selectedSeason = $event"
+        (seasonChanged)="onSeasonChanged($event)"
         (competitionSelected)="onCompetitionSelected($event)"
         (competitionAdded)="onCompetitionAdded($event)"
         (competitionUpdated)="onCompetitionUpdated($event)"
@@ -237,7 +237,7 @@
             </div>
           </div>
           <div class="d-flex gap-2 ms-2 mt-3">
-            <button type="submit" class="btn btn-primary px-4" [disabled]="!matchForm.valid">
+            <button type="submit" class="btn btn-primary px-4" >
               Créer le match
             </button>
             
