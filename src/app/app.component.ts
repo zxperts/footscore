@@ -1358,9 +1358,10 @@ Lien direct vers le match : ${matchUrl}
           // Convertir la date string en Date object
           match.heureDebut = new Date(match.heureDebut);
           
-          // Vérifier si le match existe déjà dans matches
-          const existingMatchIndex = this.matches.findIndex(m => m.id === match.id);
+          // Vérifier si le match existe déjà dans matches (comparaison complète: ID, équipes, score)
+          const existingMatchIndex = this.matches.findIndex(m => this.isSameMatch(m, match));
           let matchToSelect: Match;
+
           if (existingMatchIndex === -1) {
             // Ajouter le match à la liste s'il n'existe pas déjà
             console.log('Ajout du nouveau match à la liste');
@@ -1369,20 +1370,16 @@ Lien direct vers le match : ${matchUrl}
             this.saveData();
             matchToSelect = match;
           } else {
-            // Afficher correctement l'ID du match existant
             const existingMatch = this.matches[existingMatchIndex];
-            console.log('this.matches:', this.matches);
-            console.log('Match déjà existant dans la liste à l index:', existingMatchIndex);
-            console.log('Match déjà existant dans la liste! ID:', existingMatch && existingMatch.id ? existingMatch.id : existingMatch.id);
-            alert(existingMatchIndex+' Match déjà existant dans la liste! ID:' + existingMatch && existingMatch.id ? existingMatch.id : existingMatch.id);
             matchToSelect = existingMatch;
           }
 
           this.selectMatch(matchToSelect);
+
           // Scroll to the match
-          this.selectedMatch = match;
+          this.selectedMatch = matchToSelect;
           setTimeout(() => {
-            const matchElement = document.querySelector(`[data-match-id="${match.id}"]`);
+            const matchElement = document.querySelector(`[data-match-id="${matchToSelect.id}"]`);
             if (matchElement) {
               matchElement.scrollIntoView({ behavior: 'smooth' });
             }
@@ -1394,6 +1391,15 @@ Lien direct vers le match : ${matchUrl}
         console.error('Erreur lors du chargement du match depuis Firestore:', error);
       }
     }
+  }
+
+  // Méthode utilitaire pour comparer deux matches (ID, équipes, score)
+  private isSameMatch(match1: Match, match2: Match): boolean {
+    return match1.id === match2.id &&
+           match1.equipe1 === match2.equipe1 &&
+           match1.equipe2 === match2.equipe2 &&
+           match1.score1 === match2.score1 &&
+           match1.score2 === match2.score2;
   }
 
   // Mettre à jour l'affichage des buteurs dans la liste
