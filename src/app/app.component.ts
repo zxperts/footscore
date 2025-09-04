@@ -1415,13 +1415,18 @@ Lien direct vers le match : ${matchUrl}
           const existingMatchIndex = this.matches.findIndex(m => m.id === match.id);
           if (existingMatchIndex === -1) {
             // Ajouter le match à la liste s'il n'existe pas déjà
+            console.log('Ajout du nouveau match à la liste');
             this.matches.push(match);
             // Sauvegarder les données
             this.saveData();
           }
+          else {
+            console.log('Match déjà existant dans la liste. ID:', match.id);
+          }
           
           this.selectMatch(match);
           // Scroll to the match
+          this.selectedMatch = match;
           setTimeout(() => {
             const matchElement = document.querySelector(`[data-match-id="${match.id}"]`);
             if (matchElement) {

@@ -95,7 +95,7 @@ h1 {
   display: flex;
   justify-content: center;
   align-items: flex-start; /* Aligne le contenu en haut, sous le top */
-  z-index: 1000;
+  z-index: 1070; /* Augmenté pour apparaître au-dessus des autres modales */
   padding: 0;
   overflow-y: auto;
 }
