@@ -1413,18 +1413,22 @@ Lien direct vers le match : ${matchUrl}
           
           // Vérifier si le match existe déjà dans matches
           const existingMatchIndex = this.matches.findIndex(m => m.id === match.id);
+          let matchToSelect: Match;
           if (existingMatchIndex === -1) {
             // Ajouter le match à la liste s'il n'existe pas déjà
             console.log('Ajout du nouveau match à la liste');
             this.matches.push(match);
             // Sauvegarder les données
             this.saveData();
+            matchToSelect = match;
+          } else {
+            // Afficher correctement l'ID du match existant
+            const existingMatch = this.matches[existingMatchIndex];
+            console.log('Match déjà existant dans la liste. ID:', existingMatch && existingMatch.id ? existingMatch.id : match.id);
+            matchToSelect = existingMatch;
           }
-          else {
-            console.log('Match déjà existant dans la liste. ID:', match.id);
-          }
-          
-          this.selectMatch(match);
+
+          this.selectMatch(matchToSelect);
           // Scroll to the match
           this.selectedMatch = match;
           setTimeout(() => {
