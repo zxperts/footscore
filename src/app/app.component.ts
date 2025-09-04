@@ -406,8 +406,33 @@ export class AppComponent implements OnInit {
   }
 
   modifierButeur(matchIndex: number, buteurIndex: number) {    
+    // Vérifications de sécurité
+    if (matchIndex < 0 || matchIndex >= this.matches.length) {
+      console.error('Index de match invalide:', matchIndex);
+      return;
+    }
+    
     const match = this.matches[matchIndex];
+    if (!match) {
+      console.error('Match non trouvé à l\'index:', matchIndex);
+      return;
+    }
+    
+    if (!match.buteurs || !Array.isArray(match.buteurs)) {
+      console.error('Propriété buteurs manquante ou invalide pour le match:', match);
+      return;
+    }
+    
+    if (buteurIndex < 0 || buteurIndex >= match.buteurs.length) {
+      console.error('Index de buteur invalide:', buteurIndex, 'pour le match:', match);
+      return;
+    }
+    
     const buteur = match.buteurs[buteurIndex];
+    if (!buteur) {
+      console.error('Buteur non trouvé à l\'index:', buteurIndex);
+      return;
+    }
     
     console.log('Match trouvé:', match);
     console.log('Buteur à modifier:', buteur);
@@ -450,7 +475,25 @@ export class AppComponent implements OnInit {
       if (this.editingButeur) {
         // Modification d'un buteur existant
         const matchIndex = this.matches.indexOf(this.selectedMatch);
-        this.matches[matchIndex].buteurs[this.editingButeur.index] = newButeur;
+        
+        // Vérifications de sécurité pour la modification
+        if (matchIndex < 0 || matchIndex >= this.matches.length) {
+          console.error('Index de match invalide pour modification:', matchIndex);
+          return;
+        }
+        
+        const matchToUpdate = this.matches[matchIndex];
+        if (!matchToUpdate || !matchToUpdate.buteurs || !Array.isArray(matchToUpdate.buteurs)) {
+          console.error('Match ou propriété buteurs invalide pour modification:', matchToUpdate);
+          return;
+        }
+        
+        if (this.editingButeur.index < 0 || this.editingButeur.index >= matchToUpdate.buteurs.length) {
+          console.error('Index de buteur invalide pour modification:', this.editingButeur.index);
+          return;
+        }
+        
+        matchToUpdate.buteurs[this.editingButeur.index] = newButeur;
         console.log('Buteur modifié dans le match');
         
         // Pas de mise à jour du score car on modifie un but existant
@@ -493,8 +536,34 @@ export class AppComponent implements OnInit {
   }
 
   supprimerButeur(matchIndex: number, buteurIndex: number) {
+    // Vérifications de sécurité
+    if (matchIndex < 0 || matchIndex >= this.matches.length) {
+      console.error('Index de match invalide:', matchIndex);
+      return;
+    }
+    
     const match = this.matches[matchIndex];
+    if (!match) {
+      console.error('Match non trouvé à l\'index:', matchIndex);
+      return;
+    }
+    
+    if (!match.buteurs || !Array.isArray(match.buteurs)) {
+      console.error('Propriété buteurs manquante ou invalide pour le match:', match);
+      return;
+    }
+    
+    if (buteurIndex < 0 || buteurIndex >= match.buteurs.length) {
+      console.error('Index de buteur invalide:', buteurIndex, 'pour le match:', match);
+      return;
+    }
+    
     const buteur = match.buteurs[buteurIndex];
+    if (!buteur) {
+      console.error('Buteur non trouvé à l\'index:', buteurIndex);
+      return;
+    }
+    
     if (!confirm(`Êtes-vous sûr de vouloir supprimer le but de ${buteur.nom} à la minute ${buteur.minute} ?`)) {
       return;
     }
@@ -759,6 +828,12 @@ export class AppComponent implements OnInit {
       return;
     }
     
+    // Vérifications de sécurité pour les buteurs
+    if (!this.selectedMatch.buteurs || !Array.isArray(this.selectedMatch.buteurs) || this.selectedMatch.buteurs.length === 0) {
+      console.error('Propriété buteurs invalide ou vide:', this.selectedMatch.buteurs);
+      return;
+    }
+    
     // Trouver le dernier but ajouté et ajouter l'assist
     const lastButeur = this.selectedMatch.buteurs[this.selectedMatch.buteurs.length - 1];
     if (lastButeur && lastButeur.nom === this.lastGoalScorer) {
@@ -780,9 +855,19 @@ export class AppComponent implements OnInit {
       return;
     }
     
+    // Vérifications de sécurité pour les buteurs
+    if (!this.selectedMatch.buteurs || !Array.isArray(this.selectedMatch.buteurs)) {
+      console.error('Propriété buteurs invalide:', this.selectedMatch.buteurs);
+      return;
+    }
+    
     // Supprimer le dernier but ajouté
     if (this.selectedMatch.buteurs.length > 0) {
       const lastButeur = this.selectedMatch.buteurs[this.selectedMatch.buteurs.length - 1];
+      if (!lastButeur) {
+        console.error('Dernier buteur non trouvé');
+        return;
+      }
       console.log('Dernier buteur à supprimer:', lastButeur);
       
       // Mettre à jour le score
@@ -2621,10 +2706,26 @@ Lien direct vers le match : ${matchUrl}
     
     if (newScore > currentGoals) {
       // Score augmenté - d'abord réactiver les buts désactivés, puis ajouter si nécessaire
-      const disabledTeamGoals = this.disabledGoals.filter(dg => 
-        dg.matchId === matchId && 
-        this.selectedMatch!.buteurs[dg.buteurIndex].equipe === teamNumber
-      );
+      const disabledTeamGoals = this.disabledGoals.filter(dg => {
+        // Vérifications de sécurité pour l'accès aux buteurs
+        if (!this.selectedMatch || !this.selectedMatch.buteurs || !Array.isArray(this.selectedMatch.buteurs)) {
+          console.error('selectedMatch ou buteurs invalide dans handleTeamScoreChange');
+          return false;
+        }
+        
+        if (dg.buteurIndex < 0 || dg.buteurIndex >= this.selectedMatch.buteurs.length) {
+          console.error('Index de buteur invalide dans disabledGoals:', dg.buteurIndex);
+          return false;
+        }
+        
+        const buteur = this.selectedMatch.buteurs[dg.buteurIndex];
+        if (!buteur) {
+          console.error('Buteur non trouvé à l\'index:', dg.buteurIndex);
+          return false;
+        }
+        
+        return dg.matchId === matchId && buteur.equipe === teamNumber;
+      });
       
       console.log(`Buts désactivés pour équipe ${teamNumber}:`, disabledTeamGoals.length);
       
