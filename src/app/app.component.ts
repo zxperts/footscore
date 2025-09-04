@@ -185,6 +185,7 @@ export class AppComponent implements OnInit {
 
   async ngOnInit() {
     this.loadSavedData();
+    this.ensureAllTeamsPresent(); // S'assurer que toutes les équipes sont présentes
     this.startAutoSave();
     await this.loadMatchFromUrl();
     this.updateFilteredTeams1();
@@ -921,12 +922,26 @@ export class AppComponent implements OnInit {
         }));
         if (data.teams) {
           this.teams = data.teams;
+          // S'assurer que toutes les équipes de TEAMS sont présentes
+          this.ensureAllTeamsPresent();
         }
       } else {
         // Supprimer les données expirées
         localStorage.removeItem('footballMatches');
       }
     }
+  }
+
+  // S'assurer que toutes les équipes de TEAMS sont présentes dans this.teams
+  private ensureAllTeamsPresent() {
+    TEAMS.forEach(teamFromTEAMS => {
+      const existingTeam = this.teams.find(t => t.name === teamFromTEAMS.name);
+      if (!existingTeam) {
+        // Ajouter l'équipe manquante
+        this.teams.push({ ...teamFromTEAMS });
+        console.log(`Équipe ajoutée: ${teamFromTEAMS.name}`);
+      }
+    });
   }
 
   // Sauvegarder les données
@@ -1672,9 +1687,15 @@ Lien direct vers le match : ${matchUrl}
   }
 
   getSeasonFromDate(date: Date): string {
-    const year = date.getFullYear();
-    const month = date.getMonth() + 1; // getMonth() retourne 0-11
-    
+    let d: Date;
+    if (!date || isNaN(new Date(date).getTime())) {
+      d = new Date();
+    } else {
+      d = new Date(date);
+    }
+    const year = d.getFullYear();
+    const month = d.getMonth() + 1; // getMonth() retourne 0-11
+
     if (month >= 8) {
       return `${year}-${year + 1}`;
     } else {
