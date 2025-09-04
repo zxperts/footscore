@@ -39,7 +39,7 @@
     </button>
 
     <button 
-    *ngIf="!showCompetitionFilterModal && !showTeamFilterModal && !showMatchForm"
+    *ngIf="!showCompetitionFilterModal && !showTeamFilterModal && !showMatchForm && selectedCompetitionFilter && !selectedCompetitionFilter.includes('-')"
     class="btn btn-outline-info mt-2" 
     [ngClass]="selectedCompetitionFilter ? getCompetitionBadgeColor(selectedCompetitionFilter) : 'btn-info'"
             [hidden]="!selectedCompetitionFilter"
@@ -86,7 +86,12 @@
                            [(ngModel)]="selectedTeamFilter" 
                            id="allTeams">
                     <label class="form-check-label" for="allTeams">
-                      <span class="badge bg-secondary">Toutes les équipes</span>
+                      <span class="badge bg-secondary">
+                        Toutes les équipes 
+                        <ng-container *ngIf="selectedCompetitionFilter">
+                          de {{ selectedCompetitionFilter }}
+                        </ng-container>
+                      </span>
                     </label>
                   </div>
                 </div>
@@ -97,7 +102,7 @@
             </div>
             
             <!-- Équipes existantes -->
-            <div class="team-item mb-2" *ngFor="let team of teams">
+            <div class="team-item mb-2" *ngFor="let team of filteredTeamsForModal">
               <div class="team-card">
                 <div class="team-info">
                   <div class="form-check">

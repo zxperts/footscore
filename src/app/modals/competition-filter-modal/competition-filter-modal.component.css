@@ -57,21 +57,19 @@
 
 /* Sélecteur de saison */
 .season-selector {
-  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-  padding: 1.5rem;
+  padding: 0.5rem;
   border-radius: 10px;
-  border: 1px solid #dee2e6;
 }
 
 .season-selector .form-label {
   color: #495057;
-  margin-bottom: 0.5rem;
+
 }
 
 .season-selector .form-select {
   border: 2px solid #dee2e6;
   border-radius: 8px;
-  padding: 0.75rem;
+  padding: 0.5rem;
   font-size: 1rem;
   transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }

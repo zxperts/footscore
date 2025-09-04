@@ -1195,6 +1195,43 @@ export class AppComponent implements OnInit {
     this.showTeamFilterModal = false;
   }
 
+  // Méthode pour obtenir les équipes filtrées selon le filtre de compétition
+  get filteredTeamsForModal(): Team[] {
+    if (!this.selectedCompetitionFilter) {
+      return this.teams; // Si aucun filtre, retourner toutes les équipes
+    }
+
+    // Vérifier si selectedCompetitionFilter est une saison (format "YYYY-YYYY")
+    const isSeason = this.selectedCompetitionFilter.includes('-');
+    
+    if (isSeason) {
+      // Si c'est une saison, filtrer les équipes qui ont joué dans cette saison
+      const teamsInSeason = new Set<string>();
+      
+      this.matches.forEach(match => {
+        const matchSeason = this.getSeasonFromDate(match.heureDebut);
+        if (matchSeason === this.selectedCompetitionFilter) {
+          teamsInSeason.add(match.equipe1);
+          teamsInSeason.add(match.equipe2);
+        }
+      });
+      
+      return this.teams.filter(team => teamsInSeason.has(team.name));
+    } else {
+      // Si c'est une compétition spécifique, filtrer les équipes qui ont joué dans cette compétition
+      const teamsInCompetition = new Set<string>();
+      
+      this.matches.forEach(match => {
+        if (match.competition === this.selectedCompetitionFilter) {
+          teamsInCompetition.add(match.equipe1);
+          teamsInCompetition.add(match.equipe2);
+        }
+      });
+      
+      return this.teams.filter(team => teamsInCompetition.has(team.name));
+    }
+  }
+
   async shareMatch(match: Match) {
     this.isSharingMatch = true;
     try {
