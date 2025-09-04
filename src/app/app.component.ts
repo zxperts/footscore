@@ -1371,6 +1371,7 @@ Lien direct vers le match : ${matchUrl}
           } else {
             // Afficher correctement l'ID du match existant
             const existingMatch = this.matches[existingMatchIndex];
+            console.log('this.matches:', this.matches);
             console.log('Match déjà existant dans la liste à l index:', existingMatchIndex);
             console.log('Match déjà existant dans la liste! ID:', existingMatch && existingMatch.id ? existingMatch.id : existingMatch.id);
             alert(existingMatchIndex+' Match déjà existant dans la liste! ID:' + existingMatch && existingMatch.id ? existingMatch.id : existingMatch.id);
