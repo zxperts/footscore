@@ -1433,7 +1433,7 @@
         </div>
         <div class="mb-2 fw-bold">Joueurs</div>
         <div *ngFor="let player of newTeamPlayers; let i = index" class="d-flex align-items-center mb-2 gap-2">
-          <input class="form-control form-control-sm" style="max-width: 180px;" [(ngModel)]="player.name" [ngModelOptions]="{standalone: true}" placeholder="Nom du joueur">
+          <input class="form-control form-control-sm" style="min-width: 150px; flex: 1;" [(ngModel)]="player.name" [ngModelOptions]="{standalone: true}" placeholder="Nom du joueur">
           <select class="form-select form-select-sm" style="max-width: 120px;" [(ngModel)]="player.type" [ngModelOptions]="{standalone: true}">
             <option value="attaquant">Attaquant</option>
             <option value="milieu">Milieu</option>

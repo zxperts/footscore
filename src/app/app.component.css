@@ -1640,14 +1640,17 @@ body {
   display: flex;
   align-items: center;
   gap: 0.75rem;
+  min-width: 0; /* Permet au flex de fonctionner correctement */
 }
 
 .add-player-form .form-control {
   flex: 1;
+  min-width: 0; /* Permet à l'input de se rétrécir si nécessaire */
   border: 2px solid #e9ecef;
   border-radius: 8px;
   padding: 0.75rem;
   transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  width: auto; /* Permet au flex de contrôler la largeur */
 }
 
 .add-player-form .form-control:focus {
@@ -1703,6 +1706,10 @@ body {
     flex-wrap: wrap;
     gap: 0.5rem;
   }
+  
+  .add-player-form .form-control {
+    min-width: 200px; /* Largeur minimale sur mobile */
+  }
 }
 
 @media (max-width: 480px) {
@@ -1724,6 +1731,10 @@ body {
   .add-player-form .input-group {
     flex-direction: column;
     align-items: stretch;
+  }
+  
+  .add-player-form .form-control {
+    min-width: 100%; /* Prend toute la largeur sur très petit écran */
   }
   
   .type-selector {
