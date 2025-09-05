@@ -1245,41 +1245,57 @@ export class AppComponent implements OnInit {
     this.showTeamFilterModal = false;
   }
 
-  // Méthode pour obtenir les équipes filtrées selon le filtre de compétition
+  // Méthode pour calculer le nombre de matchs joués par une équipe
+  getMatchesPlayedByTeam(teamName: string): number {
+    return this.matches.filter(match => 
+      match.equipe1 === teamName || match.equipe2 === teamName
+    ).length;
+  }
+
+  // Méthode pour obtenir les équipes filtrées selon le filtre de compétition, triées par nombre de matchs
   get filteredTeamsForModal(): Team[] {
+    let filteredTeams: Team[];
+
     if (!this.selectedCompetitionFilter) {
-      return this.teams; // Si aucun filtre, retourner toutes les équipes
+      filteredTeams = this.teams; // Si aucun filtre, retourner toutes les équipes
+    } else {
+      // Vérifier si selectedCompetitionFilter est une saison (format "YYYY-YYYY")
+      const isSeason = this.selectedCompetitionFilter.includes('-');
+      
+      if (isSeason) {
+        // Si c'est une saison, filtrer les équipes qui ont joué dans cette saison
+        const teamsInSeason = new Set<string>();
+        
+        this.matches.forEach(match => {
+          const matchSeason = this.getSeasonFromDate(match.heureDebut);
+          if (matchSeason === this.selectedCompetitionFilter) {
+            teamsInSeason.add(match.equipe1);
+            teamsInSeason.add(match.equipe2);
+          }
+        });
+        
+        filteredTeams = this.teams.filter(team => teamsInSeason.has(team.name));
+      } else {
+        // Si c'est une compétition spécifique, filtrer les équipes qui ont joué dans cette compétition
+        const teamsInCompetition = new Set<string>();
+        
+        this.matches.forEach(match => {
+          if (match.competition === this.selectedCompetitionFilter) {
+            teamsInCompetition.add(match.equipe1);
+            teamsInCompetition.add(match.equipe2);
+          }
+        });
+        
+        filteredTeams = this.teams.filter(team => teamsInCompetition.has(team.name));
+      }
     }
 
-    // Vérifier si selectedCompetitionFilter est une saison (format "YYYY-YYYY")
-    const isSeason = this.selectedCompetitionFilter.includes('-');
-    
-    if (isSeason) {
-      // Si c'est une saison, filtrer les équipes qui ont joué dans cette saison
-      const teamsInSeason = new Set<string>();
-      
-      this.matches.forEach(match => {
-        const matchSeason = this.getSeasonFromDate(match.heureDebut);
-        if (matchSeason === this.selectedCompetitionFilter) {
-          teamsInSeason.add(match.equipe1);
-          teamsInSeason.add(match.equipe2);
-        }
-      });
-      
-      return this.teams.filter(team => teamsInSeason.has(team.name));
-    } else {
-      // Si c'est une compétition spécifique, filtrer les équipes qui ont joué dans cette compétition
-      const teamsInCompetition = new Set<string>();
-      
-      this.matches.forEach(match => {
-        if (match.competition === this.selectedCompetitionFilter) {
-          teamsInCompetition.add(match.equipe1);
-          teamsInCompetition.add(match.equipe2);
-        }
-      });
-      
-      return this.teams.filter(team => teamsInCompetition.has(team.name));
-    }
+    // Trier les équipes par nombre de matchs joués (ordre décroissant)
+    return filteredTeams.sort((a, b) => {
+      const matchesA = this.getMatchesPlayedByTeam(a.name);
+      const matchesB = this.getMatchesPlayedByTeam(b.name);
+      return matchesB - matchesA; // Ordre décroissant
+    });
   }
 
   async shareMatch(match: Match) {

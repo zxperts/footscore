@@ -113,6 +113,7 @@
                            [id]="'team-' + team.name">
                     <label class="form-check-label" for="'team-' + team.name">
                       <span class="badge team-badge">{{ team.name }}</span>
+                      <small class="text-muted ms-2">({{ getMatchesPlayedByTeam(team.name) }} matchs)</small>
                     </label>
                   </div>
                 </div>
