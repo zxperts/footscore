@@ -121,7 +121,7 @@
                   <button class="btn btn-sm btn-outline-primary" (click)="openEditPlayersModal(team.name)" title="Modifier l'équipe">
                     <i class="fas fa-edit"></i>
                   </button>
-                  <button class="btn btn-sm btn-outline-danger" (click)="deleteTeam(team.name)" title="Supprimer l'équipe">
+                  <button class="btn btn-sm btn-outline-danger" *ngIf="showDeleteButtons" (click)="deleteTeam(team.name)" title="Supprimer l'équipe">
                     <i class="fas fa-trash"></i>
                   </button>
                 </div>
@@ -148,6 +148,7 @@
         [selectedCompetition]="selectedCompetitionFilter"
         [isCompetitionWithoutSeason]="isCompetitionWithoutSeason.bind(this)"
         [getSuggestedSeason]="getSuggestedSeasonForCompetition.bind(this)"
+        [showDeleteButtons]="showDeleteButtons"
         (seasonChanged)="onSeasonChanged($event)"
         (competitionSelected)="onCompetitionSelected($event)"
         (competitionAdded)="onCompetitionAdded($event)"
@@ -655,6 +656,7 @@
               </span>
               <div>
                 <button class="btn btn-sm btn-danger" 
+                        *ngIf="showDeleteButtons"
                         (click)="supprimerDuel(matches.indexOf(selectedMatch), i)">
                   <i class="fas fa-trash-alt"></i>
                 </button>
@@ -772,7 +774,7 @@
         
         <div class="button-group mt-3">
           <button type="submit" class="btn btn-primary" (click)="onSubmitMatchEdit()">Enregistrer</button>
-          <button class="btn btn-danger float-end" style="float: right;" (click)="supprimerMatch(this.selectedMatch)">
+          <button class="btn btn-danger float-end" *ngIf="showDeleteButtons" style="float: right;" (click)="supprimerMatch(this.selectedMatch)">
             <i class="fas fa-trash-alt"></i> Supprimer le match
           </button>
         </div>
@@ -1244,6 +1246,12 @@
         <div class="modal-footer">
           <button type="button" class="btn btn-info me-auto" *ngIf="!showingLocalStorageData" (click)="showLocalStorageData()">Afficher les données sauvegardées</button>
           <button type="button" class="btn btn-warning me-auto" *ngIf="showingLocalStorageData" (click)="hideLocalStorageData()">Cacher les données sauvegardées</button>
+          <button type="button" class="btn" 
+                  [ngClass]="showDeleteButtons ? 'btn-danger' : 'btn-outline-danger'" 
+                  (click)="toggleDeleteButtons()">
+            <i class="fas" [ngClass]="showDeleteButtons ? 'fa-shield-alt' : 'fa-unlock'"></i>
+            {{ showDeleteButtons ? 'Protéger' : 'Activer suppression' }}
+          </button>
           <button type="button" class="btn btn-secondary" (click)="showHelpModal = false">Fermer</button>
         </div>
         <div *ngIf="showingLocalStorageData" class="p-3 bg-light border mt-2" style="max-height: 300px; overflow: auto; font-size: 0.95em;">
@@ -1351,7 +1359,7 @@
               </span>
             </div>
             <div class="player-actions">
-              <button class="btn btn-sm btn-outline-danger" (click)="removePlayer(i)" title="Supprimer le joueur">
+              <button class="btn btn-sm btn-outline-danger" *ngIf="showDeleteButtons" (click)="removePlayer(i)" title="Supprimer le joueur">
                 <i class="fas fa-trash"></i>
               </button>
             </div>
@@ -1439,7 +1447,7 @@
             <option value="milieu">Milieu</option>
             <option value="defenseur">Défenseur</option>
           </select>
-          <button class="btn btn-outline-danger btn-sm" (click)="removeNewTeamPlayer(i)" [disabled]="newTeamPlayers.length === 1"><i class="fas fa-trash"></i></button>
+          <button class="btn btn-outline-danger btn-sm" *ngIf="showDeleteButtons" (click)="removeNewTeamPlayer(i)" [disabled]="newTeamPlayers.length === 1"><i class="fas fa-trash"></i></button>
         </div>
         <button class="btn btn-link p-0 mt-1" (click)="addNewTeamPlayer()">+ Ajouter un joueur</button>
       </div>

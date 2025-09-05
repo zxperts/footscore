@@ -190,6 +190,7 @@
               <i class="fas fa-edit"></i>
             </button>
             <button type="button" class="btn btn-sm btn-outline-danger" 
+                    *ngIf="showDeleteButtons"
                     (click)="deleteCompetition(competition)"
                     title="Supprimer la compétition">
               <i class="fas fa-trash"></i>

@@ -113,6 +113,7 @@ export class AppComponent implements OnInit {
 
   showingLocalStorageData = false;
   localStorageData: any = null;
+  showDeleteButtons: boolean = false; // Par défaut, les boutons de suppression sont cachés
 
   // Champs d'autocomplétion pour la modale d'édition de match
   editTeam1Search: string = '';
@@ -2912,6 +2913,10 @@ Lien direct vers le match : ${matchUrl}
 
   hideLocalStorageData() {
     this.showingLocalStorageData = false;
+  }
+
+  toggleDeleteButtons() {
+    this.showDeleteButtons = !this.showDeleteButtons;
   }
 
   updateEditFilteredTeams1() {

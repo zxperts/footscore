@@ -30,6 +30,7 @@ export class CompetitionFilterModalComponent {
   @Input() selectedCompetition: string = '';
   @Input() isCompetitionWithoutSeason: (competition: string) => boolean = () => false;
   @Input() getSuggestedSeason: (competition: string) => string | null = () => null;
+  @Input() showDeleteButtons: boolean = false;
   @Input() availableSeasons: string[] = [];
   
   @Output() competitionSelected = new EventEmitter<string>();
