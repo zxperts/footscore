@@ -27,7 +27,7 @@
             class="btn btn-primary mt-2" 
             (click)="showTeamFilterModal = true">
             <i class="fas fa-users text-white"></i>
-            <!-- Equipes -->
+            <span [hidden]="!selectedCompetitionFilter.includes('-')"> Teams</span>
     </button>
 
     <button *ngIf="!showCompetitionFilterModal && !showTeamFilterModal && !showMatchForm" 
