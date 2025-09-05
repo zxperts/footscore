@@ -284,8 +284,8 @@
             </span>
             
             <!-- Ajouter le bouton de toggle ici -->
-            <button class="btn btn-link p-0" (click)="toggleVisibility(match)" style="font-size: 1.2em; cursor: pointer;">
-              <i class="fas" [ngClass]="match.showElements ? 'fa-chevron-up' : 'fa-chevron-right'"></i>
+            <button class="btn btn-link p-0" (click)="toggleVisibility(match)" style="font-size: 1.2em; cursor: pointer;" title="Afficher/Masquer les détails">
+              <i class="fas text-secondary" [ngClass]="match.showElements ? 'fa-eye-slash' : 'fa-circle-info'"></i>
             </button>
           </div>
           
