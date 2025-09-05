@@ -329,6 +329,9 @@ export class AppComponent implements OnInit {
       this.selectedTeam = u10Team || null;
     }
     
+    // Vérifier et ajouter automatiquement les joueurs ayant marqué des buts
+    this.ensureScorersInTeams(match);
+    
     // Vérifier la cohérence au chargement du match
     this.maintainScoreConsistency();
   }
@@ -2653,6 +2656,60 @@ Lien direct vers le match : ${matchUrl}
         clearInterval(this.celebrationTimer);
       }
     }, 1000);
+  }
+
+  // Méthode pour s'assurer que tous les joueurs ayant marqué des buts sont dans leurs équipes
+  ensureScorersInTeams(match: Match) {
+    if (!match || !match.buteurs || match.buteurs.length === 0) {
+      return;
+    }
+
+    console.log('Vérification des joueurs ayant marqué des buts pour le match:', match.id);
+
+    // Trouver les équipes
+    const team1 = this.teams.find(team => team.name === match.equipe1);
+    const team2 = this.teams.find(team => team.name === match.equipe2);
+
+    if (!team1 || !team2) {
+      console.log('Équipes non trouvées pour le match');
+      return;
+    }
+
+    // Parcourir tous les buteurs
+    match.buteurs.forEach(buteur => {
+      if (!buteur || !buteur.nom) {
+        return;
+      }
+
+      const targetTeam = buteur.equipe === 1 ? team1 : team2;
+      
+      // Vérifier si le joueur existe déjà dans l'équipe
+      const playerExists = targetTeam.players.some(player => 
+        player.name.toLowerCase() === buteur.nom.toLowerCase()
+      );
+
+      if (!playerExists) {
+        console.log(`Ajout du joueur ${buteur.nom} à l'équipe ${targetTeam.name}`);
+        
+        // Ajouter le joueur à l'équipe avec un type par défaut
+        targetTeam.players.push({
+          name: buteur.nom,
+          type: 'milieu' as const
+        });
+      }
+    });
+
+    // Sauvegarder les modifications
+    this.saveData();
+  }
+
+  // Méthode pour fermer la modale de score et vérifier les joueurs
+  closeScoreModal() {
+    if (this.selectedMatch) {
+      // Vérifier et ajouter automatiquement les joueurs ayant marqué des buts
+      this.ensureScorersInTeams(this.selectedMatch);
+    }
+    this.showScoreForm = false;
   }
 
   // Méthode pour gérer la modification du score
