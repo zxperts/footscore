@@ -20,7 +20,7 @@
             class="btn btn-primary mt-2" 
             (click)="showMatchForm = true">
       <i class="fas fa-plus-circle text-white"></i>
-       <span [hidden]="selectedCompetitionFilter"> Match</span>
+       <span [hidden]="!selectedCompetitionFilter.includes('-')"> Match</span>
     </button>
 
     <button *ngIf="!showMatchForm && !showTeamFilterModal && !showCompetitionFilterModal" 
@@ -51,7 +51,7 @@
     </button>
 
     <button 
-    *ngIf="!showCompetitionFilterModal && !showTeamFilterModal && !showMatchForm"
+    *ngIf="!showCompetitionFilterModal && !showTeamFilterModal && !showMatchForm && !selectedCompetitionFilter.includes('-')"
     class="btn btn-outline-info mt-2" 
     [ngClass]="selectedCompetitionFilter ? getCompetitionBadgeColor(selectedCompetitionFilter) : 'btn-info'"
             [hidden]="!selectedCompetitionFilter"
