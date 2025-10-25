@@ -1676,6 +1676,19 @@ body {
   transform: translateY(-1px);
 }
 
+/* Modal de sélection d'action - z-index élevé pour apparaître au-dessus des autres modals */
+.action-selection-modal {
+  z-index: 9999 !important;
+}
+
+.action-selection-modal .modal-dialog {
+  z-index: 10000 !important;
+}
+
+.action-selection-modal .modal-content {
+  z-index: 10001 !important;
+}
+
 /* Responsive pour la modale d'édition des joueurs */
 @media (max-width: 768px) {
   .edit-players-modal {

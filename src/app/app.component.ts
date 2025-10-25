@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, FormArray } from '@angular/forms';
-import { Match, Buteur, DuelGagne } from './models/match.model';
+import { Match, Buteur, DuelGagne, Dribble, Interception, Frappe, Faute, ContreAttaque, TikiTaka } from './models/match.model';
 import { ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Team, TEAMS, ensureDefaultPlayer, Player } from './models/team.model';
@@ -15,6 +15,15 @@ interface GroupedScorer {
   nom: string;
   minutes: number[];
   assist?: string;
+}
+
+interface CelebrationConfig {
+  type: 'but' | 'duel' | 'dribble' | 'interception' | 'frappe' | 'faute' | 'contre-attaque' | 'tiki-taka';
+  emoji: string;
+  text: string;
+  color: string;
+  showAssist: boolean;
+  showCancel: boolean;
 }
 
 interface TeamStats {
@@ -129,10 +138,18 @@ export class AppComponent implements OnInit {
   assistSearch: string = '';
   filteredAssistNames: string[] = [];
 
-  // === GESTION DES DUELS GAGNÉS ===
-  showDuelCelebration: boolean = false;
-  lastDuelWinner: string = '';
-  lastDuelTeam: string = '';
+  // === GESTION DE LA CÉLÉBRATION GÉNÉRIQUE ===
+  showCelebration: boolean = false;
+  celebrationConfig: CelebrationConfig | null = null;
+  celebrationPlayer: string = '';
+  celebrationTeam: string = '';
+  celebrationAssist: string = '';
+  
+  // === GESTION DE LA SÉLECTION D'ACTION ===
+  showActionSelectionModal: boolean = false;
+  pendingActionPlayer: string = '';
+  pendingActionTeam: 1 | 2 = 1;
+  availableActions: string[] = [];
   
   // Contrôles pour l'encodage dans la disposition tactique
   encodingGoalsEnabled: boolean = false;
@@ -187,6 +204,7 @@ export class AppComponent implements OnInit {
   async ngOnInit() {
     this.loadSavedData();
     this.ensureAllTeamsPresent(); // S'assurer que toutes les équipes sont présentes
+    this.ensureMatchProperties(); // S'assurer que les nouvelles propriétés sont initialisées
     this.startAutoSave();
     await this.loadMatchFromUrl();
     this.updateFilteredTeams1();
@@ -198,6 +216,130 @@ export class AppComponent implements OnInit {
     
     // Créer les compétitions U10 et U11 si elles n'existent pas
     this.createU10U11CompetitionsIfNeeded();
+  }
+
+  // Méthode pour obtenir la configuration de célébration selon le type
+  private getCelebrationConfig(type: 'but' | 'duel' | 'dribble' | 'interception' | 'frappe' | 'faute' | 'contre-attaque' | 'tiki-taka'): CelebrationConfig {
+    const configs: { [key: string]: CelebrationConfig } = {
+      'but': {
+        type: 'but',
+        emoji: '⚽',
+        text: 'BUUUT !',
+        color: '#ffc107',
+        showAssist: true,
+        showCancel: true
+      },
+      'duel': {
+        type: 'duel',
+        emoji: '🛡️',
+        text: 'DUEL GAGNÉ',
+        color: '#28a745',
+        showAssist: false,
+        showCancel: true
+      },
+      'dribble': {
+        type: 'dribble',
+        emoji: '🏃',
+        text: 'DRIBBLE',
+        color: '#17a2b8',
+        showAssist: false,
+        showCancel: false
+      },
+      'interception': {
+        type: 'interception',
+        emoji: '✋',
+        text: 'INTERCEPTION',
+        color: '#6f42c1',
+        showAssist: false,
+        showCancel: false
+      },
+      'frappe': {
+        type: 'frappe',
+        emoji: '🎯',
+        text: 'FRAPPE',
+        color: '#fd7e14',
+        showAssist: false,
+        showCancel: false
+      },
+      'faute': {
+        type: 'faute',
+        emoji: '⚠️',
+        text: 'FAUTE',
+        color: '#dc3545',
+        showAssist: false,
+        showCancel: false
+      },
+      'contre-attaque': {
+        type: 'contre-attaque',
+        emoji: '⚡',
+        text: 'CONTRE-ATTAQUE',
+        color: '#20c997',
+        showAssist: false,
+        showCancel: false
+      },
+      'tiki-taka': {
+        type: 'tiki-taka',
+        emoji: '🔄',
+        text: 'TIKI-TAKA',
+        color: '#6c757d',
+        showAssist: false,
+        showCancel: false
+      }
+    };
+    
+    return configs[type];
+  }
+
+  // Méthode pour démarrer une célébration générique
+  private startGenericCelebration(type: 'but' | 'duel' | 'dribble' | 'interception' | 'frappe' | 'faute' | 'contre-attaque' | 'tiki-taka', playerName: string, teamNumber: 1 | 2) {
+    console.log(`Démarrage de la célébration ${type} pour ${playerName}`);
+    
+    this.celebrationConfig = this.getCelebrationConfig(type);
+    this.celebrationPlayer = playerName;
+    this.celebrationTeam = teamNumber === 1 ? this.selectedMatch!.equipe1 : this.selectedMatch!.equipe2;
+    this.celebrationAssist = '';
+    this.showCelebration = true;
+    this.remainingDots = 5;
+    
+    this.startCelebrationTimer();
+  }
+
+  // Méthode pour s'assurer que les nouvelles propriétés de statistiques sont initialisées
+  private ensureMatchProperties() {
+    console.log('Vérification des propriétés des matches...');
+    let updated = false;
+    
+    this.matches.forEach(match => {
+      if (!match.dribbles) {
+        match.dribbles = [];
+        updated = true;
+      }
+      if (!match.interceptions) {
+        match.interceptions = [];
+        updated = true;
+      }
+      if (!match.frappes) {
+        match.frappes = [];
+        updated = true;
+      }
+      if (!match.fautes) {
+        match.fautes = [];
+        updated = true;
+      }
+      if (!match.contreAttaques) {
+        match.contreAttaques = [];
+        updated = true;
+      }
+      if (!match.tikiTakas) {
+        match.tikiTakas = [];
+        updated = true;
+      }
+    });
+    
+    if (updated) {
+      console.log('Propriétés des matches mises à jour, sauvegarde...');
+      this.saveData();
+    }
   }
 
   // Méthode pour créer les compétitions U10 et U11 pour la saison 2025-2026
@@ -235,6 +377,12 @@ export class AppComponent implements OnInit {
         score2: 0,
         buteurs: [],
         duelsGagnes: [], // Initialiser le tableau des duels gagnés
+        dribbles: [], // Initialiser le tableau des dribbles
+        interceptions: [], // Initialiser le tableau des interceptions
+        frappes: [], // Initialiser le tableau des frappes
+        fautes: [], // Initialiser le tableau des fautes
+        contreAttaques: [], // Initialiser le tableau des contre-attaques
+        tikiTakas: [], // Initialiser le tableau des tiki-taka
         showElements: true, // Initialiser la visibilité
         updatedAt: new Date()
       };
@@ -329,6 +477,9 @@ export class AppComponent implements OnInit {
       const u10Team = this.teams.find(team => team.name === 'U10 Stand. Flawinne FC');
       this.selectedTeam = u10Team || null;
     }
+    
+    // S'assurer que toutes les équipes sont présentes avec leurs joueurs
+    this.ensureAllTeamsPresent();
     
     // Vérifier et ajouter automatiquement les joueurs ayant marqué des buts
     this.ensureScorersInTeams(match);
@@ -671,18 +822,7 @@ export class AppComponent implements OnInit {
     this.saveData();
     
     // Célébration du but
-    this.lastGoalScorer = playerName;
-    this.lastGoalTeam = teamNumber === 1 ? this.selectedMatch.equipe1 : this.selectedMatch.equipe2;
-    this.showGoalCelebration = true;
-    this.remainingDots = 5;
-    
-    console.log('Célébration du but:', {
-      scorer: this.lastGoalScorer,
-      team: this.lastGoalTeam,
-      showCelebration: this.showGoalCelebration
-    });
-    
-    this.startCelebrationTimer();
+    this.startGenericCelebration('but', playerName, teamNumber);
     console.log('But ajouté rapidement avec succès');
   }
 
@@ -726,22 +866,275 @@ export class AppComponent implements OnInit {
     this.saveData();
     
     // Célébration du duel gagné
-    this.lastDuelWinner = playerName;
-    this.lastDuelTeam = teamNumber === 1 ? this.selectedMatch.equipe1 : this.selectedMatch.equipe2;
-    this.showDuelCelebration = true;
-    this.remainingDots = 5;
-    
-    console.log('Célébration du duel gagné:', {
-      winner: this.lastDuelWinner,
-      team: this.lastDuelTeam,
-      showCelebration: this.showDuelCelebration
-    });
-    
-    this.startCelebrationTimer();
+    this.startGenericCelebration('duel', playerName, teamNumber);
     console.log('Duel gagné ajouté rapidement avec succès');
   }
 
-  // Nouvelle méthode qui combine la logique de selectPosition et quickAddGoal/quickAddDuel
+  quickAddDribble(playerName: string, teamNumber: 1 | 2) {
+    console.log('quickAddDribble() appelée avec playerName:', playerName, 'teamNumber:', teamNumber);
+    
+    if (!this.selectedMatch) {
+      console.log('selectedMatch null - ajout rapide annulé');
+      return;
+    }
+    
+    console.log('Match sélectionné:', this.selectedMatch);
+    
+    // Calculer la minute actuelle
+    const elapsedMinutes = this.calculateElapsedMinutes(this.selectedMatch.heureDebut);
+    console.log('Minutes écoulées:', elapsedMinutes);
+    
+    if (elapsedMinutes < 0) {
+      console.log('Match pas encore commencé - ajout rapide annulé');
+      return;
+    }
+    
+    // Initialiser le tableau des dribbles s'il n'existe pas
+    if (!this.selectedMatch.dribbles) {
+      this.selectedMatch.dribbles = [];
+    }
+    
+    const newDribble: Dribble = {
+      nom: playerName,
+      minute: elapsedMinutes,
+      equipe: teamNumber
+    };
+    
+    console.log('Nouveau dribble créé:', newDribble);
+    
+    this.selectedMatch.dribbles.push(newDribble);
+    console.log('Dribble ajouté au match');
+    
+    console.log('Match après ajout rapide:', this.selectedMatch);
+    
+    this.saveData();
+    
+    // Célébration du dribble
+    this.startGenericCelebration('dribble', playerName, teamNumber);
+    console.log('Dribble ajouté rapidement avec succès');
+  }
+
+  quickAddInterception(playerName: string, teamNumber: 1 | 2) {
+    console.log('quickAddInterception() appelée avec playerName:', playerName, 'teamNumber:', teamNumber);
+    
+    if (!this.selectedMatch) {
+      console.log('selectedMatch null - ajout rapide annulé');
+      return;
+    }
+    
+    console.log('Match sélectionné:', this.selectedMatch);
+    
+    // Calculer la minute actuelle
+    const elapsedMinutes = this.calculateElapsedMinutes(this.selectedMatch.heureDebut);
+    console.log('Minutes écoulées:', elapsedMinutes);
+    
+    if (elapsedMinutes < 0) {
+      console.log('Match pas encore commencé - ajout rapide annulé');
+      return;
+    }
+    
+    // Initialiser le tableau des interceptions s'il n'existe pas
+    if (!this.selectedMatch.interceptions) {
+      this.selectedMatch.interceptions = [];
+    }
+    
+    const newInterception: Interception = {
+      nom: playerName,
+      minute: elapsedMinutes,
+      equipe: teamNumber
+    };
+    
+    console.log('Nouvelle interception créée:', newInterception);
+    
+    this.selectedMatch.interceptions.push(newInterception);
+    console.log('Interception ajoutée au match');
+    
+    console.log('Match après ajout rapide:', this.selectedMatch);
+    
+    this.saveData();
+    
+    // Célébration de l'interception
+    this.startGenericCelebration('interception', playerName, teamNumber);
+    console.log('Interception ajoutée rapidement avec succès');
+  }
+
+  quickAddFrappe(playerName: string, teamNumber: 1 | 2) {
+    console.log('quickAddFrappe() appelée avec playerName:', playerName, 'teamNumber:', teamNumber);
+    
+    if (!this.selectedMatch) {
+      console.log('selectedMatch null - ajout rapide annulé');
+      return;
+    }
+    
+    console.log('Match sélectionné:', this.selectedMatch);
+    
+    // Calculer la minute actuelle
+    const elapsedMinutes = this.calculateElapsedMinutes(this.selectedMatch.heureDebut);
+    console.log('Minutes écoulées:', elapsedMinutes);
+    
+    if (elapsedMinutes < 0) {
+      console.log('Match pas encore commencé - ajout rapide annulé');
+      return;
+    }
+    
+    // Initialiser le tableau des frappes s'il n'existe pas
+    if (!this.selectedMatch.frappes) {
+      this.selectedMatch.frappes = [];
+    }
+    
+    const newFrappe: Frappe = {
+      nom: playerName,
+      minute: elapsedMinutes,
+      equipe: teamNumber
+    };
+    
+    console.log('Nouvelle frappe créée:', newFrappe);
+    
+    this.selectedMatch.frappes.push(newFrappe);
+    console.log('Frappe ajoutée au match');
+    
+    console.log('Match après ajout rapide:', this.selectedMatch);
+    
+    this.saveData();
+    
+    // Célébration de la frappe
+    this.startGenericCelebration('frappe', playerName, teamNumber);
+    console.log('Frappe ajoutée rapidement avec succès');
+  }
+
+  quickAddFaute(playerName: string, teamNumber: 1 | 2) {
+    console.log('quickAddFaute() appelée avec playerName:', playerName, 'teamNumber:', teamNumber);
+    
+    if (!this.selectedMatch) {
+      console.log('selectedMatch null - ajout rapide annulé');
+      return;
+    }
+    
+    console.log('Match sélectionné:', this.selectedMatch);
+    
+    // Calculer la minute actuelle
+    const elapsedMinutes = this.calculateElapsedMinutes(this.selectedMatch.heureDebut);
+    console.log('Minutes écoulées:', elapsedMinutes);
+    
+    if (elapsedMinutes < 0) {
+      console.log('Match pas encore commencé - ajout rapide annulé');
+      return;
+    }
+    
+    // Initialiser le tableau des fautes s'il n'existe pas
+    if (!this.selectedMatch.fautes) {
+      this.selectedMatch.fautes = [];
+    }
+    
+    const newFaute: Faute = {
+      nom: playerName,
+      minute: elapsedMinutes,
+      equipe: teamNumber
+    };
+    
+    console.log('Nouvelle faute créée:', newFaute);
+    
+    this.selectedMatch.fautes.push(newFaute);
+    console.log('Faute ajoutée au match');
+    
+    console.log('Match après ajout rapide:', this.selectedMatch);
+    
+    this.saveData();
+    
+    // Célébration de la faute
+    this.startGenericCelebration('faute', playerName, teamNumber);
+    console.log('Faute ajoutée rapidement avec succès');
+  }
+
+  quickAddContreAttaque(playerName: string, teamNumber: 1 | 2) {
+    console.log('quickAddContreAttaque() appelée avec playerName:', playerName, 'teamNumber:', teamNumber);
+    
+    if (!this.selectedMatch) {
+      console.log('selectedMatch null - ajout rapide annulé');
+      return;
+    }
+    
+    console.log('Match sélectionné:', this.selectedMatch);
+    
+    // Calculer la minute actuelle
+    const elapsedMinutes = this.calculateElapsedMinutes(this.selectedMatch.heureDebut);
+    console.log('Minutes écoulées:', elapsedMinutes);
+    
+    if (elapsedMinutes < 0) {
+      console.log('Match pas encore commencé - ajout rapide annulé');
+      return;
+    }
+    
+    // Initialiser le tableau des contre-attaques s'il n'existe pas
+    if (!this.selectedMatch.contreAttaques) {
+      this.selectedMatch.contreAttaques = [];
+    }
+    
+    const newContreAttaque: ContreAttaque = {
+      nom: playerName,
+      minute: elapsedMinutes,
+      equipe: teamNumber
+    };
+    
+    console.log('Nouvelle contre-attaque créée:', newContreAttaque);
+    
+    this.selectedMatch.contreAttaques.push(newContreAttaque);
+    console.log('Contre-attaque ajoutée au match');
+    
+    console.log('Match après ajout rapide:', this.selectedMatch);
+    
+    this.saveData();
+    
+    // Célébration de la contre-attaque
+    this.startGenericCelebration('contre-attaque', playerName, teamNumber);
+    console.log('Contre-attaque ajoutée rapidement avec succès');
+  }
+
+  quickAddTikiTaka(playerName: string, teamNumber: 1 | 2) {
+    console.log('quickAddTikiTaka() appelée avec playerName:', playerName, 'teamNumber:', teamNumber);
+    
+    if (!this.selectedMatch) {
+      console.log('selectedMatch null - ajout rapide annulé');
+      return;
+    }
+    
+    console.log('Match sélectionné:', this.selectedMatch);
+    
+    // Calculer la minute actuelle
+    const elapsedMinutes = this.calculateElapsedMinutes(this.selectedMatch.heureDebut);
+    console.log('Minutes écoulées:', elapsedMinutes);
+    
+    if (elapsedMinutes < 0) {
+      console.log('Match pas encore commencé - ajout rapide annulé');
+      return;
+    }
+    
+    // Initialiser le tableau des tiki-taka s'il n'existe pas
+    if (!this.selectedMatch.tikiTakas) {
+      this.selectedMatch.tikiTakas = [];
+    }
+    
+    const newTikiTaka: TikiTaka = {
+      nom: playerName,
+      minute: elapsedMinutes,
+      equipe: teamNumber
+    };
+    
+    console.log('Nouveau tiki-taka créé:', newTikiTaka);
+    
+    this.selectedMatch.tikiTakas.push(newTikiTaka);
+    console.log('Tiki-taka ajouté au match');
+    
+    console.log('Match après ajout rapide:', this.selectedMatch);
+    
+    this.saveData();
+    
+    // Célébration du tiki-taka
+    this.startGenericCelebration('tiki-taka', playerName, teamNumber);
+    console.log('Tiki-taka ajouté rapidement avec succès');
+  }
+
+  // Nouvelle méthode qui permet à l'utilisateur de choisir l'action à enregistrer
   quickAddAction(playerName: string, teamNumber: 1 | 2) {
     console.log('quickAddAction() appelée avec playerName:', playerName, 'teamNumber:', teamNumber);
     
@@ -759,17 +1152,92 @@ export class AppComponent implements OnInit {
     
     console.log('Type du joueur:', player.type);
     
-    // Déterminer si c'est un joueur défensif
-    const isDefensivePlayer = player.type === 'defenseur';
-    console.log('isDefensivePlayer:', isDefensivePlayer);
+    // Définir les actions disponibles selon le type de joueur
+    let actions: string[] = [];
     
-    if (isDefensivePlayer) {
-      // Pour les défenseurs, enregistrer un duel gagné
-      this.quickAddDuel(playerName, teamNumber);
-    } else {
-      // Pour les attaquants et milieux, enregistrer un but
-      this.quickAddGoal(playerName, teamNumber);
+    switch (player.type) {
+      case 'defenseur':
+        actions = ['interception', 'duel', 'faute'];
+        break;
+      case 'milieu':
+        actions = ['tiki-taka', 'dribble', 'contre-attaque', 'interception'];
+        break;
+      case 'attaquant':
+        actions = ['frappe', 'dribble', 'but', 'contre-attaque'];
+        break;
+      default:
+        // Actions par défaut pour tous les types
+        actions = ['but', 'duel', 'dribble', 'interception', 'frappe', 'faute', 'contre-attaque', 'tiki-taka'];
+        break;
     }
+    
+    // Stocker les informations pour le modal
+    this.pendingActionPlayer = playerName;
+    this.pendingActionTeam = teamNumber;
+    this.availableActions = actions;
+    
+    // Afficher le modal de sélection d'action
+    this.showActionSelectionModal = true;
+    
+    console.log('Modal de sélection d\'action affiché pour:', {
+      player: playerName,
+      team: teamNumber,
+      type: player.type,
+      actions: actions
+    });
+  }
+
+  // Méthode pour exécuter l'action sélectionnée
+  executeSelectedAction(action: string) {
+    console.log('Exécution de l\'action sélectionnée:', action);
+    
+    // Fermer le modal
+    this.showActionSelectionModal = false;
+    
+    // Exécuter l'action correspondante
+    switch (action) {
+      case 'but':
+        this.quickAddGoal(this.pendingActionPlayer, this.pendingActionTeam);
+        break;
+      case 'duel':
+        this.quickAddDuel(this.pendingActionPlayer, this.pendingActionTeam);
+        break;
+      case 'dribble':
+        this.quickAddDribble(this.pendingActionPlayer, this.pendingActionTeam);
+        break;
+      case 'interception':
+        this.quickAddInterception(this.pendingActionPlayer, this.pendingActionTeam);
+        break;
+      case 'frappe':
+        this.quickAddFrappe(this.pendingActionPlayer, this.pendingActionTeam);
+        break;
+      case 'faute':
+        this.quickAddFaute(this.pendingActionPlayer, this.pendingActionTeam);
+        break;
+      case 'contre-attaque':
+        this.quickAddContreAttaque(this.pendingActionPlayer, this.pendingActionTeam);
+        break;
+      case 'tiki-taka':
+        this.quickAddTikiTaka(this.pendingActionPlayer, this.pendingActionTeam);
+        break;
+      default:
+        console.log('Action non reconnue:', action);
+        break;
+    }
+    
+    // Réinitialiser les variables
+    this.pendingActionPlayer = '';
+    this.pendingActionTeam = 1;
+    this.availableActions = [];
+  }
+
+  // Méthode pour annuler la sélection d'action
+  cancelActionSelection() {
+    console.log('Sélection d\'action annulée');
+    this.showActionSelectionModal = false;
+    this.pendingActionPlayer = '';
+    this.pendingActionTeam = 1;
+    this.availableActions = [];
   }
 
   saveGoalWithAssist() {
@@ -846,9 +1314,7 @@ export class AppComponent implements OnInit {
     console.log('saveDuel() appelée');
     
     this.saveData();
-    this.showDuelCelebration = false;
-    this.lastDuelWinner = '';
-    this.lastDuelTeam = '';
+    this.showCelebration = false;
     
     console.log('Duel gagné sauvegardé avec succès');
   }
@@ -870,7 +1336,7 @@ export class AppComponent implements OnInit {
       console.log('Dernier duel supprimé');
     }
     
-    this.showDuelCelebration = false;
+    this.showCelebration = false;
   }
 
   supprimerDuel(matchIndex: number, duelIndex: number) {
@@ -897,6 +1363,126 @@ export class AppComponent implements OnInit {
     
     this.saveData();
     console.log('Duel supprimé avec succès');
+  }
+
+  supprimerDribble(matchIndex: number, dribbleIndex: number) {
+    console.log('supprimerDribble() appelée avec matchIndex:', matchIndex, 'dribbleIndex:', dribbleIndex);
+    
+    if (matchIndex < 0 || matchIndex >= this.matches.length) {
+      console.log('Index de match invalide - suppression annulée');
+      return;
+    }
+    
+    const match = this.matches[matchIndex];
+    
+    if (!match.dribbles || dribbleIndex < 0 || dribbleIndex >= match.dribbles.length) {
+      console.log('Index de dribble invalide - suppression annulée');
+      return;
+    }
+    
+    match.dribbles.splice(dribbleIndex, 1);
+    this.saveData();
+    console.log('Dribble supprimé avec succès');
+  }
+
+  supprimerInterception(matchIndex: number, interceptionIndex: number) {
+    console.log('supprimerInterception() appelée avec matchIndex:', matchIndex, 'interceptionIndex:', interceptionIndex);
+    
+    if (matchIndex < 0 || matchIndex >= this.matches.length) {
+      console.log('Index de match invalide - suppression annulée');
+      return;
+    }
+    
+    const match = this.matches[matchIndex];
+    
+    if (!match.interceptions || interceptionIndex < 0 || interceptionIndex >= match.interceptions.length) {
+      console.log('Index d\'interception invalide - suppression annulée');
+      return;
+    }
+    
+    match.interceptions.splice(interceptionIndex, 1);
+    this.saveData();
+    console.log('Interception supprimée avec succès');
+  }
+
+  supprimerFrappe(matchIndex: number, frappeIndex: number) {
+    console.log('supprimerFrappe() appelée avec matchIndex:', matchIndex, 'frappeIndex:', frappeIndex);
+    
+    if (matchIndex < 0 || matchIndex >= this.matches.length) {
+      console.log('Index de match invalide - suppression annulée');
+      return;
+    }
+    
+    const match = this.matches[matchIndex];
+    
+    if (!match.frappes || frappeIndex < 0 || frappeIndex >= match.frappes.length) {
+      console.log('Index de frappe invalide - suppression annulée');
+      return;
+    }
+    
+    match.frappes.splice(frappeIndex, 1);
+    this.saveData();
+    console.log('Frappe supprimée avec succès');
+  }
+
+  supprimerFaute(matchIndex: number, fauteIndex: number) {
+    console.log('supprimerFaute() appelée avec matchIndex:', matchIndex, 'fauteIndex:', fauteIndex);
+    
+    if (matchIndex < 0 || matchIndex >= this.matches.length) {
+      console.log('Index de match invalide - suppression annulée');
+      return;
+    }
+    
+    const match = this.matches[matchIndex];
+    
+    if (!match.fautes || fauteIndex < 0 || fauteIndex >= match.fautes.length) {
+      console.log('Index de faute invalide - suppression annulée');
+      return;
+    }
+    
+    match.fautes.splice(fauteIndex, 1);
+    this.saveData();
+    console.log('Faute supprimée avec succès');
+  }
+
+  supprimerContreAttaque(matchIndex: number, contreAttaqueIndex: number) {
+    console.log('supprimerContreAttaque() appelée avec matchIndex:', matchIndex, 'contreAttaqueIndex:', contreAttaqueIndex);
+    
+    if (matchIndex < 0 || matchIndex >= this.matches.length) {
+      console.log('Index de match invalide - suppression annulée');
+      return;
+    }
+    
+    const match = this.matches[matchIndex];
+    
+    if (!match.contreAttaques || contreAttaqueIndex < 0 || contreAttaqueIndex >= match.contreAttaques.length) {
+      console.log('Index de contre-attaque invalide - suppression annulée');
+      return;
+    }
+    
+    match.contreAttaques.splice(contreAttaqueIndex, 1);
+    this.saveData();
+    console.log('Contre-attaque supprimée avec succès');
+  }
+
+  supprimerTikiTaka(matchIndex: number, tikiTakaIndex: number) {
+    console.log('supprimerTikiTaka() appelée avec matchIndex:', matchIndex, 'tikiTakaIndex:', tikiTakaIndex);
+    
+    if (matchIndex < 0 || matchIndex >= this.matches.length) {
+      console.log('Index de match invalide - suppression annulée');
+      return;
+    }
+    
+    const match = this.matches[matchIndex];
+    
+    if (!match.tikiTakas || tikiTakaIndex < 0 || tikiTakaIndex >= match.tikiTakas.length) {
+      console.log('Index de tiki-taka invalide - suppression annulée');
+      return;
+    }
+    
+    match.tikiTakas.splice(tikiTakaIndex, 1);
+    this.saveData();
+    console.log('Tiki-taka supprimé avec succès');
   }
 
   supprimerMatch(match: Match) {
@@ -928,6 +1514,8 @@ export class AppComponent implements OnInit {
           this.teams = data.teams;
           // S'assurer que toutes les équipes de TEAMS sont présentes
           this.ensureAllTeamsPresent();
+          // Sauvegarder immédiatement pour persister les joueurs ajoutés
+          this.saveData();
         }
       } else {
         // Supprimer les données expirées
@@ -944,6 +1532,20 @@ export class AppComponent implements OnInit {
         // Ajouter l'équipe manquante
         this.teams.push({ ...teamFromTEAMS });
         console.log(`Équipe ajoutée: ${teamFromTEAMS.name}`);
+      } else {
+        // S'assurer que l'équipe existante a tous les joueurs de TEAMS
+        if (teamFromTEAMS.players.length > 0) {
+          const missingPlayers = teamFromTEAMS.players.filter(
+            teamPlayer => !existingTeam.players.some(existingPlayer => 
+              existingPlayer.name === teamPlayer.name
+            )
+          );
+          
+          if (missingPlayers.length > 0) {
+            existingTeam.players.push(...missingPlayers);
+            console.log(`Joueurs ajoutés à ${teamFromTEAMS.name}:`, missingPlayers.map(p => p.name));
+          }
+        }
       }
     });
   }
@@ -1023,6 +1625,150 @@ export class AppComponent implements OnInit {
 
     // Trier par nom
     return groupedDuels.sort((a, b) => a.nom.localeCompare(b.nom));
+  }
+
+  getGroupedDribbles(match: Match, equipe: 1 | 2): GroupedScorer[] {
+    if (!match.dribbles) {
+      return [];
+    }
+    
+    const groupedDribbles = match.dribbles
+      .filter(d => d.equipe === equipe)
+      .reduce((acc, dribble) => {
+        const existingDribble = acc.find(s => s.nom === dribble.nom);
+        if (existingDribble) {
+          existingDribble.minutes.push(dribble.minute);
+          existingDribble.minutes.sort((a, b) => a - b);
+        } else {
+          acc.push({ 
+            nom: dribble.nom, 
+            minutes: [dribble.minute]
+          });
+        }
+        return acc;
+      }, [] as GroupedScorer[]);
+
+    return groupedDribbles.sort((a, b) => a.nom.localeCompare(b.nom));
+  }
+
+  getGroupedInterceptions(match: Match, equipe: 1 | 2): GroupedScorer[] {
+    if (!match.interceptions) {
+      return [];
+    }
+    
+    const groupedInterceptions = match.interceptions
+      .filter(d => d.equipe === equipe)
+      .reduce((acc, interception) => {
+        const existingInterception = acc.find(s => s.nom === interception.nom);
+        if (existingInterception) {
+          existingInterception.minutes.push(interception.minute);
+          existingInterception.minutes.sort((a, b) => a - b);
+        } else {
+          acc.push({ 
+            nom: interception.nom, 
+            minutes: [interception.minute]
+          });
+        }
+        return acc;
+      }, [] as GroupedScorer[]);
+
+    return groupedInterceptions.sort((a, b) => a.nom.localeCompare(b.nom));
+  }
+
+  getGroupedFrappes(match: Match, equipe: 1 | 2): GroupedScorer[] {
+    if (!match.frappes) {
+      return [];
+    }
+    
+    const groupedFrappes = match.frappes
+      .filter(d => d.equipe === equipe)
+      .reduce((acc, frappe) => {
+        const existingFrappe = acc.find(s => s.nom === frappe.nom);
+        if (existingFrappe) {
+          existingFrappe.minutes.push(frappe.minute);
+          existingFrappe.minutes.sort((a, b) => a - b);
+        } else {
+          acc.push({ 
+            nom: frappe.nom, 
+            minutes: [frappe.minute]
+          });
+        }
+        return acc;
+      }, [] as GroupedScorer[]);
+
+    return groupedFrappes.sort((a, b) => a.nom.localeCompare(b.nom));
+  }
+
+  getGroupedFautes(match: Match, equipe: 1 | 2): GroupedScorer[] {
+    if (!match.fautes) {
+      return [];
+    }
+    
+    const groupedFautes = match.fautes
+      .filter(d => d.equipe === equipe)
+      .reduce((acc, faute) => {
+        const existingFaute = acc.find(s => s.nom === faute.nom);
+        if (existingFaute) {
+          existingFaute.minutes.push(faute.minute);
+          existingFaute.minutes.sort((a, b) => a - b);
+        } else {
+          acc.push({ 
+            nom: faute.nom, 
+            minutes: [faute.minute]
+          });
+        }
+        return acc;
+      }, [] as GroupedScorer[]);
+
+    return groupedFautes.sort((a, b) => a.nom.localeCompare(b.nom));
+  }
+
+  getGroupedContreAttaques(match: Match, equipe: 1 | 2): GroupedScorer[] {
+    if (!match.contreAttaques) {
+      return [];
+    }
+    
+    const groupedContreAttaques = match.contreAttaques
+      .filter(d => d.equipe === equipe)
+      .reduce((acc, contreAttaque) => {
+        const existingContreAttaque = acc.find(s => s.nom === contreAttaque.nom);
+        if (existingContreAttaque) {
+          existingContreAttaque.minutes.push(contreAttaque.minute);
+          existingContreAttaque.minutes.sort((a, b) => a - b);
+        } else {
+          acc.push({ 
+            nom: contreAttaque.nom, 
+            minutes: [contreAttaque.minute]
+          });
+        }
+        return acc;
+      }, [] as GroupedScorer[]);
+
+    return groupedContreAttaques.sort((a, b) => a.nom.localeCompare(b.nom));
+  }
+
+  getGroupedTikiTakas(match: Match, equipe: 1 | 2): GroupedScorer[] {
+    if (!match.tikiTakas) {
+      return [];
+    }
+    
+    const groupedTikiTakas = match.tikiTakas
+      .filter(d => d.equipe === equipe)
+      .reduce((acc, tikiTaka) => {
+        const existingTikiTaka = acc.find(s => s.nom === tikiTaka.nom);
+        if (existingTikiTaka) {
+          existingTikiTaka.minutes.push(tikiTaka.minute);
+          existingTikiTaka.minutes.sort((a, b) => a - b);
+        } else {
+          acc.push({ 
+            nom: tikiTaka.nom, 
+            minutes: [tikiTaka.minute]
+          });
+        }
+        return acc;
+      }, [] as GroupedScorer[]);
+
+    return groupedTikiTakas.sort((a, b) => a.nom.localeCompare(b.nom));
   }
 
   // Nouvelle méthode qui filtre les buts désactivés
@@ -1496,7 +2242,13 @@ Lien direct vers le match : ${matchUrl}
         showElements: true,
         competition: competition.name,
         updatedAt: new Date(),
-        duelsGagnes: []
+        duelsGagnes: [],
+        dribbles: [],
+        interceptions: [],
+        frappes: [],
+        fautes: [],
+        contreAttaques: [],
+        tikiTakas: []
       };
 
       // Ajouter le match temporaire pour créer la compétition
@@ -2112,6 +2864,12 @@ Lien direct vers le match : ${matchUrl}
         competition: values[6]?.replace(/"/g, '') || '',
         buteurs: [],
         duelsGagnes: [],
+        dribbles: [],
+        interceptions: [],
+        frappes: [],
+        fautes: [],
+        contreAttaques: [],
+        tikiTakas: [],
         updatedAt: new Date()
       };
       
@@ -2663,16 +3421,71 @@ Lien direct vers le match : ${matchUrl}
       console.log('Dots restants:', this.remainingDots);
       if (this.remainingDots <= 0) {
         // Gérer la fin de célébration selon le type
-        if (this.showGoalCelebration) {
-          this.showGoalCelebration = false;
-          this.saveGoalWithAssist();
-        } else if (this.showDuelCelebration) {
-          this.showDuelCelebration = false;
-          this.saveDuel();
+        if (this.showCelebration && this.celebrationConfig) {
+          this.showCelebration = false;
+          
+          // Actions spécifiques selon le type
+          if (this.celebrationConfig.type === 'but') {
+            this.saveCelebrationWithAssist();
+          } else if (this.celebrationConfig.type === 'duel') {
+            this.saveDuel();
+          }
+          // Pour les autres types, pas d'action supplémentaire nécessaire
         }
         clearInterval(this.celebrationTimer);
       }
     }, 1000);
+  }
+
+  // Méthode pour sauvegarder avec assist (pour les buts)
+  saveCelebrationWithAssist() {
+    console.log('saveCelebrationWithAssist() appelée');
+    
+    if (!this.selectedMatch || !this.celebrationPlayer || !this.celebrationConfig) {
+      console.log('Données de célébration manquantes - sauvegarde annulée');
+      return;
+    }
+    
+    // Vérifications de sécurité pour les buteurs
+    if (!this.selectedMatch.buteurs || !Array.isArray(this.selectedMatch.buteurs) || this.selectedMatch.buteurs.length === 0) {
+      console.error('Propriété buteurs invalide ou vide:', this.selectedMatch.buteurs);
+      return;
+    }
+    
+    // Trouver le dernier but ajouté et ajouter l'assist
+    const lastButeur = this.selectedMatch.buteurs[this.selectedMatch.buteurs.length - 1];
+    if (lastButeur && lastButeur.nom === this.celebrationPlayer) {
+      lastButeur.assist = this.celebrationAssist;
+      console.log('Assist ajouté au buteur:', lastButeur);
+    }
+    
+    this.saveData();
+    this.showCelebration = false;
+    console.log('But avec assist sauvegardé avec succès');
+  }
+
+  // Méthode pour annuler la célébration
+  cancelCelebration() {
+    console.log('cancelCelebration() appelée');
+    
+    if (!this.selectedMatch || !this.celebrationConfig) {
+      console.log('Données de célébration manquantes - annulation annulée');
+      return;
+    }
+    
+    // Actions spécifiques selon le type
+    if (this.celebrationConfig.type === 'but') {
+      this.cancelGoal();
+    } else if (this.celebrationConfig.type === 'duel') {
+      this.cancelDuel();
+    }
+    // Pour les autres types, pas d'action d'annulation nécessaire
+    
+    this.showCelebration = false;
+    this.celebrationConfig = null;
+    this.celebrationPlayer = '';
+    this.celebrationTeam = '';
+    this.celebrationAssist = '';
   }
 
   // Méthode pour s'assurer que tous les joueurs ayant marqué des buts sont dans leurs équipes
@@ -3132,3 +3945,4 @@ Lien direct vers le match : ${matchUrl}
     });
   }
 }
+

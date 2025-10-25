@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Firestore, collection, addDoc, getDocs, doc, getDoc, query, where, updateDoc, deleteDoc } from '@angular/fire/firestore';
-import { Match, Buteur, DuelGagne } from './models/match.model';
+import { Match, Buteur, DuelGagne, Dribble, Interception, Frappe, Faute, ContreAttaque, TikiTaka } from './models/match.model';
 import { Competition } from './models/competition.model';
 
 @Injectable({
@@ -37,7 +37,14 @@ export class FirestoreService {
         positions: data['positions'] || {},
         showElements: data['showElements'] !== undefined ? data['showElements'] : true,
         updatedAt: data['updatedAt'] ? new Date(data['updatedAt']) : new Date(),
-        duelsGagnes: data['duelsGagnes'] || []
+        duelsGagnes: data['duelsGagnes'] || [],
+        dribbles: data['dribbles'] || [],
+        interceptions: data['interceptions'] || [],
+        frappes: data['frappes'] || [],
+        fautes: data['fautes'] || [],
+        contreAttaques: data['contreAttaques'] || [],
+        tikiTakas: data['tikiTakas'] || [],
+        competition: data['competition'] || undefined
       };
     });
   }
@@ -59,7 +66,13 @@ export class FirestoreService {
         showElements: data['showElements'] !== undefined ? data['showElements'] : true,
         competition: data['competition'] || undefined,
         updatedAt: data['updatedAt'] ? new Date(data['updatedAt']) : new Date(),
-        duelsGagnes: data['duelsGagnes'] || []
+        duelsGagnes: data['duelsGagnes'] || [],
+        dribbles: data['dribbles'] || [],
+        interceptions: data['interceptions'] || [],
+        frappes: data['frappes'] || [],
+        fautes: data['fautes'] || [],
+        contreAttaques: data['contreAttaques'] || [],
+        tikiTakas: data['tikiTakas'] || []
       };
       return match;
     }
