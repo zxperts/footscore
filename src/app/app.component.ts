@@ -1862,6 +1862,21 @@ export class AppComponent implements OnInit {
     return allStats;
   }
 
+  // Méthode pour obtenir le nom lisible d'un type de statistique
+  getStatTypeName(type: string): string {
+    const typeNames: { [key: string]: string } = {
+      'duel': 'Duels gagnés',
+      'dribble': 'Dribbles',
+      'interception': 'Interceptions',
+      'frappe': 'Frappes',
+      'faute': 'Fautes',
+      'contre-attaque': 'Contre-attaques',
+      'tiki-taka': 'Tiki-taka'
+    };
+    
+    return typeNames[type] || type;
+  }
+
   // Méthode pour obtenir toutes les statistiques pour le modal de modification
   getAllStatsForModal(): any[] {
     if (!this.selectedMatch) {

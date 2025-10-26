@@ -371,7 +371,7 @@
               <div class="scorers-column left">
                 <div *ngFor="let stat of getAllGroupedStats(match, 1)">
                   <div class="buteur-equipe" [style.color]="stat.color">
-                    <span>{{ stat.emoji }} {{ stat.nom }}:</span>
+                    <span>{{ stat.emoji }} {{ getStatTypeName(stat.type) }} - {{ stat.nom }}:</span>
                     <span class="minutes-list left-team" [style.color]="stat.color">
                       <ng-container *ngFor="let minute of stat.minutes; let i = index">
                         <span *ngIf="i > 0 && i % 5 === 0"><br></span>
@@ -385,7 +385,7 @@
               <div class="scorers-column right">
                 <div *ngFor="let stat of getAllGroupedStats(match, 2)">
                   <div class="buteur-equipe" [style.color]="stat.color">
-                    <span>{{ stat.emoji }} {{ stat.nom }}:</span>
+                    <span>{{ stat.emoji }} {{ getStatTypeName(stat.type) }} - {{ stat.nom }}:</span>
                     <span class="minutes-list right-team" [style.color]="stat.color">
                       <ng-container *ngFor="let minute of stat.minutes; let i = index">
                         <span *ngIf="i > 0 && i % 5 === 0"><br></span>
@@ -649,7 +649,7 @@
             <div class="duel-item d-flex justify-content-between align-items-center p-2 border rounded mb-2"
                  [style.border-color]="stat.color + ' !important'">
               <span class="flex-grow-1">
-                <strong [style.color]="stat.color">{{ stat.emoji }} {{ stat.nom }} - {{ stat.minute }}'</strong> 
+                <strong [style.color]="stat.color">{{ stat.emoji }} {{ getStatTypeName(stat.type) }} - {{ stat.nom }} - {{ stat.minute }}'</strong> 
                 <em [style.color]="stat.color">({{ stat.equipe === 1 ? selectedMatch.equipe1 : selectedMatch.equipe2 }})</em>
               </span>
               <div>
