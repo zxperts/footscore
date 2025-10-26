@@ -248,7 +248,7 @@ h1 {
 
 
   .team-scorers {
-    gap: 1rem;
+    gap: 0.5rem;
   }
 
   .scorers-column {
@@ -468,14 +468,14 @@ h1 {
   padding: 0.5rem;
   background-color: rgba(248, 249, 250, 0.5);
   border-radius: 8px;
-  width: 90%;
+  width: 98%;
   max-width: 900px;
 }
 
 .team-scorers {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 2rem;
+  gap: 0.5rem;
   position: relative;
 }
 
