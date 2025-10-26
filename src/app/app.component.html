@@ -646,8 +646,7 @@
         
         <div>
           <div *ngFor="let stat of getAllStatsForModal()" class="duel-item">
-            <div class="duel-item d-flex justify-content-between align-items-center p-2 border rounded mb-2"
-                 [style.border-color]="stat.color + ' !important'">
+            <div class="duel-item d-flex justify-content-between align-items-center p-2 border rounded mb-2">
               <span class="flex-grow-1">
                 <strong [style.color]="stat.color">{{ stat.emoji }} {{ getStatTypeName(stat.type) }} - {{ stat.nom }} - {{ stat.minute }}'</strong> 
                 <em [style.color]="stat.color">({{ stat.equipe === 1 ? selectedMatch.equipe1 : selectedMatch.equipe2 }})</em>
