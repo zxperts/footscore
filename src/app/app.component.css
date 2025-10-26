@@ -252,7 +252,7 @@ h1 {
   }
 
   .scorers-column {
-    padding: 0 0.5rem;
+    padding: 0.1rem;
     font-size: 0.85em;
   }
 
@@ -491,7 +491,7 @@ h1 {
 }
 
 .scorers-column {
-  padding: 0 1rem;
+  padding: 0.1rem;
 }
 
 .scorers-column.left {
