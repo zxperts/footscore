@@ -1152,24 +1152,8 @@ export class AppComponent implements OnInit {
     
     console.log('Type du joueur:', player.type);
     
-    // Définir les actions disponibles selon le type de joueur
-    let actions: string[] = [];
-    
-    switch (player.type) {
-      case 'defenseur':
-        actions = ['interception', 'duel', 'faute'];
-        break;
-      case 'milieu':
-        actions = ['tiki-taka', 'dribble', 'contre-attaque', 'interception'];
-        break;
-      case 'attaquant':
-        actions = ['frappe', 'dribble', 'but', 'contre-attaque'];
-        break;
-      default:
-        // Actions par défaut pour tous les types
-        actions = ['but', 'duel', 'dribble', 'interception', 'frappe', 'faute', 'contre-attaque', 'tiki-taka'];
-        break;
-    }
+    // Tous les joueurs peuvent effectuer toutes les actions
+    const actions: string[] = ['but', 'duel', 'dribble', 'interception', 'frappe', 'faute', 'contre-attaque', 'tiki-taka'];
     
     // Stocker les informations pour le modal
     this.pendingActionPlayer = playerName;

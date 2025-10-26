@@ -1450,22 +1450,64 @@
         </p>
         <p class="text-muted mb-3">Choisissez l'action à enregistrer :</p>
         
-        <div class="row g-2">
-          <div class="col-6" *ngFor="let action of availableActions">
-            <button 
-              class="btn btn-outline-primary w-100 mb-2" 
-              (click)="executeSelectedAction(action)"
-              [class.btn-primary]="false">
-              <i class="fas fa-futbol me-2" *ngIf="action === 'but'"></i>
-              <i class="fas fa-shield-alt me-2" *ngIf="action === 'duel'"></i>
-              <i class="fas fa-running me-2" *ngIf="action === 'dribble'"></i>
-              <i class="fas fa-hand-paper me-2" *ngIf="action === 'interception'"></i>
-              <i class="fas fa-bullseye me-2" *ngIf="action === 'frappe'"></i>
-              <i class="fas fa-exclamation-triangle me-2" *ngIf="action === 'faute'"></i>
-              <i class="fas fa-bolt me-2" *ngIf="action === 'contre-attaque'"></i>
-              <i class="fas fa-exchange-alt me-2" *ngIf="action === 'tiki-taka'"></i>
-              {{ action | titlecase }}
-            </button>
+        <!-- Groupe 1 : Actions de tir et dribble -->
+        <div class="mb-3">
+          <h6 class="text-muted mb-2">🟦 Attaque</h6>
+          <div class="row g-2">
+            <div class="col-6">
+              <button class="btn btn-outline-primary w-100 mb-2" (click)="executeSelectedAction('but')">
+                <i class="fas fa-futbol me-2"></i>But
+              </button>
+            </div>
+            <div class="col-6">
+              <button class="btn btn-outline-primary w-100 mb-2" (click)="executeSelectedAction('frappe')">
+                <i class="fas fa-bullseye me-2"></i>Frappe
+              </button>
+            </div>
+            <div class="col-6">
+              <button class="btn btn-outline-primary w-100 mb-2" (click)="executeSelectedAction('dribble')">
+                <i class="fas fa-running me-2"></i>Dribble
+              </button>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Groupe 2 : Actions de jeu -->
+        <div class="mb-3">
+          <h6 class="text-muted mb-2">🟨 Jeu</h6>
+          <div class="row g-2">
+            <div class="col-6">
+              <button class="btn btn-outline-primary w-100 mb-2" (click)="executeSelectedAction('tiki-taka')">
+                <i class="fas fa-exchange-alt me-2"></i>Tiki-taka
+              </button>
+            </div>
+            <div class="col-6">
+              <button class="btn btn-outline-primary w-100 mb-2" (click)="executeSelectedAction('contre-attaque')">
+                <i class="fas fa-bolt me-2"></i>Contre-attaque
+              </button>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Groupe 3 : Actions défensives -->
+        <div class="mb-3">
+          <h6 class="text-muted mb-2">🟥 Défense</h6>
+          <div class="row g-2">
+            <div class="col-6">
+              <button class="btn btn-outline-primary w-100 mb-2" (click)="executeSelectedAction('interception')">
+                <i class="fas fa-hand-paper me-2"></i>Interception
+              </button>
+            </div>
+            <div class="col-6">
+              <button class="btn btn-outline-primary w-100 mb-2" (click)="executeSelectedAction('duel')">
+                <i class="fas fa-shield-alt me-2"></i>Duel
+              </button>
+            </div>
+            <div class="col-6">
+              <button class="btn btn-outline-primary w-100 mb-2" (click)="executeSelectedAction('faute')">
+                <i class="fas fa-exclamation-triangle me-2"></i>Faute
+              </button>
+            </div>
           </div>
         </div>
       </div>
