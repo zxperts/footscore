@@ -1771,6 +1771,221 @@ export class AppComponent implements OnInit {
     return groupedTikiTakas.sort((a, b) => a.nom.localeCompare(b.nom));
   }
 
+  // Méthode pour obtenir toutes les statistiques groupées pour une équipe
+  getAllGroupedStats(match: Match, equipe: 1 | 2): any[] {
+    const allStats: any[] = [];
+    
+    // Duels
+    const duels = this.getGroupedDuels(match, equipe);
+    duels.forEach(duel => {
+      allStats.push({
+        nom: duel.nom,
+        minutes: duel.minutes,
+        type: 'duel',
+        emoji: '🛡️',
+        color: '#28a745'
+      });
+    });
+    
+    // Dribbles
+    const dribbles = this.getGroupedDribbles(match, equipe);
+    dribbles.forEach(dribble => {
+      allStats.push({
+        nom: dribble.nom,
+        minutes: dribble.minutes,
+        type: 'dribble',
+        emoji: '🏃',
+        color: '#17a2b8'
+      });
+    });
+    
+    // Interceptions
+    const interceptions = this.getGroupedInterceptions(match, equipe);
+    interceptions.forEach(interception => {
+      allStats.push({
+        nom: interception.nom,
+        minutes: interception.minutes,
+        type: 'interception',
+        emoji: '✋',
+        color: '#6f42c1'
+      });
+    });
+    
+    // Frappes
+    const frappes = this.getGroupedFrappes(match, equipe);
+    frappes.forEach(frappe => {
+      allStats.push({
+        nom: frappe.nom,
+        minutes: frappe.minutes,
+        type: 'frappe',
+        emoji: '🎯',
+        color: '#fd7e14'
+      });
+    });
+    
+    // Fautes
+    const fautes = this.getGroupedFautes(match, equipe);
+    fautes.forEach(faute => {
+      allStats.push({
+        nom: faute.nom,
+        minutes: faute.minutes,
+        type: 'faute',
+        emoji: '⚠️',
+        color: '#dc3545'
+      });
+    });
+    
+    // Contre-attaques
+    const contreAttaques = this.getGroupedContreAttaques(match, equipe);
+    contreAttaques.forEach(contreAttaque => {
+      allStats.push({
+        nom: contreAttaque.nom,
+        minutes: contreAttaque.minutes,
+        type: 'contre-attaque',
+        emoji: '⚡',
+        color: '#20c997'
+      });
+    });
+    
+    // Tiki-taka
+    const tikiTakas = this.getGroupedTikiTakas(match, equipe);
+    tikiTakas.forEach(tikiTaka => {
+      allStats.push({
+        nom: tikiTaka.nom,
+        minutes: tikiTaka.minutes,
+        type: 'tiki-taka',
+        emoji: '🔄',
+        color: '#6c757d'
+      });
+    });
+    
+    return allStats;
+  }
+
+  // Méthode pour obtenir toutes les statistiques pour le modal de modification
+  getAllStatsForModal(): any[] {
+    if (!this.selectedMatch) {
+      return [];
+    }
+    
+    const allStats: any[] = [];
+    
+    // Duels
+    if (this.selectedMatch.duelsGagnes) {
+      this.selectedMatch.duelsGagnes.forEach((duel, index) => {
+        allStats.push({
+          nom: duel.nom,
+          minute: duel.minute,
+          equipe: duel.equipe,
+          type: 'duel',
+          emoji: '🛡️',
+          color: '#28a745',
+          index: index,
+          supprimerFn: () => this.supprimerDuel(this.matches.indexOf(this.selectedMatch!), index)
+        });
+      });
+    }
+    
+    // Dribbles
+    if (this.selectedMatch.dribbles) {
+      this.selectedMatch.dribbles.forEach((dribble, index) => {
+        allStats.push({
+          nom: dribble.nom,
+          minute: dribble.minute,
+          equipe: dribble.equipe,
+          type: 'dribble',
+          emoji: '🏃',
+          color: '#17a2b8',
+          index: index,
+          supprimerFn: () => this.supprimerDribble(this.matches.indexOf(this.selectedMatch!), index)
+        });
+      });
+    }
+    
+    // Interceptions
+    if (this.selectedMatch.interceptions) {
+      this.selectedMatch.interceptions.forEach((interception, index) => {
+        allStats.push({
+          nom: interception.nom,
+          minute: interception.minute,
+          equipe: interception.equipe,
+          type: 'interception',
+          emoji: '✋',
+          color: '#6f42c1',
+          index: index,
+          supprimerFn: () => this.supprimerInterception(this.matches.indexOf(this.selectedMatch!), index)
+        });
+      });
+    }
+    
+    // Frappes
+    if (this.selectedMatch.frappes) {
+      this.selectedMatch.frappes.forEach((frappe, index) => {
+        allStats.push({
+          nom: frappe.nom,
+          minute: frappe.minute,
+          equipe: frappe.equipe,
+          type: 'frappe',
+          emoji: '🎯',
+          color: '#fd7e14',
+          index: index,
+          supprimerFn: () => this.supprimerFrappe(this.matches.indexOf(this.selectedMatch!), index)
+        });
+      });
+    }
+    
+    // Fautes
+    if (this.selectedMatch.fautes) {
+      this.selectedMatch.fautes.forEach((faute, index) => {
+        allStats.push({
+          nom: faute.nom,
+          minute: faute.minute,
+          equipe: faute.equipe,
+          type: 'faute',
+          emoji: '⚠️',
+          color: '#dc3545',
+          index: index,
+          supprimerFn: () => this.supprimerFaute(this.matches.indexOf(this.selectedMatch!), index)
+        });
+      });
+    }
+    
+    // Contre-attaques
+    if (this.selectedMatch.contreAttaques) {
+      this.selectedMatch.contreAttaques.forEach((contreAttaque, index) => {
+        allStats.push({
+          nom: contreAttaque.nom,
+          minute: contreAttaque.minute,
+          equipe: contreAttaque.equipe,
+          type: 'contre-attaque',
+          emoji: '⚡',
+          color: '#20c997',
+          index: index,
+          supprimerFn: () => this.supprimerContreAttaque(this.matches.indexOf(this.selectedMatch!), index)
+        });
+      });
+    }
+    
+    // Tiki-taka
+    if (this.selectedMatch.tikiTakas) {
+      this.selectedMatch.tikiTakas.forEach((tikiTaka, index) => {
+        allStats.push({
+          nom: tikiTaka.nom,
+          minute: tikiTaka.minute,
+          equipe: tikiTaka.equipe,
+          type: 'tiki-taka',
+          emoji: '🔄',
+          color: '#6c757d',
+          index: index,
+          supprimerFn: () => this.supprimerTikiTaka(this.matches.indexOf(this.selectedMatch!), index)
+        });
+      });
+    }
+    
+    // Trier par minute
+    return allStats.sort((a, b) => a.minute - b.minute);
+  }
+
   // Nouvelle méthode qui filtre les buts désactivés
   getActiveGroupedScorers(match: Match, equipe: 1 | 2): GroupedScorer[] {
     

@@ -364,32 +364,32 @@
             </div>
           </div>
 
-          <!-- Section pour afficher les duels gagnés -->
-          <div class="match-scorers" *ngIf="match.showElements && match.duelsGagnes && match.duelsGagnes.length > 0">
+          <!-- Section pour afficher les statistiques (duels, dribbles, interceptions, frappes, fautes, contre-attaques, tiki-taka) -->
+          <div class="match-scorers" *ngIf="match.showElements && ((match.duelsGagnes && match.duelsGagnes.length > 0) || (match.dribbles && match.dribbles.length > 0) || (match.interceptions && match.interceptions.length > 0) || (match.frappes && match.frappes.length > 0) || (match.fautes && match.fautes.length > 0) || (match.contreAttaques && match.contreAttaques.length > 0) || (match.tikiTakas && match.tikiTakas.length > 0))">
             <div class="team-scorers">
-              <!-- Duels équipe 1 -->
+              <!-- Statistiques équipe 1 -->
               <div class="scorers-column left">
-                <div *ngFor="let duel of getGroupedDuels(match, 1)">
-                  <div class="buteur-equipe duel-equipe">
-                    <span>🛡️ {{ duel.nom }}:</span>
-                    <span class="minutes-list left-team">
-                      <ng-container *ngFor="let minute of duel.minutes; let i = index">
-                        <span *ngIf="i > 0 && i % 5 === 0"><br></span> <!-- Line break after every 5 minutes -->
-                        {{minute}}'<span *ngIf="i < duel.minutes.length - 1">,</span>
+                <div *ngFor="let stat of getAllGroupedStats(match, 1)">
+                  <div class="buteur-equipe" [style.color]="stat.color">
+                    <span>{{ stat.emoji }} {{ stat.nom }}:</span>
+                    <span class="minutes-list left-team" [style.color]="stat.color">
+                      <ng-container *ngFor="let minute of stat.minutes; let i = index">
+                        <span *ngIf="i > 0 && i % 5 === 0"><br></span>
+                        {{minute}}'<span *ngIf="i < stat.minutes.length - 1">,</span>
                       </ng-container>
                     </span>
                   </div>
                 </div>
               </div>
-              <!-- Duels équipe 2 -->
+              <!-- Statistiques équipe 2 -->
               <div class="scorers-column right">
-                <div *ngFor="let duel of getGroupedDuels(match, 2)">
-                  <div class="buteur-equipe duel-equipe">
-                    <span>🛡️ {{ duel.nom }}:</span>
-                    <span class="minutes-list right-team">
-                      <ng-container *ngFor="let minute of duel.minutes; let i = index">
-                        <span *ngIf="i > 0 && i % 5 === 0"><br></span> <!-- Line break after every 5 minutes -->
-                        {{minute}}'<span *ngIf="i < duel.minutes.length - 1">,</span>
+                <div *ngFor="let stat of getAllGroupedStats(match, 2)">
+                  <div class="buteur-equipe" [style.color]="stat.color">
+                    <span>{{ stat.emoji }} {{ stat.nom }}:</span>
+                    <span class="minutes-list right-team" [style.color]="stat.color">
+                      <ng-container *ngFor="let minute of stat.minutes; let i = index">
+                        <span *ngIf="i > 0 && i % 5 === 0"><br></span>
+                        {{minute}}'<span *ngIf="i < stat.minutes.length - 1">,</span>
                       </ng-container>
                     </span>
                   </div>
@@ -397,212 +397,6 @@
               </div>
             </div>
           </div>
-          
-          <!-- Section pour afficher les dribbles -->
-          <div class="match-scorers" *ngIf="match.showElements && match.dribbles && match.dribbles.length > 0">
-            <div class="team-scorers">
-              <!-- Dribbles équipe 1 -->
-              <div class="scorers-column left">
-                <div *ngFor="let dribble of getGroupedDribbles(match, 1)">
-                  <div class="buteur-equipe dribble-equipe">
-                    <span>🏃 {{ dribble.nom }}:</span>
-                    <span class="minutes-list left-team">
-                      <ng-container *ngFor="let minute of dribble.minutes; let i = index">
-                        <span *ngIf="i > 0 && i % 5 === 0"><br></span>
-                        {{minute}}'<span *ngIf="i < dribble.minutes.length - 1">,</span>
-                      </ng-container>
-                    </span>
-                  </div>
-                </div>
-              </div>
-              <!-- Dribbles équipe 2 -->
-              <div class="scorers-column right">
-                <div *ngFor="let dribble of getGroupedDribbles(match, 2)">
-                  <div class="buteur-equipe dribble-equipe">
-                    <span>🏃 {{ dribble.nom }}:</span>
-                    <span class="minutes-list right-team">
-                      <ng-container *ngFor="let minute of dribble.minutes; let i = index">
-                        <span *ngIf="i > 0 && i % 5 === 0"><br></span>
-                        {{minute}}'<span *ngIf="i < dribble.minutes.length - 1">,</span>
-                      </ng-container>
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          <!-- Section pour afficher les interceptions -->
-          <div class="match-scorers" *ngIf="match.showElements && match.interceptions && match.interceptions.length > 0">
-            <div class="team-scorers">
-              <!-- Interceptions équipe 1 -->
-              <div class="scorers-column left">
-                <div *ngFor="let interception of getGroupedInterceptions(match, 1)">
-                  <div class="buteur-equipe interception-equipe">
-                    <span>✋ {{ interception.nom }}:</span>
-                    <span class="minutes-list left-team">
-                      <ng-container *ngFor="let minute of interception.minutes; let i = index">
-                        <span *ngIf="i > 0 && i % 5 === 0"><br></span>
-                        {{minute}}'<span *ngIf="i < interception.minutes.length - 1">,</span>
-                      </ng-container>
-                    </span>
-                  </div>
-                </div>
-              </div>
-              <!-- Interceptions équipe 2 -->
-              <div class="scorers-column right">
-                <div *ngFor="let interception of getGroupedInterceptions(match, 2)">
-                  <div class="buteur-equipe interception-equipe">
-                    <span>✋ {{ interception.nom }}:</span>
-                    <span class="minutes-list right-team">
-                      <ng-container *ngFor="let minute of interception.minutes; let i = index">
-                        <span *ngIf="i > 0 && i % 5 === 0"><br></span>
-                        {{minute}}'<span *ngIf="i < interception.minutes.length - 1">,</span>
-                      </ng-container>
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          <!-- Section pour afficher les frappes -->
-          <div class="match-scorers" *ngIf="match.showElements && match.frappes && match.frappes.length > 0">
-            <div class="team-scorers">
-              <!-- Frappes équipe 1 -->
-              <div class="scorers-column left">
-                <div *ngFor="let frappe of getGroupedFrappes(match, 1)">
-                  <div class="buteur-equipe frappe-equipe">
-                    <span>🎯 {{ frappe.nom }}:</span>
-                    <span class="minutes-list left-team">
-                      <ng-container *ngFor="let minute of frappe.minutes; let i = index">
-                        <span *ngIf="i > 0 && i % 5 === 0"><br></span>
-                        {{minute}}'<span *ngIf="i < frappe.minutes.length - 1">,</span>
-                      </ng-container>
-                    </span>
-                  </div>
-                </div>
-              </div>
-              <!-- Frappes équipe 2 -->
-              <div class="scorers-column right">
-                <div *ngFor="let frappe of getGroupedFrappes(match, 2)">
-                  <div class="buteur-equipe frappe-equipe">
-                    <span>🎯 {{ frappe.nom }}:</span>
-                    <span class="minutes-list right-team">
-                      <ng-container *ngFor="let minute of frappe.minutes; let i = index">
-                        <span *ngIf="i > 0 && i % 5 === 0"><br></span>
-                        {{minute}}'<span *ngIf="i < frappe.minutes.length - 1">,</span>
-                      </ng-container>
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          <!-- Section pour afficher les fautes -->
-          <div class="match-scorers" *ngIf="match.showElements && match.fautes && match.fautes.length > 0">
-            <div class="team-scorers">
-              <!-- Fautes équipe 1 -->
-              <div class="scorers-column left">
-                <div *ngFor="let faute of getGroupedFautes(match, 1)">
-                  <div class="buteur-equipe faute-equipe">
-                    <span>⚠️ {{ faute.nom }}:</span>
-                    <span class="minutes-list left-team">
-                      <ng-container *ngFor="let minute of faute.minutes; let i = index">
-                        <span *ngIf="i > 0 && i % 5 === 0"><br></span>
-                        {{minute}}'<span *ngIf="i < faute.minutes.length - 1">,</span>
-                      </ng-container>
-                    </span>
-                  </div>
-                </div>
-              </div>
-              <!-- Fautes équipe 2 -->
-              <div class="scorers-column right">
-                <div *ngFor="let faute of getGroupedFautes(match, 2)">
-                  <div class="buteur-equipe faute-equipe">
-                    <span>⚠️ {{ faute.nom }}:</span>
-                    <span class="minutes-list right-team">
-                      <ng-container *ngFor="let minute of faute.minutes; let i = index">
-                        <span *ngIf="i > 0 && i % 5 === 0"><br></span>
-                        {{minute}}'<span *ngIf="i < faute.minutes.length - 1">,</span>
-                      </ng-container>
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          <!-- Section pour afficher les contre-attaques -->
-          <div class="match-scorers" *ngIf="match.showElements && match.contreAttaques && match.contreAttaques.length > 0">
-            <div class="team-scorers">
-              <!-- Contre-attaques équipe 1 -->
-              <div class="scorers-column left">
-                <div *ngFor="let contreAttaque of getGroupedContreAttaques(match, 1)">
-                  <div class="buteur-equipe contre-attaque-equipe">
-                    <span>⚡ {{ contreAttaque.nom }}:</span>
-                    <span class="minutes-list left-team">
-                      <ng-container *ngFor="let minute of contreAttaque.minutes; let i = index">
-                        <span *ngIf="i > 0 && i % 5 === 0"><br></span>
-                        {{minute}}'<span *ngIf="i < contreAttaque.minutes.length - 1">,</span>
-                      </ng-container>
-                    </span>
-                  </div>
-                </div>
-              </div>
-              <!-- Contre-attaques équipe 2 -->
-              <div class="scorers-column right">
-                <div *ngFor="let contreAttaque of getGroupedContreAttaques(match, 2)">
-                  <div class="buteur-equipe contre-attaque-equipe">
-                    <span>⚡ {{ contreAttaque.nom }}:</span>
-                    <span class="minutes-list right-team">
-                      <ng-container *ngFor="let minute of contreAttaque.minutes; let i = index">
-                        <span *ngIf="i > 0 && i % 5 === 0"><br></span>
-                        {{minute}}'<span *ngIf="i < contreAttaque.minutes.length - 1">,</span>
-                      </ng-container>
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          <!-- Section pour afficher les tiki-taka -->
-          <div class="match-scorers" *ngIf="match.showElements && match.tikiTakas && match.tikiTakas.length > 0">
-            <div class="team-scorers">
-              <!-- Tiki-taka équipe 1 -->
-              <div class="scorers-column left">
-                <div *ngFor="let tikiTaka of getGroupedTikiTakas(match, 1)">
-                  <div class="buteur-equipe tiki-taka-equipe">
-                    <span>🔄 {{ tikiTaka.nom }}:</span>
-                    <span class="minutes-list left-team">
-                      <ng-container *ngFor="let minute of tikiTaka.minutes; let i = index">
-                        <span *ngIf="i > 0 && i % 5 === 0"><br></span>
-                        {{minute}}'<span *ngIf="i < tikiTaka.minutes.length - 1">,</span>
-                      </ng-container>
-                    </span>
-                  </div>
-                </div>
-              </div>
-              <!-- Tiki-taka équipe 2 -->
-              <div class="scorers-column right">
-                <div *ngFor="let tikiTaka of getGroupedTikiTakas(match, 2)">
-                  <div class="buteur-equipe tiki-taka-equipe">
-                    <span>🔄 {{ tikiTaka.nom }}:</span>
-                    <span class="minutes-list right-team">
-                      <ng-container *ngFor="let minute of tikiTaka.minutes; let i = index">
-                        <span *ngIf="i > 0 && i % 5 === 0"><br></span>
-                        {{minute}}'<span *ngIf="i < tikiTaka.minutes.length - 1">,</span>
-                      </ng-container>
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          <!-- Boutons d'action -->
           <div class="match-actions d-flex gap-2 justify-content-center mt-3" *ngIf="match.showElements">
             <button class="btn btn-sm btn-primary d-flex align-items-center" 
                     (click)="selectMatch(match)"
@@ -841,201 +635,27 @@
         </div>
       </div>
 
-      <!-- Section pour afficher les duels gagnés -->
-      <div class="duels-list mb-3" *ngIf="selectedMatch.duelsGagnes && selectedMatch.duelsGagnes.length > 0">
+      <!-- Section pour afficher toutes les statistiques (duels, dribbles, interceptions, frappes, fautes, contre-attaques, tiki-taka) -->
+      <div class="duels-list mb-3" *ngIf="getAllStatsForModal().length > 0">
         <div class="section-header">
           <h4>
-            <span class="toggle-icon">🛡️</span>
-            Duels gagnés ({{ selectedMatch.duelsGagnes.length }})
+            <span class="toggle-icon">📊</span>
+            Statistiques ({{ getAllStatsForModal().length }})
           </h4>
         </div>
         
         <div>
-          <div *ngFor="let duel of selectedMatch.duelsGagnes; let i = index" class="duel-item">
+          <div *ngFor="let stat of getAllStatsForModal()" class="duel-item">
             <div class="duel-item d-flex justify-content-between align-items-center p-2 border rounded mb-2"
-                 style="border-color: #28a745 !important;">
+                 [style.border-color]="stat.color + ' !important'">
               <span class="flex-grow-1">
-                <strong style="color: #28a745;">🛡️ {{ duel.nom }} - {{ duel.minute }}'</strong> 
-                <em style="color: #28a745;">({{ duel.equipe === 1 ? selectedMatch.equipe1 : selectedMatch.equipe2 }})</em>
+                <strong [style.color]="stat.color">{{ stat.emoji }} {{ stat.nom }} - {{ stat.minute }}'</strong> 
+                <em [style.color]="stat.color">({{ stat.equipe === 1 ? selectedMatch.equipe1 : selectedMatch.equipe2 }})</em>
               </span>
               <div>
                 <button class="btn btn-sm btn-danger" 
                         *ngIf="showDeleteButtons"
-                        (click)="supprimerDuel(matches.indexOf(selectedMatch), i)">
-                  <i class="fas fa-trash-alt"></i>
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Section pour afficher les dribbles -->
-      <div class="duels-list mb-3" *ngIf="selectedMatch.dribbles && selectedMatch.dribbles.length > 0">
-        <div class="section-header">
-          <h4>
-            <span class="toggle-icon">🏃</span>
-            Dribbles ({{ selectedMatch.dribbles.length }})
-          </h4>
-        </div>
-        
-        <div>
-          <div *ngFor="let dribble of selectedMatch.dribbles; let i = index" class="duel-item">
-            <div class="duel-item d-flex justify-content-between align-items-center p-2 border rounded mb-2"
-                 style="border-color: #17a2b8 !important;">
-              <span class="flex-grow-1">
-                <strong style="color: #17a2b8;">🏃 {{ dribble.nom }} - {{ dribble.minute }}'</strong> 
-                <em style="color: #17a2b8;">({{ dribble.equipe === 1 ? selectedMatch.equipe1 : selectedMatch.equipe2 }})</em>
-              </span>
-              <div>
-                <button class="btn btn-sm btn-danger" 
-                        *ngIf="showDeleteButtons"
-                        (click)="supprimerDribble(matches.indexOf(selectedMatch), i)">
-                  <i class="fas fa-trash-alt"></i>
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Section pour afficher les interceptions -->
-      <div class="duels-list mb-3" *ngIf="selectedMatch.interceptions && selectedMatch.interceptions.length > 0">
-        <div class="section-header">
-          <h4>
-            <span class="toggle-icon">✋</span>
-            Interceptions ({{ selectedMatch.interceptions.length }})
-          </h4>
-        </div>
-        
-        <div>
-          <div *ngFor="let interception of selectedMatch.interceptions; let i = index" class="duel-item">
-            <div class="duel-item d-flex justify-content-between align-items-center p-2 border rounded mb-2"
-                 style="border-color: #6f42c1 !important;">
-              <span class="flex-grow-1">
-                <strong style="color: #6f42c1;">✋ {{ interception.nom }} - {{ interception.minute }}'</strong> 
-                <em style="color: #6f42c1;">({{ interception.equipe === 1 ? selectedMatch.equipe1 : selectedMatch.equipe2 }})</em>
-              </span>
-              <div>
-                <button class="btn btn-sm btn-danger" 
-                        *ngIf="showDeleteButtons"
-                        (click)="supprimerInterception(matches.indexOf(selectedMatch), i)">
-                  <i class="fas fa-trash-alt"></i>
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Section pour afficher les frappes -->
-      <div class="duels-list mb-3" *ngIf="selectedMatch.frappes && selectedMatch.frappes.length > 0">
-        <div class="section-header">
-          <h4>
-            <span class="toggle-icon">🎯</span>
-            Frappes ({{ selectedMatch.frappes.length }})
-          </h4>
-        </div>
-        
-        <div>
-          <div *ngFor="let frappe of selectedMatch.frappes; let i = index" class="duel-item">
-            <div class="duel-item d-flex justify-content-between align-items-center p-2 border rounded mb-2"
-                 style="border-color: #fd7e14 !important;">
-              <span class="flex-grow-1">
-                <strong style="color: #fd7e14;">🎯 {{ frappe.nom }} - {{ frappe.minute }}'</strong> 
-                <em style="color: #fd7e14;">({{ frappe.equipe === 1 ? selectedMatch.equipe1 : selectedMatch.equipe2 }})</em>
-              </span>
-              <div>
-                <button class="btn btn-sm btn-danger" 
-                        *ngIf="showDeleteButtons"
-                        (click)="supprimerFrappe(matches.indexOf(selectedMatch), i)">
-                  <i class="fas fa-trash-alt"></i>
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Section pour afficher les fautes -->
-      <div class="duels-list mb-3" *ngIf="selectedMatch.fautes && selectedMatch.fautes.length > 0">
-        <div class="section-header">
-          <h4>
-            <span class="toggle-icon">⚠️</span>
-            Fautes ({{ selectedMatch.fautes.length }})
-          </h4>
-        </div>
-        
-        <div>
-          <div *ngFor="let faute of selectedMatch.fautes; let i = index" class="duel-item">
-            <div class="duel-item d-flex justify-content-between align-items-center p-2 border rounded mb-2"
-                 style="border-color: #dc3545 !important;">
-              <span class="flex-grow-1">
-                <strong style="color: #dc3545;">⚠️ {{ faute.nom }} - {{ faute.minute }}'</strong> 
-                <em style="color: #dc3545;">({{ faute.equipe === 1 ? selectedMatch.equipe1 : selectedMatch.equipe2 }})</em>
-              </span>
-              <div>
-                <button class="btn btn-sm btn-danger" 
-                        *ngIf="showDeleteButtons"
-                        (click)="supprimerFaute(matches.indexOf(selectedMatch), i)">
-                  <i class="fas fa-trash-alt"></i>
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Section pour afficher les contre-attaques -->
-      <div class="duels-list mb-3" *ngIf="selectedMatch.contreAttaques && selectedMatch.contreAttaques.length > 0">
-        <div class="section-header">
-          <h4>
-            <span class="toggle-icon">⚡</span>
-            Contre-attaques ({{ selectedMatch.contreAttaques.length }})
-          </h4>
-        </div>
-        
-        <div>
-          <div *ngFor="let contreAttaque of selectedMatch.contreAttaques; let i = index" class="duel-item">
-            <div class="duel-item d-flex justify-content-between align-items-center p-2 border rounded mb-2"
-                 style="border-color: #20c997 !important;">
-              <span class="flex-grow-1">
-                <strong style="color: #20c997;">⚡ {{ contreAttaque.nom }} - {{ contreAttaque.minute }}'</strong> 
-                <em style="color: #20c997;">({{ contreAttaque.equipe === 1 ? selectedMatch.equipe1 : selectedMatch.equipe2 }})</em>
-              </span>
-              <div>
-                <button class="btn btn-sm btn-danger" 
-                        *ngIf="showDeleteButtons"
-                        (click)="supprimerContreAttaque(matches.indexOf(selectedMatch), i)">
-                  <i class="fas fa-trash-alt"></i>
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Section pour afficher les tiki-taka -->
-      <div class="duels-list mb-3" *ngIf="selectedMatch.tikiTakas && selectedMatch.tikiTakas.length > 0">
-        <div class="section-header">
-          <h4>
-            <span class="toggle-icon">🔄</span>
-            Tiki-taka ({{ selectedMatch.tikiTakas.length }})
-          </h4>
-        </div>
-        
-        <div>
-          <div *ngFor="let tikiTaka of selectedMatch.tikiTakas; let i = index" class="duel-item">
-            <div class="duel-item d-flex justify-content-between align-items-center p-2 border rounded mb-2"
-                 style="border-color: #6c757d !important;">
-              <span class="flex-grow-1">
-                <strong style="color: #6c757d;">🔄 {{ tikiTaka.nom }} - {{ tikiTaka.minute }}'</strong> 
-                <em style="color: #6c757d;">({{ tikiTaka.equipe === 1 ? selectedMatch.equipe1 : selectedMatch.equipe2 }})</em>
-              </span>
-              <div>
-                <button class="btn btn-sm btn-danger" 
-                        *ngIf="showDeleteButtons"
-                        (click)="supprimerTikiTaka(matches.indexOf(selectedMatch), i)">
+                        (click)="stat.supprimerFn()">
                   <i class="fas fa-trash-alt"></i>
                 </button>
               </div>
