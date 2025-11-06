@@ -427,20 +427,18 @@
   </div>
 
   <!-- Modal pour modifier le score -->
-  <div *ngIf="selectedMatch && showScoreForm" class="score-modal">
-    
-    <div class="score-modal-content">
-      
-      <button class="close-button" (click)="closeScoreModal()" 
-      style="position: absolute; right: 0; top: O; transform: translateY(-45%);">×</button>
-      
-      
-      <h3 style="text-align: center;">
-        <i class="fas fa-futbol me-2" style="color: #27ae60;"></i>Modifier le score
-      </h3>
-
-
-      <br>
+  <div class="modal-overlay" *ngIf="selectedMatch && showScoreForm">
+    <div class="score-modal">
+    <div class="modal-header">
+      <h5 class="modal-title">
+        <i class="fas fa-futbol me-2"></i>
+        Modifier le score
+      </h5>
+      <button type="button" class="close-button" (click)="closeScoreModal()" aria-label="Fermer">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <div class="modal-body">
 
       <!-- Ajout du score en haut -->
       <div class="match-score-display mb-4">
@@ -682,12 +680,12 @@
           </button>
         </div>
       </div>
-
-      <div class="mt-3">
-        <button type="button" class="btn btn-secondary" (click)="selectedMatch = null">
-          Fermer
-        </button>
-      </div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" (click)="closeScoreModal()">
+        <i class="fas fa-times me-2"></i>Fermer
+      </button>
+    </div>
     </div>
   </div>
 

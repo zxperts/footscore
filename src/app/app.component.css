@@ -87,31 +87,69 @@ h1 {
 
 /* Style de la modal */
 .score-modal {
-  position: fixed;
-  top: 10px; /* Décale le haut de la modale sous le haut de la page */
-  left: 0;
-  width: 100%;
-  height: calc(100% - 10px); /* Ajuste la hauteur pour ne pas dépasser le bas */
-  display: flex;
-  justify-content: center;
-  align-items: flex-start; /* Aligne le contenu en haut, sous le top */
-  z-index: 1070; /* Augmenté pour apparaître au-dessus des autres modales */
-  padding: 0;
-  overflow-y: auto;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  max-width: 1000px;
+  width: 90%;
+  max-height: 90vh;
+  overflow: hidden;
+  z-index: 1050;
+  animation: modalSlideIn 0.3s ease-out;
 }
 
 .score-modal-content {
-  position: relative;
-  width: 100%;
-  max-width: 1000px;
-  margin: 1.75rem auto;
-  background: #fff;
-  border-radius: 0.5rem;
-  box-shadow: 0 0.5rem 1rem rgba(0,0,0,.15);
-  padding: 0.2rem;
-  outline: 0;
+  display: contents;
+}
+
+/* En-tête de la modale score */
+.score-modal .modal-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 1rem;
+  border-bottom: none;
+}
+
+.score-modal .modal-title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+}
+
+.score-modal .close-button {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  opacity: 0.7;
+}
+
+.score-modal .close-button:hover {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+.score-modal .modal-body {
+  padding: 2rem;
+  max-height: 70vh;
   overflow-y: auto;
-  animation: fadeIn .3s;
+  background-color: #ffffff;
+}
+
+.score-modal .modal-footer {
+  padding: 1.5rem;
+  border-top: 1px solid #e9ecef;
+  background-color: #f8f9fa;
 }
 
 .modal-body {
