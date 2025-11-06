@@ -3,7 +3,7 @@
   <div class="modal-header">
     <h5 class="modal-title">
       <i class="fas fa-trophy me-2"></i>
-      Compétitions
+      Gestion Compétition
     </h5>
     <button type="button" class="close-button" (click)="close()" aria-label="Fermer">
       <span aria-hidden="true">&times;</span>
@@ -207,18 +207,15 @@
           <p>Créez votre première compétition !</p>
         </div>
       </div>
-
-      <!-- Bouton d'ajout de compétition -->
-      <div class="add-competition-section mt-4">
-        <button type="button" class="btn btn-success w-100" (click)="openAddForm()" *ngIf="!showAddForm && !showEditForm">
-          <i class="fas fa-plus me-2"></i>
-          Nouvelle compétition
-        </button>
-      </div>
     </div>
   </div>
 
-  <div class="modal-footer">
+  <div class="modal-footer"> 
+    <!-- Bouton d'ajout de compétition -->
+    <button type="button" class="btn btn-success me-auto" (click)="openAddForm()" *ngIf="!showAddForm && !showEditForm">
+      <i class="fas fa-plus-circle me-2"></i>
+      Compétition
+    </button>
     <button type="button" class="btn btn-secondary" (click)="close()">
       <i class="fas fa-times me-2"></i>Fermer
     </button>
