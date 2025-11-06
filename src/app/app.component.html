@@ -1433,84 +1433,89 @@
 </div>
 
 <!-- Modal de sélection d'action -->
-<div class="modal fade action-selection-modal" [class.show]="showActionSelectionModal" [style.display]="showActionSelectionModal ? 'block' : 'none'" tabindex="-1" role="dialog">
-  <div class="modal-dialog modal-dialog-centered" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Sélectionner une action</h5>
-        <button type="button" class="btn-close" (click)="cancelActionSelection()" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <p class="mb-3">
-          <strong>{{ pendingActionPlayer }}</strong> - 
-          {{ pendingActionTeam === 1 ? selectedMatch?.equipe1 : selectedMatch?.equipe2 }}
-        </p>
-        <p class="text-muted mb-3">Choisissez l'action à enregistrer :</p>
-        
-        <!-- Groupe 1 : Actions de tir et dribble -->
-        <div class="mb-3">
-          <h6 class="text-muted mb-2">🟦 Attaque</h6>
-          <div class="row g-2">
-            <div class="col-6">
-              <button class="btn btn-outline-primary w-100 mb-2" (click)="executeSelectedAction('but')">
-                <i class="fas fa-futbol me-2"></i>But
-              </button>
-            </div>
-            <div class="col-6">
-              <button class="btn btn-outline-primary w-100 mb-2" (click)="executeSelectedAction('frappe')">
-                <i class="fas fa-bullseye me-2"></i>Frappe
-              </button>
-            </div>
-            <div class="col-6">
-              <button class="btn btn-outline-primary w-100 mb-2" (click)="executeSelectedAction('dribble')">
-                <i class="fas fa-running me-2"></i>Dribble
-              </button>
-            </div>
+<div class="modal-overlay" *ngIf="showActionSelectionModal">
+  <div class="action-selection-modal">
+    <div class="modal-header">
+      <h5 class="modal-title">
+        <i class="fas fa-tasks me-2"></i>
+        Sélectionner une action
+      </h5>
+      <button type="button" class="close-button" (click)="cancelActionSelection()" aria-label="Fermer">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <div class="modal-body">
+      <p class="mb-3">
+        <strong>{{ pendingActionPlayer }}</strong> - 
+        {{ pendingActionTeam === 1 ? selectedMatch?.equipe1 : selectedMatch?.equipe2 }}
+      </p>
+      <p class="text-muted mb-3">Choisissez l'action à enregistrer :</p>
+      
+      <!-- Groupe 1 : Actions de tir et dribble -->
+      <div class="mb-3">
+        <h6 class="text-muted mb-2">🟦 Attaque</h6>
+        <div class="row g-2">
+          <div class="col-6">
+            <button class="btn btn-outline-primary w-100 mb-2" (click)="executeSelectedAction('but')">
+              <i class="fas fa-futbol me-2"></i>But
+            </button>
           </div>
-        </div>
-        
-        <!-- Groupe 2 : Actions de jeu -->
-        <div class="mb-3">
-          <h6 class="text-muted mb-2">🟨 Jeu</h6>
-          <div class="row g-2">
-            <div class="col-6">
-              <button class="btn btn-outline-primary w-100 mb-2" (click)="executeSelectedAction('tiki-taka')">
-                <i class="fas fa-exchange-alt me-2"></i>Tiki-taka
-              </button>
-            </div>
-            <div class="col-6">
-              <button class="btn btn-outline-primary w-100 mb-2" (click)="executeSelectedAction('contre-attaque')">
-                <i class="fas fa-bolt me-2"></i>Contre-attaque
-              </button>
-            </div>
+          <div class="col-6">
+            <button class="btn btn-outline-primary w-100 mb-2" (click)="executeSelectedAction('frappe')">
+              <i class="fas fa-bullseye me-2"></i>Frappe
+            </button>
           </div>
-        </div>
-        
-        <!-- Groupe 3 : Actions défensives -->
-        <div class="mb-3">
-          <h6 class="text-muted mb-2">🟥 Défense</h6>
-          <div class="row g-2">
-            <div class="col-6">
-              <button class="btn btn-outline-primary w-100 mb-2" (click)="executeSelectedAction('interception')">
-                <i class="fas fa-hand-paper me-2"></i>Interception
-              </button>
-            </div>
-            <div class="col-6">
-              <button class="btn btn-outline-primary w-100 mb-2" (click)="executeSelectedAction('duel')">
-                <i class="fas fa-shield-alt me-2"></i>Duel
-              </button>
-            </div>
-            <div class="col-6">
-              <button class="btn btn-outline-primary w-100 mb-2" (click)="executeSelectedAction('faute')">
-                <i class="fas fa-exclamation-triangle me-2"></i>Faute
-              </button>
-            </div>
+          <div class="col-6">
+            <button class="btn btn-outline-primary w-100 mb-2" (click)="executeSelectedAction('dribble')">
+              <i class="fas fa-running me-2"></i>Dribble
+            </button>
           </div>
         </div>
       </div>
-      <div class="modal-footer">
-        <button class="btn btn-secondary" (click)="cancelActionSelection()">Annuler</button>
+      
+      <!-- Groupe 2 : Actions de jeu -->
+      <div class="mb-3">
+        <h6 class="text-muted mb-2">🟨 Jeu</h6>
+        <div class="row g-2">
+          <div class="col-6">
+            <button class="btn btn-outline-primary w-100 mb-2" (click)="executeSelectedAction('tiki-taka')">
+              <i class="fas fa-exchange-alt me-2"></i>Tiki-taka
+            </button>
+          </div>
+          <div class="col-6">
+            <button class="btn btn-outline-primary w-100 mb-2" (click)="executeSelectedAction('contre-attaque')">
+              <i class="fas fa-bolt me-2"></i>Contre-attaque
+            </button>
+          </div>
+        </div>
       </div>
+      
+      <!-- Groupe 3 : Actions défensives -->
+      <div class="mb-3">
+        <h6 class="text-muted mb-2">🟥 Défense</h6>
+        <div class="row g-2">
+          <div class="col-6">
+            <button class="btn btn-outline-primary w-100 mb-2" (click)="executeSelectedAction('interception')">
+              <i class="fas fa-hand-paper me-2"></i>Interception
+            </button>
+          </div>
+          <div class="col-6">
+            <button class="btn btn-outline-primary w-100 mb-2" (click)="executeSelectedAction('duel')">
+              <i class="fas fa-shield-alt me-2"></i>Duel
+            </button>
+          </div>
+          <div class="col-6">
+            <button class="btn btn-outline-primary w-100 mb-2" (click)="executeSelectedAction('faute')">
+              <i class="fas fa-exclamation-triangle me-2"></i>Faute
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="cancelActionSelection()">
+        <i class="fas fa-times me-2"></i>Annuler
+      </button>
     </div>
   </div>
 </div>

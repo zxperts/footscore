@@ -1716,15 +1716,64 @@ body {
 
 /* Modal de sélection d'action - z-index élevé pour apparaître au-dessus des autres modals */
 .action-selection-modal {
-  z-index: 9999 !important;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  max-width: 600px;
+  width: 90%;
+  max-height: 90vh;
+  overflow: hidden;
+  z-index: 1050;
+  animation: modalSlideIn 0.3s ease-out;
 }
 
-.action-selection-modal .modal-dialog {
-  z-index: 10000 !important;
+.action-selection-modal .modal-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 1rem;
+  border-bottom: none;
 }
 
-.action-selection-modal .modal-content {
-  z-index: 10001 !important;
+.action-selection-modal .modal-title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+}
+
+.action-selection-modal .close-button {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  opacity: 0.8;
+}
+
+.action-selection-modal .close-button:hover {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+.action-selection-modal .modal-body {
+  padding: 2rem;
+  max-height: 70vh;
+  overflow-y: auto;
+  background-color: #ffffff;
+}
+
+.action-selection-modal .modal-footer {
+  padding: 1.5rem;
+  border-top: 1px solid #e9ecef;
+  background-color: #f8f9fa;
 }
 
 /* Responsive pour la modale d'édition des joueurs */
