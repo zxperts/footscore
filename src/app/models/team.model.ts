@@ -1,6 +1,7 @@
 export interface Player {
   name: string;
   type: 'attaquant' | 'milieu' | 'defenseur';
+  number?: number;
 }
 
 export interface Team {

@@ -241,6 +241,11 @@
                   </button>
                 </div>
               </div>
+              <div class="mb-2">
+                <label for="commentaire" class="form-label text-muted">Commentaire (optionnel)</label>
+                <textarea class="form-control form-control-sm" id="commentaire" formControlName="commentaire" 
+                          placeholder="Ajoutez un commentaire sur ce match..." rows="2"></textarea>
+              </div>
             </div>
           </div>
           <div class="d-flex gap-2 ms-2 mt-2">
@@ -397,6 +402,17 @@
               </div>
             </div>
           </div>
+          
+          <!-- Section pour afficher le commentaire -->
+          <div class="match-comment" *ngIf="match.showElements && match.commentaire">
+            <div class="comment-header">
+              <i class="fas fa-comment me-1"></i>Commentaire:
+            </div>
+            <div class="comment-text">
+              {{ match.commentaire }}
+            </div>
+          </div>
+          
           <div class="match-actions d-flex gap-2 justify-content-center mt-3" *ngIf="match.showElements">
             <button class="btn btn-sm btn-primary d-flex align-items-center" 
                     (click)="selectMatch(match)"
@@ -559,6 +575,14 @@
 
       <!-- Liste des joueurs (déplacée avant la liste des buteurs) -->
       <div class="mt-4">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <h6 class="mb-0">Joueurs</h6>
+          <button class="btn btn-sm btn-outline-info" (click)="displayPlayerAsNumber = !displayPlayerAsNumber" 
+                  [title]="displayPlayerAsNumber ? 'Afficher les noms' : 'Afficher les numéros'">
+            <i class="fas" [ngClass]="displayPlayerAsNumber ? 'fa-user' : 'fa-hashtag'"></i>
+            {{ displayPlayerAsNumber ? ' Noms' : ' Numéros' }}
+          </button>
+        </div>
         <div class="row">
           <div class="col-sm-6">
             <h5 class="team-title-1">{{ selectedMatch.equipe1 }}</h5>
@@ -566,11 +590,12 @@
               <!-- Boutons d'ajout de but/duel équipe 1 -->
               <button *ngFor="let player of getTeamPlayers(1)" 
                       class="btn btn-outline-primary btn-sm me-2 mb-2"
-                      (click)="quickAddAction(player.name, 1)">
+                      (click)="quickAddAction(player.name, 1)"
+                      [title]="player.name + (player.number ? ' (' + player.number + ')' : '')">
                 <i *ngIf="player.type === 'attaquant'" class="fas fa-futbol me-1"></i>
                 <i *ngIf="player.type === 'defenseur'" class="fas fa-shield me-1"></i>
                 <i *ngIf="player.type === 'milieu'" class="fas fa-arrows-alt-h me-1"></i>
-                {{ player.name }}
+                {{ getPlayerDisplayText(player) }}
               </button>
               <button *ngIf="!showButeurForm" 
               class="btn btn-outline-primary btn-sm me-2 mb-2"
@@ -585,11 +610,12 @@
               <!-- Idem pour équipe 2 -->
               <button *ngFor="let player of getTeamPlayers(2)" 
                       class="btn btn-outline-secondary btn-sm me-2 mb-2"
-                      (click)="quickAddAction(player.name, 2)">
+                      (click)="quickAddAction(player.name, 2)"
+                      [title]="player.name + (player.number ? ' (' + player.number + ')' : '')">
                 <i *ngIf="player.type === 'attaquant'" class="fas fa-futbol me-1"></i>
                 <i *ngIf="player.type === 'defenseur'" class="fas fa-shield me-1"></i>
                 <i *ngIf="player.type === 'milieu'" class="fas fa-arrows-alt-h me-1"></i>
-                {{ player.name }}
+                {{ getPlayerDisplayText(player) }}
               </button>
               <button *ngIf="!showButeurForm" 
               class="btn btn-outline-secondary btn-sm me-2 mb-2"
@@ -672,7 +698,7 @@
               <i *ngIf="player.type === 'attaquant'" class="fas fa-futbol me-1"></i>
               <i *ngIf="player.type === 'defenseur'" class="fas fa-shield me-1"></i>
               <i *ngIf="player.type === 'milieu'" class="fas fa-arrows-alt-h me-1"></i>
-              {{ player.name }}
+              {{ getPlayerFullDisplayText(player) }}
             </button>
           </div>
           <button class="btn btn-sm btn-secondary mt-2" (click)="selectedPosition = null">
@@ -765,6 +791,12 @@
               </button>
             </div>
           </div>
+        </div>
+        
+        <div class="form-group">
+          <label for="commentaire" class="form-label">Commentaire:</label>
+          <textarea id="commentaire" class="form-control" formControlName="commentaire" 
+                    placeholder="Ajoutez un commentaire sur ce match..." rows="3"></textarea>
         </div>
         
         <div class="button-group mt-3">
@@ -1132,7 +1164,7 @@
               <i *ngIf="player.type === 'attaquant'" class="fas fa-futbol me-1"></i>
               <i *ngIf="player.type === 'defenseur'" class="fas fa-shield me-1"></i>
               <i *ngIf="player.type === 'milieu'" class="fas fa-arrows-alt-h me-1"></i>
-              {{ player.name }}
+              {{ getPlayerFullDisplayText(player) }}
             </button>
           </div>
           <button class="btn btn-sm btn-secondary mt-2" (click)="selectedPosition = null">
@@ -1327,6 +1359,7 @@
                 <i *ngIf="player.type === 'defenseur'" class="fas fa-shield type-icon type-icon-clickable" (click)="cyclePlayerType(player)" title="Changer le type (Défenseur)"></i>
               </div>
               <input class="form-control player-name-input" [(ngModel)]="player.name" placeholder="Nom du joueur" />
+              <input type="number" class="form-control player-number-input ms-2" style="width: 80px;" [(ngModel)]="player.number" placeholder="N°" min="1" max="99" />
               <span class="badge bg-primary ms-2 goals-badge" *ngIf="getGoalsForPlayer(player.name) > 0" (click)="openPlayerGoalsModal(player)">
                 {{ getGoalsForPlayer(player.name) }} ⚽
               </span>
@@ -1349,6 +1382,7 @@
         <div class="add-player-form">
           <div class="input-group">
             <input [(ngModel)]="newPlayerName" class="form-control" placeholder="Nom du nouveau joueur..." (keyup.enter)="addPlayer()" />
+            <input type="number" [(ngModel)]="newPlayerNumber" class="form-control" style="width: 80px;" placeholder="N°" min="1" max="99" (keyup.enter)="addPlayer()" />
             <div class="type-selector">
               <i *ngIf="newPlayerType === 'attaquant'" class="fas fa-futbol type-icon type-icon-clickable" (click)="cycleNewPlayerType()" title="Changer le type (Attaquant)"></i>
               <i *ngIf="newPlayerType === 'milieu'" class="fas fa-arrows-alt-h type-icon type-icon-clickable" (click)="cycleNewPlayerType()" title="Changer le type (Milieu)"></i>

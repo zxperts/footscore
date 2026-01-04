@@ -66,5 +66,6 @@ export interface Match {
   positions?: { [key: string]: string };
   showElements?: boolean;
   competition?: string; // Ajout du champ compétition
+  commentaire?: string; // Ajout du champ commentaire
   updatedAt: Date;
 } 

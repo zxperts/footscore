@@ -101,6 +101,7 @@ export class AppComponent implements OnInit {
   showEditPlayersModal: boolean = false;
   teamToEdit: Team | null = null;
   newPlayerType: 'attaquant' | 'milieu' | 'defenseur' = 'milieu';
+  newPlayerNumber?: number;
   // newPlayerName déjà présente
   selectedPlayerGoalsIndex: number | null = null;
   selectedPlayerGoalsModal: Player | null = null;
@@ -159,6 +160,9 @@ export class AppComponent implements OnInit {
   newTeamTargetField: 'equipe1' | 'equipe2' | null = null;
 
   selectedSeason: string = ''; // Sera initialisée dans ngOnInit avec la saison la plus récente
+  
+  // Configuration pour l'affichage des joueurs (nom ou numéro)
+  displayPlayerAsNumber: boolean = false; // false = afficher le nom, true = afficher le numéro
 
   constructor(
     private fb: FormBuilder,
@@ -169,7 +173,8 @@ export class AppComponent implements OnInit {
       equipe2: ['', Validators.required],
       heureDebut: [this.getCurrentDateTime(), Validators.required],
       lieu: [''],
-      competition: ['']
+      competition: [''],
+      commentaire: ['']
     });
 
     this.scoreForm = this.fb.group({
@@ -197,7 +202,8 @@ export class AppComponent implements OnInit {
       equipe2: ['', Validators.required],
       heureDebut: ['', Validators.required],
       lieu: [''],
-      competition: ['']
+      competition: [''],
+      commentaire: ['']
     });
   }
 
@@ -773,6 +779,22 @@ export class AppComponent implements OnInit {
     const teamName = teamNumber === 1 ? this.selectedMatch.equipe1 : this.selectedMatch.equipe2;
     const team = this.teams.find(t => t.name === teamName);
     return team?.players || [];
+  }
+
+  // Méthode pour obtenir le texte à afficher pour un joueur (nom ou numéro)
+  getPlayerDisplayText(player: Player): string {
+    if (this.displayPlayerAsNumber && player.number) {
+      return player.number.toString();
+    }
+    return player.name;
+  }
+
+  // Méthode pour obtenir le texte complet à afficher (nom + numéro si disponible)
+  getPlayerFullDisplayText(player: Player): string {
+    if (player.number) {
+      return `${player.name} (${player.number})`;
+    }
+    return player.name;
   }
 
   quickAddGoal(playerName: string, teamNumber: 1 | 2) {
@@ -2140,7 +2162,8 @@ export class AppComponent implements OnInit {
       equipe2: match.equipe2,
       heureDebut: this.getNearestValidTime(match.heureDebut),
       lieu: match.lieu,
-      competition: match.competition
+      competition: match.competition,
+      commentaire: match.commentaire
     });
     this.editTeam1Search = match.equipe1;
     this.editTeam2Search = match.equipe2;
@@ -2170,6 +2193,7 @@ export class AppComponent implements OnInit {
       this.selectedMatch.heureDebut = new Date(updatedMatch.heureDebut);
       this.selectedMatch.lieu = updatedMatch.lieu;
       this.selectedMatch.competition = updatedMatch.competition;
+      this.selectedMatch.commentaire = updatedMatch.commentaire;
       this.saveData();
       this.showMatchEditForm = false;
     }
@@ -3400,12 +3424,21 @@ Lien direct vers le match : ${matchUrl}
     this.showEditPlayersModal = false;
     this.teamToEdit = null;
     this.newPlayerName = '';
+    this.newPlayerNumber = undefined;
   }
 
   addPlayer() {
     if (this.teamToEdit && this.newPlayerName.trim()) {
-      this.teamToEdit.players.push({ name: this.newPlayerName.trim(), type: this.newPlayerType });
+      const newPlayer: Player = { 
+        name: this.newPlayerName.trim(), 
+        type: this.newPlayerType 
+      };
+      if (this.newPlayerNumber) {
+        newPlayer.number = this.newPlayerNumber;
+      }
+      this.teamToEdit.players.push(newPlayer);
       this.newPlayerName = '';
+      this.newPlayerNumber = undefined;
       this.newPlayerType = 'milieu';
       this.saveData(); // Sauvegarder après ajout
     }

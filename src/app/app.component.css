@@ -1504,381 +1504,49 @@ body {
   }
 }
 
-/* Animations */
-@keyframes modalSlideIn {
-  from {
-    opacity: 0;
-    transform: scale(0.9) translateY(-20px);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-  }
-}
-
-.team-modal,
-.match-modal,
-.ranking-modal {
-  animation: modalSlideIn 0.3s ease-out;
-}
-
-/* Modale d'édition des joueurs */
-.edit-players-modal {
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-  max-width: 700px;
-  width: 90%;
-  max-height: 90vh;
-  overflow: hidden;
-  z-index: 1060;
-  animation: modalSlideIn 0.3s ease-out;
-}
-
-.edit-players-modal .modal-header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  padding: 1rem;
-  border-bottom: none;
-}
-
-.edit-players-modal .modal-title {
-  margin: 0;
-  font-size: 1.5rem;
-  font-weight: 600;
-}
-
-.edit-players-modal .close-button {
-  background: none;
-  border: none;
-  color: white;
-  font-size: 1.5rem;
-  cursor: pointer;
-  padding: 0;
-  width: 30px;
-  height: 30px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  transition: background-color 0.3s ease;
-}
-
-.edit-players-modal .close-button:hover {
-  background-color: rgba(255, 255, 255, 0.2);
-}
-
-.edit-players-modal .modal-body {
-  padding: 2rem;
-  max-height: 70vh;
-  overflow-y: auto;
-}
-
-.edit-players-modal .modal-footer {
-  padding: 1.5rem;
-  border-top: 1px solid #e9ecef;
+/* Styles pour la section commentaire du match */
+.match-comment {
+  margin-top: 10px;
+  padding: 12px;
   background-color: #f8f9fa;
+  border-radius: 8px;
+  border-left: 4px solid #007bff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
 }
 
-/* Sections de la modale */
-.players-list h6,
-.add-player-section h6 {
+.match-comment:hover {
+  background-color: #e9ecef;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
+}
+
+.match-comment .comment-header {
+  font-size: 0.9em;
+  color: #6c757d;
+  margin-bottom: 6px;
+  font-weight: 500;
+}
+
+.match-comment .comment-text {
   color: #495057;
-  font-weight: 600;
-  border-bottom: 2px solid #e9ecef;
-  padding-bottom: 0.5rem;
+  font-style: italic;
+  line-height: 1.4;
+  word-wrap: break-word;
 }
 
-/* Cartes des joueurs */
-.player-item {
-  transition: all 0.3s ease;
-}
-
-.player-card {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 1rem;
-  background: #f8f9fa;
-  border-radius: 10px;
-  border: 1px solid #e9ecef;
-  transition: all 0.3s ease;
-  flex-wrap: nowrap;
-  gap: 1rem;
-  min-height: 60px;
-}
-
-.player-card:hover {
-  background: #e9ecef;
-  border-color: #dee2e6;
-  transform: translateX(5px);
-}
-
-.player-info {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  min-width: 0;
-  gap: 0.75rem;
-}
-
-.player-type-icon {
-  flex-shrink: 0;
-}
-
-.player-name-input {
-  flex: 1;
-  min-width: 0;
-  max-width: 200px;
-}
-
-.goals-badge {
-  flex-shrink: 0;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.goals-badge:hover {
-  transform: scale(1.1);
-}
-
-.player-actions {
-  display: flex;
-  gap: 0.5rem;
-  opacity: 1;
-  transition: all 0.3s ease;
-  flex-shrink: 0;
-  align-items: center;
-}
-
-.player-actions .btn {
-  padding: 0.5rem;
-  width: 35px;
-  height: 35px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 6px;
-  transition: all 0.3s ease;
-}
-
-.player-actions .btn:hover {
-  transform: scale(1.1);
-}
-
-/* Section d'ajout de joueur */
-.add-player-section {
-  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-  padding: 1.5rem;
-  border-radius: 10px;
-  border: 1px solid #dee2e6;
-}
-
-.add-player-form .input-group {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  min-width: 0; /* Permet au flex de fonctionner correctement */
-}
-
-.add-player-form .form-control {
-  flex: 1;
-  min-width: 0; /* Permet à l'input de se rétrécir si nécessaire */
-  border: 2px solid #e9ecef;
-  border-radius: 8px;
-  padding: 0.75rem;
-  transition: border-color 0.3s ease, box-shadow 0.3s ease;
-  width: auto; /* Permet au flex de contrôler la largeur */
-}
-
-.add-player-form .form-control:focus {
-  border-color: #667eea;
-  box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
-}
-
-.type-selector {
-  display: flex;
-  gap: 0.5rem;
-  flex-shrink: 0;
-}
-
-.add-player-form .btn {
-  padding: 0.75rem 1.5rem;
-  font-weight: 600;
-  border-radius: 8px;
-  transition: all 0.3s ease;
-  flex-shrink: 0;
-}
-
-.add-player-form .btn:hover {
-  transform: translateY(-1px);
-}
-
-/* Modal de sélection d'action - z-index élevé pour apparaître au-dessus des autres modals */
-.action-selection-modal {
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-  max-width: 600px;
-  width: 90%;
-  max-height: 90vh;
-  overflow: hidden;
-  z-index: 1050;
-  animation: modalSlideIn 0.3s ease-out;
-}
-
-.action-selection-modal .modal-header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  padding: 1rem;
-  border-bottom: none;
-}
-
-.action-selection-modal .modal-title {
-  margin: 0;
-  font-size: 1.25rem;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-}
-
-.action-selection-modal .close-button {
-  background: none;
-  border: none;
-  color: white;
-  font-size: 1.5rem;
-  cursor: pointer;
-  padding: 0;
-  width: 30px;
-  height: 30px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.3s ease;
-  opacity: 0.8;
-}
-
-.action-selection-modal .close-button:hover {
-  opacity: 1;
-  transform: scale(1.1);
-}
-
-.action-selection-modal .modal-body {
-  padding: 2rem;
-  max-height: 70vh;
-  overflow-y: auto;
-  background-color: #ffffff;
-}
-
-.action-selection-modal .modal-footer {
-  padding: 1.5rem;
-  border-top: 1px solid #e9ecef;
-  background-color: #f8f9fa;
-}
-
-/* Responsive pour la modale d'édition des joueurs */
+/* Responsive pour les petits écrans */
 @media (max-width: 768px) {
-  .edit-players-modal {
-    width: 95%;
-    max-width: none;
-    max-height: 95vh;
+  .match-comment {
+    padding: 8px;
+    margin-top: 8px;
   }
   
-  .edit-players-modal .modal-body {
-    padding: 1rem;
+  .match-comment .comment-header {
+    font-size: 0.8em;
   }
   
-  .player-card {
-    flex-wrap: nowrap;
-    gap: 0.75rem;
-    min-height: 55px;
+  .match-comment .comment-text {
+    font-size: 0.9em;
   }
-  
-  .player-actions {
-    gap: 0.5rem;
-  }
-  
-  .player-name-input {
-    max-width: 150px;
-  }
-  
-  .add-player-form .input-group {
-    flex-wrap: wrap;
-    gap: 0.5rem;
-  }
-  
-  .add-player-form .form-control {
-    min-width: 200px; /* Largeur minimale sur mobile */
-  }
-}
-
-@media (max-width: 480px) {
-  .player-card {
-    min-height: 50px;
-    padding: 0.75rem;
-  }
-  
-  .player-actions .btn {
-    width: 32px;
-    height: 32px;
-    padding: 0.4rem;
-  }
-  
-  .player-name-input {
-    max-width: 120px;
-  }
-  
-  .add-player-form .input-group {
-    flex-direction: column;
-    align-items: stretch;
-  }
-  
-  .add-player-form .form-control {
-    min-width: 100%; /* Prend toute la largeur sur très petit écran */
-  }
-  
-  .type-selector {
-    justify-content: center;
-  }
-}
-
-/* Styles pour les couleurs des scores - Couleurs modernes */
-.btn-score-success {
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-  color: white;
-  box-shadow: 0 4px 14px 0 rgba(16, 185, 129, 0.39);
-  transition: all 0.3s ease;
-}
-
-.btn-score-success:hover {
-  background: linear-gradient(135deg, #059669 0%, #047857 100%);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px 0 rgba(16, 185, 129, 0.5);
-}
-
-.btn-score-danger {
-  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-  color: white;
-  box-shadow: 0 4px 14px 0 rgba(239, 68, 68, 0.39);
-  transition: all 0.3s ease;
-}
-
-.btn-score-danger:hover {
-  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px 0 rgba(239, 68, 68, 0.5);
-}
-
-.btn-score-light {
-  background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
-  border: 2px solid #d1d5db;
-  box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.1);
-  transition: all 0.3s ease;
-}
-
-.btn-score-light:hover {
-  background: linear-gradient(135deg, #e5e7eb 0%, #d1d5db 100%);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px 0 rgba(0, 0, 0, 0.15);
 }
 
