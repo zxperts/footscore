@@ -148,9 +148,17 @@ export class AppComponent implements OnInit {
   
   // === GESTION DE LA SÉLECTION D'ACTION ===
   showActionSelectionModal: boolean = false;
+  
+  // === NOUVELLE GESTION D'ACTIONS ===
+  showTeamActionModal: boolean = false;
+  showPlayerSelectionModal: boolean = false;
+  selectedAction: string = '';
   pendingActionPlayer: string = '';
-  pendingActionTeam: 1 | 2 = 1;
+  pendingActionTeam: 1 | 2 | null = null;
   availableActions: string[] = [];
+  
+  // Contrôle pour basculer entre joueurs et actions dans la modale score
+  showPlayersList: boolean = false;
   
   // Contrôles pour l'encodage dans la disposition tactique
   encodingGoalsEnabled: boolean = false;
@@ -446,6 +454,7 @@ export class AppComponent implements OnInit {
     // Ne plus initialiser showButeurForm à true
     this.showButeurForm = false;  // Masquer le formulaire par défaut
     this.showScoreForm = true;
+    this.showPlayersList = false; // Pas commencer par l'affichage des joueurs
     this.buteurForm.patchValue({
       nom: '',
       minute: elapsedMinutes,
@@ -1197,6 +1206,12 @@ export class AppComponent implements OnInit {
   executeSelectedAction(action: string) {
     console.log('Exécution de l\'action sélectionnée:', action);
     
+    // Vérifier que nous avons une équipe sélectionnée
+    if (!this.pendingActionTeam) {
+      console.error('Aucune équipe sélectionnée pour l\'action');
+      return;
+    }
+    
     // Fermer le modal
     this.showActionSelectionModal = false;
     
@@ -1233,7 +1248,7 @@ export class AppComponent implements OnInit {
     
     // Réinitialiser les variables
     this.pendingActionPlayer = '';
-    this.pendingActionTeam = 1;
+    this.pendingActionTeam = null;
     this.availableActions = [];
   }
 
@@ -1242,8 +1257,14 @@ export class AppComponent implements OnInit {
     console.log('Sélection d\'action annulée');
     this.showActionSelectionModal = false;
     this.pendingActionPlayer = '';
-    this.pendingActionTeam = 1;
+    this.pendingActionTeam = null;
     this.availableActions = [];
+  }
+
+  // Méthode pour basculer entre l'affichage des joueurs et des actions
+  toggleScoreModalMode() {
+    this.showPlayersList = !this.showPlayersList;
+    console.log('Mode modale basculé vers:', this.showPlayersList ? 'joueurs' : 'actions');
   }
 
   saveGoalWithAssist() {
@@ -3787,6 +3808,7 @@ Lien direct vers le match : ${matchUrl}
       this.ensureScorersInTeams(this.selectedMatch);
     }
     this.showScoreForm = false;
+    this.showPlayersList = true; // Réinitialiser à l'affichage des joueurs pour la prochaine ouverture
   }
 
   // Méthode pour gérer la modification du score
@@ -4190,6 +4212,77 @@ Lien direct vers le match : ${matchUrl}
       const bYear = parseInt(b.split('-')[0]);
       return bYear - aYear;
     });
+  }
+
+  // === NOUVELLES MÉTHODES POUR GESTION D'ACTIONS ===
+  
+  // Ouvrir la modale de sélection d'équipe pour une action
+  openTeamActionModal() {
+    this.showTeamActionModal = true;
+  }
+
+  // Fermer la modale de sélection d'équipe
+  closeTeamActionModal() {
+    this.showTeamActionModal = false;
+    this.selectedAction = '';
+  }
+
+  // Sélectionner une action pour une équipe
+  selectActionForTeam(action: string, teamNumber: 1 | 2) {
+    this.selectedAction = action;
+    this.pendingActionTeam = teamNumber;
+    this.showTeamActionModal = false;
+    this.showPlayerSelectionModal = true;
+  }
+
+  // Fermer la modale de sélection de joueur
+  closePlayerSelectionModal() {
+    this.showPlayerSelectionModal = false;
+    this.selectedAction = '';
+    this.pendingActionTeam = null;
+  }
+
+  // Sélectionner un joueur et exécuter l'action
+  selectPlayerForAction(playerName: string) {
+    if (!this.selectedAction || !this.pendingActionTeam) return;
+
+    this.pendingActionPlayer = playerName;
+    
+    // Exécuter l'action appropriée
+    this.executeAction(this.selectedAction, this.pendingActionPlayer, this.pendingActionTeam);
+    
+    // Fermer la modale
+    this.closePlayerSelectionModal();
+  }
+
+  // Exécuter l'action sélectionnée
+  private executeAction(action: string, playerName: string, teamNumber: 1 | 2) {
+    switch (action) {
+      case 'but':
+        this.quickAddGoal(playerName, teamNumber);
+        break;
+      case 'frappe':
+        this.quickAddFrappe(playerName, teamNumber);
+        break;
+      case 'dribble':
+        this.quickAddDribble(playerName, teamNumber);
+        break;
+      case 'tiki-taka':
+        this.quickAddTikiTaka(playerName, teamNumber);
+        break;
+      case 'contre-attaque':
+        this.quickAddContreAttaque(playerName, teamNumber);
+        break;
+      case 'interception':
+        this.quickAddInterception(playerName, teamNumber);
+        break;
+      case 'duel':
+        this.quickAddDuel(playerName, teamNumber);
+        break;
+      case 'faute':
+        this.quickAddFaute(playerName, teamNumber);
+        break;
+    }
   }
 }
 

@@ -573,17 +573,32 @@
         </div>
       </div>
 
-      <!-- Liste des joueurs (déplacée avant la liste des buteurs) -->
+      <!-- Section de contrôle et sélection -->
       <div class="mt-4">
         <div class="d-flex justify-content-between align-items-center mb-2">
-          <h6 class="mb-0">Joueurs</h6>
-          <button class="btn btn-sm btn-outline-info" (click)="displayPlayerAsNumber = !displayPlayerAsNumber" 
-                  [title]="displayPlayerAsNumber ? 'Afficher les noms' : 'Afficher les numéros'">
-            <i class="fas" [ngClass]="displayPlayerAsNumber ? 'fa-user' : 'fa-hashtag'"></i>
-            {{ displayPlayerAsNumber ? ' Noms' : ' Numéros' }}
-          </button>
+          <h6 class="mb-0">{{ showPlayersList ? 'Joueurs' : 'Actions' }}</h6>
+          <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-outline-primary" 
+                    (click)="displayPlayerAsNumber = !displayPlayerAsNumber" 
+                    *ngIf="showPlayersList"
+                    [title]="displayPlayerAsNumber ? 'Afficher les noms' : 'Afficher les numéros'">
+              <i class="fas" [ngClass]="displayPlayerAsNumber ? 'fa-user' : 'fa-hashtag'"></i>
+              {{ displayPlayerAsNumber ? ' Noms' : ' Numéros' }}
+            </button>
+            
+            <!-- Bouton pour basculer entre joueurs et actions -->
+            <button class="btn btn-sm" 
+                    [ngClass]="showPlayersList ? 'btn-primary' : 'btn-primary'" 
+                    (click)="toggleScoreModalMode()"
+                    [title]="showPlayersList ? 'Passer aux actions' : 'Revenir aux joueurs'">
+              <i class="fas" [ngClass]="showPlayersList ? 'fa-exchange-alt' : 'fa-users'"></i>
+              {{ showPlayersList ? ' Actions' : ' Joueurs' }}
+            </button>
+          </div>
         </div>
-        <div class="row">
+        
+        <!-- Affichage des joueurs -->
+        <div class="row" *ngIf="showPlayersList">
           <div class="col-sm-6">
             <h5 class="team-title-1">{{ selectedMatch.equipe1 }}</h5>
             <div class="player-badges player-badges-team1">
@@ -625,6 +640,113 @@
             </div>
           </div>
         </div>
+        
+        <!-- Section de sélection d'actions -->
+        <div class="actions-section mb-3" *ngIf="!showPlayersList">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h6 class="mb-0">
+            <i class="fas fa-tasks me-2"></i>Sélectionner une action
+          </h6>
+        </div>
+        
+        <div class="row">
+          <!-- Actions pour équipe 1 -->
+          <div class="col-sm-6">
+            <h6 class="text-muted mb-2">{{ selectedMatch.equipe1 }}</h6>
+            
+            <!-- Groupe 1 : Actions d'attaque -->
+            <div class="action-group">
+              <div class="action-buttons">
+                <button class="btn btn-sm btn-success" (click)="selectActionForTeam('but', 1)">
+                  <i class="fas fa-futbol me-1"></i>But
+                </button>
+                <button class="btn btn-sm btn-outline-secondary" (click)="selectActionForTeam('frappe', 1)">
+                  <i class="fas fa-bullseye me-1"></i>Frappe
+                </button>
+                <button class="btn btn-sm btn-outline-secondary" (click)="selectActionForTeam('dribble', 1)">
+                  <i class="fas fa-running me-1"></i>Dribble
+                </button>
+              </div>
+            </div>
+            
+            <!-- Groupe 2 : Actions de jeu -->
+            <div class="action-group">
+              <div class="action-buttons">
+                <button class="btn btn-sm btn-outline-secondary" (click)="selectActionForTeam('tiki-taka', 1)">
+                  <i class="fas fa-exchange-alt me-1"></i>Tiki-taka
+                </button>
+                <button class="btn btn-sm btn-outline-secondary" (click)="selectActionForTeam('contre-attaque', 1)">
+                  <i class="fas fa-bolt me-1"></i>Contre-attaque
+                </button>
+              </div>
+            </div>
+            
+            <!-- Groupe 3 : Actions défensives -->
+            <div class="action-group">
+              <div class="action-buttons">
+                <button class="btn btn-sm btn-outline-danger" (click)="selectActionForTeam('interception', 1)">
+                  <i class="fas fa-hand-paper me-1"></i>Interception
+                </button>
+                <button class="btn btn-sm btn-outline-danger" (click)="selectActionForTeam('duel', 1)">
+                  <i class="fas fa-shield-alt me-1"></i>Duel
+                </button>
+                <button class="btn btn-sm btn-outline-danger" (click)="selectActionForTeam('faute', 1)">
+                  <i class="fas fa-exclamation-triangle me-1"></i>Faute
+                </button>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Actions pour équipe 2 -->
+          <div class="col-sm-6">
+            <h6 class="text-muted mb-2">{{ selectedMatch.equipe2 }}</h6>
+            
+            <!-- Groupe 1 : Actions d'attaque -->
+            <div class="action-group">
+              <div class="action-buttons">
+                <button class="btn btn-sm btn-success" (click)="selectActionForTeam('but', 2)">
+                  <i class="fas fa-futbol me-1"></i>But
+                </button>
+                <button class="btn btn-sm btn-outline-secondary" (click)="selectActionForTeam('frappe', 2)">
+                  <i class="fas fa-bullseye me-1"></i>Frappe
+                </button>
+                <button class="btn btn-sm btn-outline-secondary" (click)="selectActionForTeam('dribble', 2)">
+                  <i class="fas fa-running me-1"></i>Dribble
+                </button>
+              </div>
+            </div>
+            
+            <!-- Groupe 2 : Actions de jeu -->
+            <div class="action-group">
+              <div class="action-buttons">
+                <button class="btn btn-sm btn-outline-secondary" (click)="selectActionForTeam('tiki-taka', 2)">
+                  <i class="fas fa-exchange-alt me-1"></i>Tiki-taka
+                </button>
+                <button class="btn btn-sm btn-outline-secondary" (click)="selectActionForTeam('contre-attaque', 2)">
+                  <i class="fas fa-bolt me-1"></i>Contre-attaque
+                </button>
+              </div>
+            </div>
+            
+            <!-- Groupe 3 : Actions défensives -->
+            <div class="action-group">
+              <div class="action-buttons">
+                <button class="btn btn-sm btn-outline-danger" (click)="selectActionForTeam('interception', 2)">
+                  <i class="fas fa-hand-paper me-1"></i>Interception
+                </button>
+                <button class="btn btn-sm btn-outline-danger" (click)="selectActionForTeam('duel', 2)">
+                  <i class="fas fa-shield-alt me-1"></i>Duel
+                </button>
+                <button class="btn btn-sm btn-outline-danger" (click)="selectActionForTeam('faute', 2)">
+                  <i class="fas fa-exclamation-triangle me-1"></i>Faute
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Fin de la section de contrôle et sélection -->
       </div>
 
       <!-- Remplacer la liste par des divs simples -->
@@ -1548,6 +1670,44 @@
     </div>
     <div class="modal-footer">
       <button class="btn btn-secondary" (click)="cancelActionSelection()">
+        <i class="fas fa-times me-2"></i>Annuler
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de sélection de joueur pour action -->
+<div class="modal-overlay" *ngIf="showPlayerSelectionModal">
+  <div class="player-selection-modal">
+    <div class="modal-header">
+      <h5 class="modal-title">
+        <i class="fas fa-user me-2"></i>
+        Sélectionner un joueur
+      </h5>
+      <button type="button" class="close-button" (click)="closePlayerSelectionModal()" aria-label="Fermer">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <div class="modal-body">
+      <p class="mb-3">
+        <strong>{{ selectedAction }}</strong> pour 
+        {{ pendingActionTeam === 1 ? selectedMatch?.equipe1 : selectedMatch?.equipe2 }}
+      </p>
+      <p class="text-muted mb-3">Sélectionnez le joueur :</p>
+      
+      <div class="row g-2">
+        <div class="col-6" *ngFor="let player of getTeamPlayers(pendingActionTeam!)">
+          <button class="btn btn-outline-primary w-100 mb-2" (click)="selectPlayerForAction(player.name)">
+            <i *ngIf="player.type === 'attaquant'" class="fas fa-futbol me-1"></i>
+            <i *ngIf="player.type === 'defenseur'" class="fas fa-shield me-1"></i>
+            <i *ngIf="player.type === 'milieu'" class="fas fa-arrows-alt-h me-1"></i>
+            {{ getPlayerFullDisplayText(player) }}
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="closePlayerSelectionModal()">
         <i class="fas fa-times me-2"></i>Annuler
       </button>
     </div>
