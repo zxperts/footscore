@@ -18,7 +18,7 @@
     <!-- Bouton pour afficher le formulaire -->
     <button *ngIf="!showMatchForm && !showTeamFilterModal && !showCompetitionFilterModal" 
             class="btn btn-primary mt-2" 
-            (click)="showMatchForm = true">
+            (click)="openMatchForm()">
       <i class="fas fa-plus-circle text-white"></i>
        <span [hidden]="!selectedCompetitionFilter.includes('-')"> Match</span>
     </button>
@@ -168,7 +168,7 @@
       <h4 class="modal-title">
         <i class="fas fa-futbol me-2"></i>Ajouter un Match!
       </h4>
-      <button type="button" class="close-button" aria-label="Fermer" (click)="showMatchForm = false">
+      <button type="button" class="close-button" aria-label="Fermer" (click)="closeMatchForm()">
         <span aria-hidden="true">&times;</span>
       </button>
     </div>
@@ -220,31 +220,43 @@
                 <label for="heureDebut" class="form-label text-muted">Heure de début</label>
                 <input type="datetime-local" step="3600" class="form-control form-control-sm" id="heureDebut" formControlName="heureDebut">
               </div>
-              <div class="mb-2">
-                <label for="lieu" class="form-label text-muted">Lieu du match (optionnel)</label>
-                <input type="text" class="form-control form-control-sm" id="lieu" formControlName="lieu" placeholder="Stade, ville...">
+              
+              <!-- Bouton pour afficher/masquer les champs optionnels -->
+              <div class="mb-3 text-center">
+                <button type="button" class="btn btn-sm btn-outline-secondary" (click)="toggleOptionalFields()">
+                  <i class="fas" [ngClass]="showOptionalFields ? 'fa-eye-slash' : 'fa-plus'"></i>
+                  {{ showOptionalFields ? 'Masquer les champs optionnels' : 'Afficher les champs optionnels' }}
+                </button>
               </div>
-              <div class="mb-2 position-relative">
-                <label for="competition" class="form-label text-muted">Compétition (optionnel)</label>
-                <input id="competition" type="text" class="form-control form-control-sm" placeholder="Rechercher ou créer une compétition..."
-                       [(ngModel)]="competitionSearch" [ngModelOptions]="{standalone: true}" (input)="updateFilteredCompetitions()" name="competitionSearch"
-                       (focus)="updateFilteredCompetitions()" autocomplete="off">
-                <input type="hidden" formControlName="competition">
-                <div class="list-group position-absolute w-100" *ngIf="filteredCompetitions.length > 0 && competitionSearch">
-                  <button type="button" class="list-group-item list-group-item-action"
-                          *ngFor="let name of filteredCompetitions"
-                          (click)="selectCompetition(name)">{{ name }}</button>
+              
+              <!-- Champs optionnels -->
+              <div *ngIf="showOptionalFields">
+                <div class="mb-2">
+                  <label for="lieu" class="form-label text-muted">Lieu du match (optionnel)</label>
+                  <input type="text" class="form-control form-control-sm" id="lieu" formControlName="lieu" placeholder="Stade, ville...">
                 </div>
-                <div *ngIf="shouldShowCreateCompetition()" class="mt-1">
-                  <button type="button" class="btn btn-link p-0" (click)="selectCompetition(competitionSearch)">
-                    Créer "{{ competitionSearch }}"
-                  </button>
+                <div class="mb-2 position-relative">
+                  <label for="competition" class="form-label text-muted">Compétition (optionnel)</label>
+                  <input id="competition" type="text" class="form-control form-control-sm" placeholder="Rechercher ou créer une compétition..."
+                         [(ngModel)]="competitionSearch" [ngModelOptions]="{standalone: true}" (input)="updateFilteredCompetitions()" name="competitionSearch"
+                         (focus)="updateFilteredCompetitions()" autocomplete="off">
+                  <input type="hidden" formControlName="competition">
+                  <div class="list-group position-absolute w-100" *ngIf="filteredCompetitions.length > 0 && competitionSearch">
+                    <button type="button" class="list-group-item list-group-item-action"
+                            *ngFor="let name of filteredCompetitions"
+                            (click)="selectCompetition(name)">{{ name }}</button>
+                  </div>
+                  <div *ngIf="shouldShowCreateCompetition()" class="mt-1">
+                    <button type="button" class="btn btn-link p-0" (click)="selectCompetition(competitionSearch)">
+                      Créer "{{ competitionSearch }}"
+                    </button>
+                  </div>
                 </div>
-              </div>
-              <div class="mb-2">
-                <label for="commentaire" class="form-label text-muted">Commentaire (optionnel)</label>
-                <textarea class="form-control form-control-sm" id="commentaire" formControlName="commentaire" 
-                          placeholder="Ajoutez un commentaire sur ce match..." rows="2"></textarea>
+                <div class="mb-2">
+                  <label for="commentaire" class="form-label text-muted">Commentaire (optionnel)</label>
+                  <textarea class="form-control form-control-sm" id="commentaire" formControlName="commentaire" 
+                            placeholder="Ajoutez un commentaire sur ce match..." rows="2"></textarea>
+                </div>
               </div>
             </div>
           </div>
@@ -256,7 +268,7 @@
             <button type="button" class="btn btn-secondary dropdown-toggle me-auto" data-bs-toggle="dropdown" aria-expanded="false">
               🧰
             </button>
-            <button type="button" class="btn btn-outline-secondary ms-2" (click)="showMatchForm = false">
+            <button type="button" class="btn btn-outline-secondary ms-2" (click)="closeMatchForm()">
               Annuler
             </button>
             <ul class="dropdown-menu">
@@ -267,7 +279,7 @@
         </form>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" (click)="showMatchForm = false">
+        <button type="button" class="btn btn-secondary" (click)="closeMatchForm()">
           <i class="fas fa-times me-2"></i>Annuler
         </button>
       </div>

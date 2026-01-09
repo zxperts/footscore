@@ -61,6 +61,7 @@ export class AppComponent implements OnInit {
   selectedMatch: Match | null = null;
   showButeurForm = false;
   showMatchForm = false;
+  showOptionalFields = false; // Contrôle l'affichage des champs optionnels dans la modale d'ajout de match
   editingButeur: { index: number, buteur: Buteur } | null = null;
   teams = TEAMS;
   selectedTeam: Team | null = null;
@@ -407,6 +408,7 @@ export class AppComponent implements OnInit {
         heureDebut: this.getCurrentDateTime()
       });
       this.showMatchForm = false;
+      this.showOptionalFields = false; // Réinitialiser l'affichage des champs optionnels
     } else {
       console.log('MatchForm invalide - soumission annulée');
     }
@@ -1265,6 +1267,26 @@ export class AppComponent implements OnInit {
   toggleScoreModalMode() {
     this.showPlayersList = !this.showPlayersList;
     console.log('Mode modale basculé vers:', this.showPlayersList ? 'joueurs' : 'actions');
+  }
+
+  // Méthode pour basculer l'affichage des champs optionnels
+  toggleOptionalFields() {
+    this.showOptionalFields = !this.showOptionalFields;
+    console.log('Champs optionnels:', this.showOptionalFields ? 'affichés' : 'masqués');
+  }
+
+  // Méthode pour ouvrir la modale d'ajout de match
+  openMatchForm() {
+    this.showMatchForm = true;
+    this.showOptionalFields = false; // Réinitialiser les champs optionnels
+    console.log('Modale d\'ajout de match ouverte');
+  }
+
+  // Méthode pour fermer la modale d'ajout de match
+  closeMatchForm() {
+    this.showMatchForm = false;
+    this.showOptionalFields = false; // Réinitialiser les champs optionnels
+    console.log('Modale d\'ajout de match fermée');
   }
 
   saveGoalWithAssist() {
