@@ -239,7 +239,7 @@ export class AppComponent implements OnInit {
         type: 'but',
         emoji: '⚽',
         text: 'BUUUT !',
-        color: '#ffc107',
+        color: '#6c757d',
         showAssist: true,
         showCancel: true
       },
@@ -247,7 +247,7 @@ export class AppComponent implements OnInit {
         type: 'duel',
         emoji: '🛡️',
         text: 'DUEL GAGNÉ',
-        color: '#28a745',
+        color: '#6c757d',
         showAssist: false,
         showCancel: true
       },
@@ -255,7 +255,7 @@ export class AppComponent implements OnInit {
         type: 'dribble',
         emoji: '🏃',
         text: 'DRIBBLE',
-        color: '#17a2b8',
+        color: '#6c757d',
         showAssist: false,
         showCancel: false
       },
@@ -263,7 +263,7 @@ export class AppComponent implements OnInit {
         type: 'interception',
         emoji: '✋',
         text: 'INTERCEPTION',
-        color: '#6f42c1',
+        color: '#6c757d',
         showAssist: false,
         showCancel: false
       },
@@ -271,7 +271,7 @@ export class AppComponent implements OnInit {
         type: 'frappe',
         emoji: '🎯',
         text: 'FRAPPE',
-        color: '#fd7e14',
+        color: '#6c757d',
         showAssist: false,
         showCancel: false
       },
@@ -279,7 +279,7 @@ export class AppComponent implements OnInit {
         type: 'faute',
         emoji: '⚠️',
         text: 'FAUTE',
-        color: '#dc3545',
+        color: '#6c757d',
         showAssist: false,
         showCancel: false
       },
@@ -287,7 +287,7 @@ export class AppComponent implements OnInit {
         type: 'contre-attaque',
         emoji: '⚡',
         text: 'CONTRE-ATTAQUE',
-        color: '#20c997',
+        color: '#6c757d',
         showAssist: false,
         showCancel: false
       },
@@ -1810,7 +1810,7 @@ export class AppComponent implements OnInit {
         minutes: duel.minutes,
         type: 'duel',
         emoji: '🛡️',
-        color: '#28a745'
+        color: '#6c757d'
       });
     });
     
@@ -1822,7 +1822,7 @@ export class AppComponent implements OnInit {
         minutes: dribble.minutes,
         type: 'dribble',
         emoji: '🏃',
-        color: '#17a2b8'
+        color: '#6c757d'
       });
     });
     
@@ -1834,7 +1834,7 @@ export class AppComponent implements OnInit {
         minutes: interception.minutes,
         type: 'interception',
         emoji: '✋',
-        color: '#6f42c1'
+        color: '#6c757d'
       });
     });
     
@@ -1846,7 +1846,7 @@ export class AppComponent implements OnInit {
         minutes: frappe.minutes,
         type: 'frappe',
         emoji: '🎯',
-        color: '#fd7e14'
+        color: '#6c757d'
       });
     });
     
@@ -1858,7 +1858,7 @@ export class AppComponent implements OnInit {
         minutes: faute.minutes,
         type: 'faute',
         emoji: '⚠️',
-        color: '#dc3545'
+        color: '#6c757d'
       });
     });
     
@@ -1870,7 +1870,7 @@ export class AppComponent implements OnInit {
         minutes: contreAttaque.minutes,
         type: 'contre-attaque',
         emoji: '⚡',
-        color: '#20c997'
+        color: '#6c757d'
       });
     });
     
@@ -1921,7 +1921,7 @@ export class AppComponent implements OnInit {
           equipe: duel.equipe,
           type: 'duel',
           emoji: '🛡️',
-          color: '#28a745',
+          color: '#6c757d',
           index: index,
           supprimerFn: () => this.supprimerDuel(this.matches.indexOf(this.selectedMatch!), index)
         });
@@ -1937,7 +1937,7 @@ export class AppComponent implements OnInit {
           equipe: dribble.equipe,
           type: 'dribble',
           emoji: '🏃',
-          color: '#17a2b8',
+          color: '#6c757d',
           index: index,
           supprimerFn: () => this.supprimerDribble(this.matches.indexOf(this.selectedMatch!), index)
         });
@@ -1953,7 +1953,7 @@ export class AppComponent implements OnInit {
           equipe: interception.equipe,
           type: 'interception',
           emoji: '✋',
-          color: '#6f42c1',
+          color: '#6c757d',
           index: index,
           supprimerFn: () => this.supprimerInterception(this.matches.indexOf(this.selectedMatch!), index)
         });
@@ -1969,7 +1969,7 @@ export class AppComponent implements OnInit {
           equipe: frappe.equipe,
           type: 'frappe',
           emoji: '🎯',
-          color: '#fd7e14',
+          color: '#6c757d',
           index: index,
           supprimerFn: () => this.supprimerFrappe(this.matches.indexOf(this.selectedMatch!), index)
         });
@@ -1985,7 +1985,7 @@ export class AppComponent implements OnInit {
           equipe: faute.equipe,
           type: 'faute',
           emoji: '⚠️',
-          color: '#dc3545',
+          color: '#6c757d',
           index: index,
           supprimerFn: () => this.supprimerFaute(this.matches.indexOf(this.selectedMatch!), index)
         });
@@ -2001,7 +2001,7 @@ export class AppComponent implements OnInit {
           equipe: contreAttaque.equipe,
           type: 'contre-attaque',
           emoji: '⚡',
-          color: '#20c997',
+          color: '#6c757d',
           index: index,
           supprimerFn: () => this.supprimerContreAttaque(this.matches.indexOf(this.selectedMatch!), index)
         });
