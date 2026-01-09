@@ -2830,24 +2830,25 @@ Lien direct vers le match : ${matchUrl}
   }
 
   getScoreColor(match: Match): string {
-    // Vérifier si une des équipes contient "flawinne" (insensible à la casse)
-    const hasFlawinneTeam = [match.equipe1, match.equipe2].some(teamName => 
-      teamName.toLowerCase().includes('flawinne')
-    );
+    // Compter le nombre de matchs joués par chaque équipe
+    const team1MatchCount = this.getMatchesPlayedByTeam(match.equipe1);
+    const team2MatchCount = this.getMatchesPlayedByTeam(match.equipe2);
     
-    if (!hasFlawinneTeam) {
-      return 'btn-light'; // Gris clair par défaut si pas d'équipe Flawinne
+    // Si les deux équipes ont joué le même nombre de matchs, couleur neutre
+    if (team1MatchCount === team2MatchCount) {
+      return 'btn-score-light'; // Gris moderne si égalité de matchs
     }
     
-    // Déterminer le résultat pour l'équipe Flawinne
-    const flawinneTeam = match.equipe1.toLowerCase().includes('flawinne') ? match.equipe1 : match.equipe2;
-    const flawinneScore = match.equipe1.toLowerCase().includes('flawinne') ? match.score1 : match.score2;
-    const opponentScore = match.equipe1.toLowerCase().includes('flawinne') ? match.score2 : match.score1;
+    // Déterminer l'équipe qui a joué le plus de matchs
+    const mostActiveTeam = team1MatchCount > team2MatchCount ? match.equipe1 : match.equipe2;
+    const mostActiveTeamScore = team1MatchCount > team2MatchCount ? match.score1 : match.score2;
+    const otherTeamScore = team1MatchCount > team2MatchCount ? match.score2 : match.score1;
     
-    if (flawinneScore > opponentScore) {
-      return 'btn-score-success'; // Vert moderne si victoire
-    } else if (flawinneScore < opponentScore) {
-      return 'btn-score-danger'; // Rouge moderne si défaite
+    // Colorier en fonction du résultat de l'équipe la plus active
+    if (mostActiveTeamScore > otherTeamScore) {
+      return 'btn-score-success'; // Vert si l'équipe la plus active a gagné
+    } else if (mostActiveTeamScore < otherTeamScore) {
+      return 'btn-score-danger'; // Rouge si l'équipe la plus active a perdu
     } else {
       return 'btn-score-light'; // Gris moderne si match nul
     }

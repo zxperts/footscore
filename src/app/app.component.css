@@ -1955,3 +1955,14 @@ body {
   box-shadow: 0 6px 20px 0 rgba(0, 0, 0, 0.3);
 }
 
+.btn-score-light {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  color: #495057;
+  box-shadow: 0 4px 14px 0 rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.btn-score-light:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px 0 rgba(0, 0, 0, 0.15);
+}
