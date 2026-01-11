@@ -121,6 +121,12 @@
                   <button class="btn btn-sm btn-outline-primary" (click)="openEditPlayersModal(team.name)" title="Modifier l'équipe">
                     <i class="fas fa-edit"></i>
                   </button>
+                  <button class="btn btn-sm btn-outline-info" 
+                          (click)="shareTeam(team.name)" 
+                          [disabled]="isSharingTeam"
+                          title="Partager l'équipe">
+                    <i class="fas" [ngClass]="isSharingTeam ? 'fa-spinner fa-spin' : 'fa-share-alt'"></i>
+                  </button>
                   <button class="btn btn-sm btn-outline-danger" *ngIf="showDeleteButtons" (click)="deleteTeam(team.name)" title="Supprimer l'équipe">
                     <i class="fas fa-trash"></i>
                   </button>

@@ -98,6 +98,7 @@ export class AppComponent implements OnInit {
   currentRanking: TeamStats[] = [];
   isSharingCompetition: boolean = false;
   isSharingMatch: boolean = false;
+  isSharingTeam: boolean = false; // Nouvelle propriété pour le partage d'équipe
   sharingLogs: string[] = [];
   showEditPlayersModal: boolean = false;
   teamToEdit: Team | null = null;
@@ -3446,6 +3447,119 @@ Lien direct vers le match : ${matchUrl}
       alert('Une erreur est survenue lors de la sauvegarde ou du partage de la compétition.');
     } finally {
       this.isSharingCompetition = false;
+    }
+  }
+
+  async shareTeam(teamName: string) {
+    if (!teamName) {
+      alert('Veuillez sélectionner une équipe');
+      return;
+    }
+
+    this.isSharingTeam = true;
+    this.sharingLogs = ['Préparation du partage de l\'équipe...'];
+    
+    try {
+      const teamMatches = this.matches.filter(m => m.equipe1 === teamName || m.equipe2 === teamName);
+      if (teamMatches.length === 0) {
+        alert('Aucun match trouvé pour cette équipe');
+        return;
+      }
+
+      this.sharingLogs.push('Sauvegarde des matchs de l\'équipe...');
+
+      // Calculer les statistiques de l'équipe
+      let wins = 0, draws = 0, losses = 0, goalsFor = 0, goalsAgainst = 0;
+      
+      teamMatches.forEach(match => {
+        const isTeam1 = match.equipe1 === teamName;
+        const teamScore = isTeam1 ? match.score1 : match.score2;
+        const opponentScore = isTeam1 ? match.score2 : match.score1;
+        
+        goalsFor += teamScore;
+        goalsAgainst += opponentScore;
+        
+        if (teamScore > opponentScore) wins++;
+        else if (teamScore < opponentScore) losses++;
+        else draws++;
+      });
+
+      // Sauvegarder les matchs individuellement pour récupérer leurs IDs
+      const matchIds: string[] = [];
+      for (const match of teamMatches) {
+        const matchId = await this.firestoreService.saveMatch(match);
+        matchIds.push(matchId);
+        this.sharingLogs.push(`Match ${match.equipe1} vs ${match.equipe2} sauvegardé`);
+      }
+
+      // Créer l'ID unique pour l'équipe basé sur le nom et timestamp
+      const teamId = `team_${teamName.toLowerCase().replace(/\s+/g, '_')}_${Date.now()}`;
+
+      // Construire le message de partage
+      const teamInfo = `
+          Équipe : ${teamName}
+          Nombre de matchs : ${teamMatches.length}
+          
+          Statistiques :
+          Victoires : ${wins}
+          Matches nuls : ${draws}
+          Défaites : ${losses}
+          Buts marqués : ${goalsFor}
+          Buts encaissés : ${goalsAgainst}
+          Différence de buts : ${goalsFor - goalsAgainst}
+
+          Matchs :
+          ${teamMatches.map(match => {
+            const isTeam1 = match.equipe1 === teamName;
+            const opponent = isTeam1 ? match.equipe2 : match.equipe1;
+            return `
+          ${teamName} vs ${opponent}
+          Score : ${match.score1} - ${match.score2}
+          Date : ${match.heureDebut.toLocaleString('fr-FR', { 
+            weekday: 'long', 
+            day: 'numeric', 
+            month: 'long', 
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+          })}
+          Lieu : ${match.lieu || 'Non spécifié'}
+          ----------------------------------------`;
+          }).join('\n')}
+
+          Lien vers l'équipe : ${window.location.origin}?teamName=${encodeURIComponent(teamName)}
+                `.trim();
+
+      // Partager les informations de l'équipe
+      if (navigator.share) {
+        await navigator.share({
+          title: `Équipe ${teamName}`,
+          text: teamInfo,
+          url: `${window.location.origin}?teamName=${encodeURIComponent(teamName)}`
+        });
+      } else {
+        // Fallback pour les navigateurs qui ne supportent pas l'API Web Share
+        const textArea = document.createElement('textarea');
+        textArea.value = teamInfo;
+        document.body.appendChild(textArea);
+        textArea.select();
+        try {
+          document.execCommand('copy');
+          alert('Informations de l\'équipe copiées dans le presse-papiers !');
+        } catch (err) {
+          console.error('Erreur lors de la copie:', err);
+        }
+        document.body.removeChild(textArea);
+      }
+
+      this.sharingLogs.push('Équipe partagée avec succès !');
+
+    } catch (error) {
+      console.error('Erreur lors de la sauvegarde ou du partage de l\'équipe:', error);
+      this.sharingLogs.push('Erreur lors de la sauvegarde de l\'équipe');
+      alert('Une erreur est survenue lors de la sauvegarde ou du partage de l\'équipe.');
+    } finally {
+      this.isSharingTeam = false;
     }
   }
 
