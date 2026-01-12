@@ -2399,6 +2399,7 @@ Lien direct vers le match : ${matchUrl}
     const urlParams = new URLSearchParams(window.location.search);
     const competitionId = urlParams.get('competitionId');
     const matchId = urlParams.get('matchId');
+    const teamId = urlParams.get('teamId');
     
     if (competitionId) {
       try {
@@ -2413,6 +2414,24 @@ Lien direct vers le match : ${matchUrl}
         }
       } catch (error) {
         console.error('Erreur lors du chargement de la compétition:', error);
+      }
+    } else if (teamId) {
+      try {
+        const team = await this.firestoreService.getTeamById(teamId);
+        if (team) {
+          const matches = await this.firestoreService.getMatchesByTeam(teamId);
+          if (matches.length > 0) {
+            // Convertir les dates string en Date objects
+            matches.forEach(match => {
+              match.heureDebut = new Date(match.heureDebut);
+            });
+            this.matches = matches;
+            this.selectedTeamFilter = team.name;
+            this.saveData();
+          }
+        }
+      } catch (error) {
+        console.error('Erreur lors du chargement de l\'équipe:', error);
       }
     } else if (matchId) {
       try {
@@ -3457,7 +3476,7 @@ Lien direct vers le match : ${matchUrl}
     }
 
     this.isSharingTeam = true;
-    this.sharingLogs = ['Préparation du partage de l\'équipe...'];
+    this.sharingLogs = ['Équipe en cours de sauvegarde...'];
     
     try {
       const teamMatches = this.matches.filter(m => m.equipe1 === teamName || m.equipe2 === teamName);
@@ -3466,7 +3485,14 @@ Lien direct vers le match : ${matchUrl}
         return;
       }
 
-      this.sharingLogs.push('Sauvegarde des matchs de l\'équipe...');
+      // Sauvegarder l'équipe dans Firestore
+      const teamId = await this.firestoreService.shareTeam(
+        teamName, 
+        teamMatches,
+        (log) => {
+          this.sharingLogs.push(log);
+        }
+      );
 
       // Calculer les statistiques de l'équipe
       let wins = 0, draws = 0, losses = 0, goalsFor = 0, goalsAgainst = 0;
@@ -3483,17 +3509,6 @@ Lien direct vers le match : ${matchUrl}
         else if (teamScore < opponentScore) losses++;
         else draws++;
       });
-
-      // Sauvegarder les matchs individuellement pour récupérer leurs IDs
-      const matchIds: string[] = [];
-      for (const match of teamMatches) {
-        const matchId = await this.firestoreService.saveMatch(match);
-        matchIds.push(matchId);
-        this.sharingLogs.push(`Match ${match.equipe1} vs ${match.equipe2} sauvegardé`);
-      }
-
-      // Créer l'ID unique pour l'équipe basé sur le nom et timestamp
-      const teamId = `team_${teamName.toLowerCase().replace(/\s+/g, '_')}_${Date.now()}`;
 
       // Construire le message de partage
       const teamInfo = `
@@ -3527,7 +3542,7 @@ Lien direct vers le match : ${matchUrl}
           ----------------------------------------`;
           }).join('\n')}
 
-          Lien vers l'équipe : ${window.location.origin}?teamName=${encodeURIComponent(teamName)}
+          Lien vers l'équipe : ${window.location.origin}?teamId=${teamId}
                 `.trim();
 
       // Partager les informations de l'équipe
@@ -3535,7 +3550,7 @@ Lien direct vers le match : ${matchUrl}
         await navigator.share({
           title: `Équipe ${teamName}`,
           text: teamInfo,
-          url: `${window.location.origin}?teamName=${encodeURIComponent(teamName)}`
+          url: `${window.location.origin}?teamId=${teamId}`
         });
       } else {
         // Fallback pour les navigateurs qui ne supportent pas l'API Web Share

@@ -10,6 +10,14 @@ export interface Team {
   players: Player[];
 }
 
+export interface SharedTeam {
+  id?: string;
+  name: string;
+  matchIds: string[];
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 export const TEAMS: Team[] = [
   {
     id: 1,
@@ -93,4 +101,4 @@ export function ensureDefaultPlayer(team: Team): Team {
     team.players = [{ name: 'Joueur non listé', type: 'milieu' }];
   }
   return team;
-} 
+}

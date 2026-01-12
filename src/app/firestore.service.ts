@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { Firestore, collection, addDoc, getDocs, doc, getDoc, query, where, updateDoc, deleteDoc } from '@angular/fire/firestore';
 import { Match, Buteur, DuelGagne, Dribble, Interception, Frappe, Faute, ContreAttaque, TikiTaka } from './models/match.model';
 import { Competition } from './models/competition.model';
+import { SharedTeam } from './models/team.model';
 
 @Injectable({
   providedIn: 'root'
@@ -159,4 +160,94 @@ export class FirestoreService {
     onLog?.('Compétition créée');
     return competitionId;
   }
-} 
+
+  // Méthodes pour les équipes partagées
+  async saveTeam(team: SharedTeam): Promise<string> {
+    const teamRef = await addDoc(collection(this.firestore, 'teams'), {
+      ...team,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    });
+    console.log('Team saved:', teamRef.id);
+    return teamRef.id;
+  }
+
+  async getTeamById(teamId: string): Promise<SharedTeam | null> {
+    const teamDoc = await getDoc(doc(this.firestore, 'teams', teamId));
+    if (teamDoc.exists()) {
+      return {
+        ...teamDoc.data(),
+        id: teamDoc.id
+      } as SharedTeam;
+    }
+    return null;
+  }
+
+  async getTeamByName(name: string): Promise<SharedTeam | null> {
+    const teamsRef = collection(this.firestore, 'teams');
+    const q = query(teamsRef, where('name', '==', name));
+    const querySnapshot = await getDocs(q);
+    
+    if (!querySnapshot.empty) {
+      const doc = querySnapshot.docs[0];
+      return {
+        ...doc.data(),
+        id: doc.id
+      } as SharedTeam;
+    }
+    return null;
+  }
+
+  async addMatchToTeam(teamId: string, matchId: string): Promise<void> {
+    const teamRef = doc(this.firestore, 'teams', teamId);
+    const team = await this.getTeamById(teamId);
+    
+    if (team) {
+      const updatedMatchIds = [...team.matchIds, matchId];
+      await updateDoc(teamRef, {
+        matchIds: updatedMatchIds,
+        updatedAt: new Date()
+      });
+    }
+  }
+
+  async getMatchesByTeam(teamId: string): Promise<Match[]> {
+    const team = await this.getTeamById(teamId);
+    if (!team) return [];
+
+    const matches: Match[] = [];
+    for (const matchId of team.matchIds) {
+      const match = await this.getMatchById(matchId);
+      if (match) {
+        matches.push(match);
+      }
+    }
+    return matches;
+  }
+
+  async shareTeam(
+    teamName: string, 
+    matches: Match[], 
+    onLog?: (message: string) => void
+  ): Promise<string> {
+    // Créer une nouvelle équipe partagée
+    const team: SharedTeam = {
+      name: teamName,
+      matchIds: [],
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+    const teamId = await this.saveTeam(team);
+    onLog?.('Équipe créée');
+    
+    // Sauvegarder tous les matchs de l'équipe et les associer
+    for (const match of matches) {
+      const matchId = await this.saveMatch(match);
+      await this.addMatchToTeam(teamId, matchId);
+      onLog?.(`Match ${match.equipe1} vs ${match.equipe2} ajouté à l'équipe`);
+    }
+    
+    onLog?.('Équipe sauvegardée avec succès !');
+    return teamId;
+  }
+}
