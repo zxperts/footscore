@@ -371,6 +371,83 @@ export class AppComponent implements OnInit {
     return;
   }
 
+  // Méthode pour charger les données depuis les paramètres URL
+  async loadMatchFromUrl() {
+    const params = new URLSearchParams(window.location.search);
+    const teamId = params.get('teamId');
+    const competitionId = params.get('competitionId');
+    const matchId = params.get('matchId');
+    const teamName = params.get('teamName');
+
+    try {
+      if (teamId) {
+        console.log('Chargement de l\'équipe avec ID:', teamId);
+        // Charger l'équipe depuis Firestore
+        const team = await this.firestoreService.getTeamById(teamId);
+        if (team) {
+          console.log('Équipe trouvée:', team.name);
+          // Charger tous les matchs de l'équipe
+          const teamMatches = await this.firestoreService.getMatchesByTeam(teamId);
+          if (teamMatches.length > 0) {
+            console.log(`${teamMatches.length} matchs trouvés pour l'équipe ${team.name}`);
+            // Remplacer les matchs locaux par ceux de l'équipe partagée
+            this.matches = teamMatches;
+            // Appliquer le filtre d'équipe
+            this.selectedTeamFilter = team.name;
+            console.log(`Filtre d'équipe appliqué: ${team.name}`);
+          }
+        } else {
+          console.warn('Équipe non trouvée avec l\'ID:', teamId);
+        }
+      } else if (competitionId) {
+        console.log('Chargement de la compétition avec ID:', competitionId);
+        // Charger la compétition depuis Firestore
+        const competition = await this.firestoreService.getCompetitionById(competitionId);
+        if (competition) {
+          console.log('Compétition trouvée:', competition.name);
+          // Charger tous les matchs de la compétition
+          const competitionMatches = await this.firestoreService.getMatchesByCompetition(competitionId);
+          if (competitionMatches.length > 0) {
+            console.log(`${competitionMatches.length} matchs trouvés pour la compétition ${competition.name}`);
+            // Remplacer les matchs locaux par ceux de la compétition partagée
+            this.matches = competitionMatches;
+            // Appliquer le filtre de compétition
+            this.selectedCompetitionFilter = competition.name;
+            console.log(`Filtre de compétition appliqué: ${competition.name}`);
+          }
+        } else {
+          console.warn('Compétition non trouvée avec l\'ID:', competitionId);
+        }
+      } else if (matchId) {
+        console.log('Chargement du match avec ID:', matchId);
+        // Charger un match spécifique depuis Firestore
+        const match = await this.firestoreService.getMatchById(matchId);
+        if (match) {
+          console.log('Match trouvé:', `${match.equipe1} vs ${match.equipe2}`);
+          // Ajouter le match aux matchs locaux s'il n'existe pas déjà
+          const existingMatch = this.matches.find(m => 
+            m.equipe1 === match.equipe1 && 
+            m.equipe2 === match.equipe2 && 
+            m.heureDebut.getTime() === match.heureDebut.getTime()
+          );
+          if (!existingMatch) {
+            this.matches.push(match);
+            console.log('Match ajouté aux matchs locaux');
+          }
+        } else {
+          console.warn('Match non trouvé avec l\'ID:', matchId);
+        }
+      } else if (teamName) {
+        console.log('Application du filtre d\'équipe depuis l\'URL:', teamName);
+        // Appliquer simplement le filtre d'équipe pour les matchs locaux
+        this.selectedTeamFilter = teamName;
+        console.log(`Filtre d'équipe appliqué depuis l'URL: ${teamName}`);
+      }
+    } catch (error) {
+      console.error('Erreur lors du chargement depuis l\'URL:', error);
+    }
+  }
+
   getCurrentDateTime(): string {
     const now = new Date();
     // Ajuster pour le fuseau horaire local
@@ -2395,95 +2472,6 @@ Lien direct vers le match : ${matchUrl}
     }
   }
 
-  private async loadMatchFromUrl() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const competitionId = urlParams.get('competitionId');
-    const matchId = urlParams.get('matchId');
-    const teamId = urlParams.get('teamId');
-    
-    if (competitionId) {
-      try {
-        const competition = await this.firestoreService.getCompetitionById(competitionId);
-        if (competition) {
-          const matches = await this.firestoreService.getMatchesByCompetition(competitionId);
-          if (matches.length > 0) {
-            this.matches = matches;
-            this.selectedCompetitionFilter = competition.name;
-            this.saveData();
-          }
-        }
-      } catch (error) {
-        console.error('Erreur lors du chargement de la compétition:', error);
-      }
-    } else if (teamId) {
-      try {
-        const team = await this.firestoreService.getTeamById(teamId);
-        if (team) {
-          const matches = await this.firestoreService.getMatchesByTeam(teamId);
-          if (matches.length > 0) {
-            // Convertir les dates string en Date objects
-            matches.forEach(match => {
-              match.heureDebut = new Date(match.heureDebut);
-            });
-            this.matches = matches;
-            this.selectedTeamFilter = team.name;
-            this.saveData();
-          }
-        }
-      } catch (error) {
-        console.error('Erreur lors du chargement de l\'équipe:', error);
-      }
-    } else if (matchId) {
-      try {
-        const match = await this.firestoreService.getMatchById(matchId);
-        if (match) {
-          // Convertir la date string en Date object
-          match.heureDebut = new Date(match.heureDebut);
-          
-          // Vérifier si le match existe déjà dans matches (comparaison complète: ID, équipes, score)
-          const existingMatchIndex = this.matches.findIndex(m => this.isSameMatch(m, match));
-          let matchToSelect: Match;
-
-          if (existingMatchIndex === -1) {
-            // Ajouter le match à la liste s'il n'existe pas déjà
-            console.log('Ajout du nouveau match à la liste');
-            this.matches.push(match);
-            // Sauvegarder les données
-            this.saveData();
-            matchToSelect = match;
-          } else {
-            const existingMatch = this.matches[existingMatchIndex];
-            matchToSelect = existingMatch;
-          }
-
-          this.selectMatch(matchToSelect);
-
-          // Scroll to the match
-          this.selectedMatch = matchToSelect;
-          setTimeout(() => {
-            const matchElement = document.querySelector(`[data-match-id="${matchToSelect.id}"]`);
-            if (matchElement) {
-              matchElement.scrollIntoView({ behavior: 'smooth' });
-            }
-          }, 100);
-        } else {
-          console.error('Match non trouvé dans Firestore');
-        }
-      } catch (error) {
-        console.error('Erreur lors du chargement du match depuis Firestore:', error);
-      }
-    }
-  }
-
-  // Méthode utilitaire pour comparer deux matches (ID, équipes, score)
-  private isSameMatch(match1: Match, match2: Match): boolean {
-    return match1.id === match2.id &&
-           match1.equipe1 === match2.equipe1 &&
-           match1.equipe2 === match2.equipe2 &&
-           match1.score1 === match2.score1 &&
-           match1.score2 === match2.score2;
-  }
-
   // Mettre à jour l'affichage des buteurs dans la liste
   getButeurDisplay(buteur: Buteur): string {
     let display = `⚽ ${buteur.nom} (${buteur.minute}')`;
@@ -4434,6 +4422,97 @@ Lien direct vers le match : ${matchUrl}
       case 'faute':
         this.quickAddFaute(playerName, teamNumber);
         break;
+    }
+  }
+
+  // Méthode de test pour vérifier le partage d'équipe
+  async testTeamSharing() {
+    console.log('=== Test du partage d\'équipe ===');
+    
+    // Créer quelques matchs de test
+    const testMatches: Match[] = [
+      {
+        id: 999,
+        equipe1: 'Équipe Test',
+        equipe2: 'Adversaire 1',
+        score1: 2,
+        score2: 1,
+        buteurs: [],
+        heureDebut: new Date(),
+        lieu: 'Terrain Test',
+        positions: {},
+        showElements: true,
+        updatedAt: new Date(),
+        duelsGagnes: [],
+        dribbles: [],
+        interceptions: [],
+        frappes: [],
+        fautes: [],
+        contreAttaques: [],
+        tikiTakas: [],
+        competition: 'Test Competition'
+      },
+      {
+        id: 1000,
+        equipe1: 'Adversaire 2',
+        equipe2: 'Équipe Test',
+        score1: 0,
+        score2: 3,
+        buteurs: [],
+        heureDebut: new Date(),
+        lieu: 'Terrain Test 2',
+        positions: {},
+        showElements: true,
+        updatedAt: new Date(),
+        duelsGagnes: [],
+        dribbles: [],
+        interceptions: [],
+        frappes: [],
+        fautes: [],
+        contreAttaques: [],
+        tikiTakas: [],
+        competition: 'Test Competition'
+      }
+    ];
+
+    try {
+      console.log('1. Sauvegarde de l\'équipe test dans Firestore...');
+      const teamId = await this.firestoreService.shareTeam(
+        'Équipe Test',
+        testMatches,
+        (log) => console.log(`   ${log}`)
+      );
+      console.log(`2. Équipe sauvegardée avec l'ID: ${teamId}`);
+
+      console.log('3. Chargement de l\'équipe depuis Firestore...');
+      const retrievedTeam = await this.firestoreService.getTeamById(teamId);
+      console.log('4. Équipe récupérée:', retrievedTeam);
+
+      console.log('5. Chargement des matchs de l\'équipe...');
+      const retrievedMatches = await this.firestoreService.getMatchesByTeam(teamId);
+      console.log(`6. ${retrievedMatches.length} matchs récupérés:`, retrievedMatches);
+
+      // Test du lien de partage
+      const shareUrl = `${window.location.origin}?teamId=${teamId}`;
+      console.log(`7. URL de partage générée: ${shareUrl}`);
+      
+      console.log('=== Test terminé avec succès ! ===');
+      
+      // Afficher un message à l'utilisateur
+      alert(`Test réussi ! 
+      
+Équipe sauvegardée avec l'ID: ${teamId}
+${retrievedMatches.length} matchs récupérés
+URL de partage: ${shareUrl}
+
+Vérifiez la console pour plus de détails.`);
+
+      return { teamId, teamName: 'Équipe Test', matchCount: retrievedMatches.length };
+
+    } catch (error) {
+      console.error('=== Erreur lors du test ===', error);
+      alert(`Erreur lors du test: ${error}`);
+      throw error;
     }
   }
 }
