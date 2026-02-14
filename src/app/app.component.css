@@ -1676,19 +1676,32 @@ body {
 
 .add-player-form .input-group {
   display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.input-row {
+  display: flex;
   align-items: center;
   gap: 0.75rem;
-  min-width: 0; /* Permet au flex de fonctionner correctement */
+  flex-wrap: wrap;
+  width: 100%;
 }
 
 .add-player-form .form-control {
   flex: 1;
-  min-width: 0; /* Permet à l'input de se rétrécir si nécessaire */
+  min-width: 0;
   border: 2px solid #e9ecef;
   border-radius: 8px;
   padding: 0.75rem;
   transition: border-color 0.3s ease, box-shadow 0.3s ease;
-  width: auto; /* Permet au flex de contrôler la largeur */
+  width: auto;
+}
+
+.add-player-form .number-input {
+  flex: 0 0 80px;
+  width: 80px !important;
 }
 
 .add-player-form .form-control:focus {
@@ -1708,6 +1721,7 @@ body {
   border-radius: 8px;
   transition: all 0.3s ease;
   flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .add-player-form .btn:hover {
@@ -1932,37 +1946,278 @@ body {
   }
 }
 
-.btn-score-danger {
-  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-  color: white;
-  box-shadow: 0 4px 14px 0 rgba(239, 68, 68, 0.39);
-  transition: all 0.3s ease;
+/* === STYLES RESPONSIVE POUR LA MODALE D'ÉDITION DES JOUEURS === */
+/* Optimisation pour écrans moyens (tablettes) */
+@media (max-width: 768px) {
+  .edit-players-modal {
+    width: 95%;
+    max-height: 95vh;
+  }
+  
+  .edit-players-modal .modal-body {
+    padding: 1.5rem;
+  }
+  
+  .player-card {
+    padding: 0.75rem;
+    gap: 0.75rem;
+  }
+  
+  .player-main-row {
+    flex-wrap: nowrap;
+    gap: 0.5rem;
+  }
+  
+  .player-name-input {
+    min-width: 100px;
+    flex: 1.5;
+  }
+  
+  .player-number-input {
+    flex: 0 0 70px;
+    width: 70px !important;
+  }
+  
+  .add-player-section {
+    padding: 1rem;
+  }
+  
+  .input-row {
+    gap: 0.5rem;
+  }
+  
+  .add-player-form .number-input {
+    flex: 0 0 70px;
+    width: 70px !important;
+  }
 }
 
-.btn-score-success {
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-  color: white;
-  box-shadow: 0 4px 14px 0 rgba(16, 185, 129, 0.39);
-  transition: all 0.3s ease;
+/* Optimisation pour petits écrans (smartphones) */
+@media (max-width: 576px) {
+  .edit-players-modal {
+    width: 98%;
+    max-height: 98vh;
+    margin: 1vh;
+  }
+  
+  .edit-players-modal .modal-header {
+    padding: 0.75rem;
+  }
+  
+  .edit-players-modal .modal-title {
+    font-size: 1.25rem;
+  }
+  
+  .edit-players-modal .modal-body {
+    padding: 1rem;
+  }
+  
+  .edit-players-modal .modal-footer {
+    padding: 1rem;
+  }
+  
+  /* Cartes des joueurs - disposition verticale sur petits écrans */
+  .player-card {
+    padding: 0.75rem;
+    gap: 0.5rem;
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .player-info {
+    width: 100%;
+  }
+  
+  .player-main-row {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: center;
+  }
+  
+  .player-type-icon {
+    order: 1;
+  }
+  
+  .player-name-input {
+    order: 2;
+    flex: 1;
+    min-width: 0;
+    width: 100%;
+  }
+  
+  .player-number-input {
+    order: 3;
+    flex: 0 0 80px;
+    width: 80px !important;
+  }
+  
+  .goals-badge {
+    order: 4;
+    align-self: flex-start;
+    margin-top: 0.25rem;
+  }
+  
+  .player-actions {
+    width: 100%;
+    justify-content: center;
+    margin-top: 0.5rem;
+  }
+  
+  /* Section d'ajout de joueur */
+  .add-player-section {
+    padding: 0.75rem;
+  }
+  
+  .add-player-section h6 {
+    font-size: 1rem;
+    margin-bottom: 0.75rem;
+  }
+  
+  .input-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+  
+  .type-selector {
+    order: 1;
+    align-self: center;
+    margin-bottom: 0.5rem;
+  }
+  
+  .add-player-form .form-control:not(.number-input) {
+    order: 2;
+    width: 100%;
+  }
+  
+  .add-player-form .number-input {
+    order: 3;
+    align-self: center;
+    flex: 0 0 80px;
+    width: 80px !important;
+  }
+  
+  .add-player-form .btn {
+    order: 4;
+    width: 100%;
+    margin-top: 0.5rem;
+    padding: 0.75rem;
+  }
+  
+  .add-player-form .btn .btn-text {
+    display: inline;
+  }
 }
 
-.btn-score-danger:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px 0 rgba(0, 0, 0, 0.3);
-}
-.btn-score-success:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px 0 rgba(0, 0, 0, 0.3);
+/* Optimisation pour très petits écrans */
+@media (max-width: 480px) {
+  .edit-players-modal .modal-title {
+    font-size: 1.1rem;
+  }
+  
+  .edit-players-modal .modal-body {
+    padding: 0.75rem;
+  }
+  
+  .players-list h6,
+  .add-player-section h6 {
+    font-size: 0.95rem;
+    padding-bottom: 0.25rem;
+  }
+  
+  .player-card {
+    padding: 0.5rem;
+    min-height: auto;
+  }
+  
+  .player-main-row {
+    gap: 0.4rem;
+  }
+  
+  .player-name-input,
+  .add-player-form .form-control {
+    font-size: 0.9rem;
+    padding: 0.5rem;
+  }
+  
+  .player-number-input,
+  .add-player-form .number-input {
+    font-size: 0.9rem;
+    padding: 0.5rem;
+    text-align: center;
+  }
+  
+  .goals-badge {
+    font-size: 0.8rem;
+    padding: 0.25rem 0.5rem;
+  }
+  
+  .player-actions .btn {
+    width: 30px;
+    height: 30px;
+    padding: 0.25rem;
+  }
+  
+  .type-icon.type-icon-clickable {
+    font-size: 0.9rem;
+    padding: 0.2em 0.3em;
+  }
+  
+  .add-player-form .btn {
+    font-size: 0.9rem;
+    padding: 0.6rem;
+  }
 }
 
-.btn-score-light {
-  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-  color: #495057;
-  box-shadow: 0 4px 14px 0 rgba(0, 0, 0, 0.1);
-  transition: all 0.3s ease;
-}
-
-.btn-score-light:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px 0 rgba(0, 0, 0, 0.15);
+/* Optimisation pour écrans très étroits (320px et moins) */
+@media (max-width: 320px) {
+  .edit-players-modal {
+    width: 100%;
+    height: 100%;
+    max-height: 100vh;
+    border-radius: 0;
+    margin: 0;
+  }
+  
+  .edit-players-modal .modal-header {
+    border-radius: 0;
+    padding: 0.5rem;
+  }
+  
+  .edit-players-modal .modal-title {
+    font-size: 1rem;
+  }
+  
+  .edit-players-modal .modal-body {
+    padding: 0.5rem;
+  }
+  
+  .player-card {
+    padding: 0.4rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .player-name-input {
+    font-size: 0.85rem;
+  }
+  
+  .player-number-input {
+    flex: 0 0 60px;
+    width: 60px !important;
+    font-size: 0.85rem;
+  }
+  
+  .goals-badge {
+    font-size: 0.75rem;
+    padding: 0.2rem 0.4rem;
+  }
+  
+  .add-player-section {
+    padding: 0.5rem;
+  }
+  
+  .add-player-form .number-input {
+    flex: 0 0 60px;
+    width: 60px !important;
+  }
 }
