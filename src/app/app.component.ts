@@ -174,6 +174,11 @@ export class AppComponent implements OnInit {
   // Configuration pour l'affichage des joueurs (nom ou numéro)
   displayPlayerAsNumber: boolean = false; // false = afficher le nom, true = afficher le numéro
 
+  // Propriétés pour la modale Sheet Code
+  showSheetCodeModal: boolean = false;
+  sheetCodeInput: string = '';
+  isLoadingFromCode: boolean = false;
+
   constructor(
     private fb: FormBuilder,
     private firestoreService: FirestoreService
@@ -2882,6 +2887,88 @@ Lien direct vers le match : ${matchUrl}
     } else {
       return 'btn-score-light'; // Gris moderne si match nul
     }
+  }
+
+  // Fermer la modale Sheet Code
+  closeSheetCodeModal() {
+    this.showSheetCodeModal = false;
+    this.sheetCodeInput = '';
+    this.isLoadingFromCode = false;
+  }
+
+  // Charger les matchs depuis un Sheet Code
+  async loadMatchesBySheetCode() {
+    if (this.sheetCodeInput.length !== 6) {
+      alert('Le code doit contenir exactement 6 caractères.');
+      return;
+    }
+
+    this.isLoadingFromCode = true;
+    try {
+      // Ici vous pouvez implémenter la logique pour charger les matchs depuis Firestore
+      // en utilisant le code comme identifiant
+      console.log('Chargement des matchs avec le code:', this.sheetCodeInput);
+      
+      // Exemple : chercher dans Firestore
+      // const data = await this.firestoreService.getMatchesByCode(this.sheetCodeInput);
+      // if (data) {
+      //   this.matches = data.matches;
+      //   this.saveData();
+      // }
+      
+      alert('Fonctionnalité en cours de développement. Code saisi : ' + this.sheetCodeInput);
+      this.closeSheetCodeModal();
+    } catch (error) {
+      console.error('Erreur lors du chargement:', error);
+      alert('Erreur lors du chargement des données. Vérifiez le code et réessayez.');
+    } finally {
+      this.isLoadingFromCode = false;
+    }
+  }
+
+  // Convertit un hex en rgba (alpha entre 0 et 1)
+  private hexToRgba(hex: string, alpha: number): string {
+    if (!hex) return `rgba(0,0,0,${alpha})`;
+    const h = hex.replace('#', '');
+    const bigint = parseInt(h.length === 3 ? h.split('').map(c => c + c).join('') : h, 16);
+    const r = (bigint >> 16) & 255;
+    const g = (bigint >> 8) & 255;
+    const b = bigint & 255;
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+  }
+
+  // Retourne un objet de style pour appliquer un dégradé visible sur le fond du match
+  getMatchBackground(match: Match): { [key: string]: string } {
+    // Récupérer les équipes
+    const team1 = this.teams.find(t => t.name === match.equipe1);
+    const team2 = this.teams.find(t => t.name === match.equipe2);
+
+    // Couleurs équipe 1 (côté gauche)
+    const primary1 = team1?.primaryColor || '#f8f9fa';
+    const secondary1 = team1?.secondaryColor || primary1;
+    
+    // Couleurs équipe 2 (côté droit)
+    const primary2 = team2?.primaryColor || '#f8f9fa';
+    const secondary2 = team2?.secondaryColor || primary2;
+
+    // Créer deux dégradés très légers avec transition très rapide :
+    // - Équipe 1 : du coin inférieur gauche (45deg), s'estompe très rapidement
+    const gradient1 = `linear-gradient(45deg, 
+      ${this.hexToRgba(primary1, 0.25)} 0%, 
+      ${this.hexToRgba(secondary1, 0.12)} 5%, 
+      ${this.hexToRgba(secondary1, 0.05)} 10%, 
+      transparent 18%)`;
+    
+    // - Équipe 2 : du coin inférieur droit (-45deg), s'estompe très rapidement
+    const gradient2 = `linear-gradient(-45deg, 
+      ${this.hexToRgba(primary2, 0.25)} 0%, 
+      ${this.hexToRgba(secondary2, 0.12)} 5%, 
+      ${this.hexToRgba(secondary2, 0.05)} 10%, 
+      transparent 18%)`;
+    
+    return {
+      'background': `${gradient2}, ${gradient1}, linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)`
+    };
   }
 
   exportMatches() {

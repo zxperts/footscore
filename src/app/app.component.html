@@ -297,7 +297,7 @@
     <div class="list-group">
       <div *ngFor="let match of getSortedMatches()" 
            [attr.data-match-id]="match.id">
-        <div class="match-details">
+        <div class="match-details" [ngStyle]="getMatchBackground(match)">
           <div class="match-info text-muted small text-center">
             <span>{{ match.heureDebut | date:'EEEE dd/MM/yy HH:mm' }}</span>
             <span class="mx-2" *ngIf="match.lieu">•</span>
@@ -316,7 +316,7 @@
           <div class="match-score">
             <div class="team-name" style="flex: 1; text-align: center;">{{ match.equipe1 }}</div>
 
-            <button class="btn" [ngClass]="getScoreColor(match)" (click)="selectMatch(match)" >
+            <button class="btn" [ngClass]="getScoreColor(match)" (click)="selectMatch(match)">
               {{ match.score1 }} - {{ match.score2 }}
             </button>
             
@@ -475,6 +475,17 @@
       </button>
     </div>
     <div class="modal-body">
+      <!-- Couleurs de l'équipe (primary / secondary) -->
+      <div *ngIf="teamToEdit" class="mb-3 d-flex gap-3 align-items-center">
+        <div>
+          <label class="form-label mb-1">Couleur primaire</label>
+          <input type="color" [(ngModel)]="teamToEdit.primaryColor" class="form-control form-control-color" />
+        </div>
+        <div>
+          <label class="form-label mb-1">Couleur secondaire</label>
+          <input type="color" [(ngModel)]="teamToEdit.secondaryColor" class="form-control form-control-color" />
+        </div>
+      </div>
 
       <!-- Ajout du score en haut -->
       <div class="match-score-display mb-4">
@@ -1486,6 +1497,24 @@
       </button>
     </div>
     <div class="modal-body">
+      <!-- Couleurs de l'équipe -->
+      <div class="team-colors-section mb-4 p-3 bg-light rounded border">
+        <h6 class="mb-3">
+          <i class="fas fa-palette me-2"></i>
+          Couleurs de l'équipe
+        </h6>
+        <div class="d-flex gap-3 align-items-center">
+          <div>
+            <label class="form-label mb-1 small">Couleur primaire</label>
+            <input type="color" [(ngModel)]="teamToEdit.primaryColor" class="form-control form-control-color" style="width: 80px; height: 40px;" />
+          </div>
+          <div>
+            <label class="form-label mb-1 small">Couleur secondaire</label>
+            <input type="color" [(ngModel)]="teamToEdit.secondaryColor" class="form-control form-control-color" style="width: 80px; height: 40px;" />
+          </div>
+        </div>
+      </div>
+      
       <!-- Liste des joueurs existants -->
       <div class="players-list mb-4">
         <h6 class="mb-3">
@@ -1494,18 +1523,16 @@
         </h6>
         <div class="player-item mb-2" *ngFor="let player of teamToEdit.players; let i = index">
           <div class="player-card">
-            <div class="player-info">
-              <div class="player-type-icon">
-                <i *ngIf="player.type === 'attaquant'" class="fas fa-futbol type-icon type-icon-clickable" (click)="cyclePlayerType(player)" title="Changer le type (Attaquant)"></i>
-                <i *ngIf="player.type === 'milieu'" class="fas fa-arrows-alt-h type-icon type-icon-clickable" (click)="cyclePlayerType(player)" title="Changer le type (Milieu)"></i>
-                <i *ngIf="player.type === 'defenseur'" class="fas fa-shield type-icon type-icon-clickable" (click)="cyclePlayerType(player)" title="Changer le type (Défenseur)"></i>
-              </div>
-              <input class="form-control player-name-input" [(ngModel)]="player.name" placeholder="Nom du joueur" />
-              <input type="number" class="form-control player-number-input ms-2" style="width: 80px;" [(ngModel)]="player.number" placeholder="N°" min="1" max="99" />
-              <span class="badge bg-primary ms-2 goals-badge" *ngIf="getGoalsForPlayer(player.name) > 0" (click)="openPlayerGoalsModal(player)">
-                {{ getGoalsForPlayer(player.name) }} ⚽
-              </span>
+            <div class="player-type-icon">
+              <i *ngIf="player.type === 'attaquant'" class="fas fa-futbol type-icon type-icon-clickable" (click)="cyclePlayerType(player)" title="Changer le type (Attaquant)"></i>
+              <i *ngIf="player.type === 'milieu'" class="fas fa-arrows-alt-h type-icon type-icon-clickable" (click)="cyclePlayerType(player)" title="Changer le type (Milieu)"></i>
+              <i *ngIf="player.type === 'defenseur'" class="fas fa-shield type-icon type-icon-clickable" (click)="cyclePlayerType(player)" title="Changer le type (Défenseur)"></i>
             </div>
+            <input class="form-control player-name-input" [(ngModel)]="player.name" [attr.size]="player.name ? player.name.length + 2 : 15" placeholder="Nom du joueur" />
+            <input type="number" class="form-control player-number-input" [(ngModel)]="player.number" placeholder="N°" min="1" max="99" />
+            <span class="badge bg-primary goals-badge" *ngIf="getGoalsForPlayer(player.name) > 0" (click)="openPlayerGoalsModal(player)">
+              {{ getGoalsForPlayer(player.name) }} ⚽
+            </span>
             <div class="player-actions">
               <button class="btn btn-sm btn-outline-danger" *ngIf="showDeleteButtons" (click)="removePlayer(i)" title="Supprimer le joueur">
                 <i class="fas fa-trash"></i>
@@ -1523,16 +1550,18 @@
         </h6>
         <div class="add-player-form">
           <div class="input-group">
-            <input [(ngModel)]="newPlayerName" class="form-control" placeholder="Nom du nouveau joueur..." (keyup.enter)="addPlayer()" />
-            <input type="number" [(ngModel)]="newPlayerNumber" class="form-control" style="width: 80px;" placeholder="N°" min="1" max="99" (keyup.enter)="addPlayer()" />
-            <div class="type-selector">
-              <i *ngIf="newPlayerType === 'attaquant'" class="fas fa-futbol type-icon type-icon-clickable" (click)="cycleNewPlayerType()" title="Changer le type (Attaquant)"></i>
-              <i *ngIf="newPlayerType === 'milieu'" class="fas fa-arrows-alt-h type-icon type-icon-clickable" (click)="cycleNewPlayerType()" title="Changer le type (Milieu)"></i>
-              <i *ngIf="newPlayerType === 'defenseur'" class="fas fa-shield type-icon type-icon-clickable" (click)="cycleNewPlayerType()" title="Changer le type (Défenseur)"></i>
+            <div class="input-row">
+              <div class="type-selector">
+                <i *ngIf="newPlayerType === 'attaquant'" class="fas fa-futbol type-icon type-icon-clickable" (click)="cycleNewPlayerType()" title="Changer le type (Attaquant)"></i>
+                <i *ngIf="newPlayerType === 'milieu'" class="fas fa-arrows-alt-h type-icon type-icon-clickable" (click)="cycleNewPlayerType()" title="Changer le type (Milieu)"></i>
+                <i *ngIf="newPlayerType === 'defenseur'" class="fas fa-shield type-icon type-icon-clickable" (click)="cycleNewPlayerType()" title="Changer le type (Défenseur)"></i>
+              </div>
+              <input [(ngModel)]="newPlayerName" class="form-control" placeholder="Nom du nouveau joueur..." (keyup.enter)="addPlayer()" />
+              <input type="number" [(ngModel)]="newPlayerNumber" class="form-control number-input" placeholder="N°" min="1" max="99" (keyup.enter)="addPlayer()" />
+              <button class="btn btn-success" (click)="addPlayer()">
+                <i class="fas fa-plus me-2"></i><span class="btn-text">Ajouter</span>
+              </button>
             </div>
-            <button class="btn btn-success" (click)="addPlayer()">
-              <i class="fas fa-plus me-2"></i>Ajouter
-            </button>
           </div>
         </div>
       </div>
@@ -1729,6 +1758,127 @@
     <div class="modal-footer">
       <button class="btn btn-secondary" (click)="closePlayerSelectionModal()">
         <i class="fas fa-times me-2"></i>Annuler
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal pour saisir un Sheet Code -->
+<div class="modal-overlay sheet-code-modal-overlay" 
+     *ngIf="showSheetCodeModal" 
+     style="position: fixed !important; 
+            top: 0 !important; 
+            left: 0 !important; 
+            width: 100vw !important; 
+            height: 100vh !important; 
+            background-color: rgba(0, 0, 0, 0.7) !important; 
+            z-index: 999999 !important; 
+            display: flex !important; 
+            justify-content: center !important; 
+            align-items: center !important;">
+  <div class="modal" 
+       style="position: relative !important; 
+              z-index: 1000000 !important; 
+              background: white !important; 
+              border-radius: 15px !important; 
+              padding: 0 !important; 
+              max-width: 500px !important; 
+              width: 90% !important; 
+              box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5) !important;">
+    <div class="modal-header" style="background: linear-gradient(135deg, #3498db, #2980b9) !important; color: white !important; padding: 1.5rem !important; border-radius: 15px 15px 0 0 !important;">
+      <h5 class="modal-title" style="margin: 0 !important; font-size: 1.3rem !important;">
+        <i class="fas fa-key me-2"></i>
+        Code d'Accès
+      </h5>
+      <button type="button" 
+              class="close-button" 
+              (click)="closeSheetCodeModal()" 
+              aria-label="Fermer"
+              style="background: none !important; 
+                     border: none !important; 
+                     color: white !important; 
+                     font-size: 1.5rem !important; 
+                     cursor: pointer !important;">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <div class="modal-body" style="padding: 2rem !important; background: white !important;">
+      <p class="text-muted mb-3" style="margin-bottom: 1rem !important;">
+        <i class="fas fa-info-circle me-2"></i>
+        Entrez un code d'accès de 6 caractères pour charger les matchs d'une équipe ou d'une compétition.
+      </p>
+      
+      <div class="mb-3" style="margin-bottom: 1rem !important;">
+        <label for="sheetCodeInput" class="form-label" style="display: block !important; margin-bottom: 0.5rem !important;">Code d'accès :</label>
+        <input 
+          type="text" 
+          id="sheetCodeInput"
+          class="form-control text-uppercase text-center" 
+          [(ngModel)]="sheetCodeInput"
+          placeholder="ABC123"
+          maxlength="6"
+          style="font-size: 1.2em !important; 
+                 letter-spacing: 0.2em !important; 
+                 font-weight: bold !important;
+                 border: 2px solid #dee2e6 !important;
+                 border-radius: 8px !important;
+                 padding: 1rem !important;
+                 width: 100% !important;
+                 text-align: center !important;"
+          (keyup.enter)="loadMatchesBySheetCode()"
+          (input)="sheetCodeInput = sheetCodeInput.toUpperCase()"
+        >
+      </div>
+      
+      <div class="alert alert-info" 
+           *ngIf="sheetCodeInput.length === 6"
+           style="background: linear-gradient(135deg, #d4edda, #c3e6cb) !important;
+                  color: #155724 !important;
+                  border: none !important;
+                  border-radius: 8px !important;
+                  padding: 1rem !important;
+                  margin-top: 1rem !important;">
+        <i class="fas fa-check-circle me-2"></i>
+        Code prêt à être vérifié
+      </div>
+      
+      <div class="alert alert-warning" 
+           *ngIf="sheetCodeInput.length > 0 && sheetCodeInput.length < 6"
+           style="background: linear-gradient(135deg, #fff3cd, #ffeaa7) !important;
+                  color: #856404 !important;
+                  border: none !important;
+                  border-radius: 8px !important;
+                  padding: 1rem !important;
+                  margin-top: 1rem !important;">
+        <i class="fas fa-exclamation-triangle me-2"></i>
+        Le code doit contenir exactement 6 caractères
+      </div>
+    </div>
+    <div class="modal-footer" 
+         style="padding: 1rem 2rem 2rem 2rem !important;
+                border-top: 1px solid #dee2e6 !important;
+                display: flex !important;
+                justify-content: flex-end !important;
+                gap: 1rem !important;
+                background: white !important;
+                border-radius: 0 0 15px 15px !important;">
+      <button type="button" 
+              class="btn btn-secondary" 
+              (click)="closeSheetCodeModal()"
+              style="padding: 0.5rem 1rem !important; 
+                     border-radius: 5px !important;">
+        <i class="fas fa-times me-2"></i>Annuler
+      </button>
+      <button 
+        type="button" 
+        class="btn btn-success" 
+        (click)="loadMatchesBySheetCode()"
+        [disabled]="sheetCodeInput.length !== 6 || isLoadingFromCode"
+        style="padding: 0.5rem 1rem !important; 
+               border-radius: 5px !important;">
+        <i class="fas" [ngClass]="isLoadingFromCode ? 'fa-spinner fa-spin' : 'fa-download'"></i>
+        <span *ngIf="!isLoadingFromCode" style="margin-left: 0.5rem;">Charger</span>
+        <span *ngIf="isLoadingFromCode" style="margin-left: 0.5rem;">Chargement...</span>
       </button>
     </div>
   </div>

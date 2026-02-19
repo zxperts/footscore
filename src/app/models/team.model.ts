@@ -8,6 +8,8 @@ export interface Team {
   id: number;
   name: string;
   players: Player[];
+  primaryColor?: string;
+  secondaryColor?: string;
 }
 
 export interface SharedTeam {
@@ -22,7 +24,9 @@ export const TEAMS: Team[] = [
   {
     id: 1,
     name: 'Stand. Flawinne FC',
-    players: [{ name: 'Joueur non listé', type: 'milieu' }]
+    players: [{ name: 'Joueur non listé', type: 'milieu' }],
+    primaryColor: '#3498db',
+    secondaryColor: '#74b816'
   },
   {
     id: 2,
@@ -93,6 +97,9 @@ export const TEAMS: Team[] = [
       { name: 'Gabin', type: 'milieu' },
       { name: 'Georges', type: 'milieu' }
     ]
+    ,
+    primaryColor: '#1e90ff',
+    secondaryColor: '#27ae60'
   }
 ];
 
