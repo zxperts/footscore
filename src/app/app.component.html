@@ -1623,62 +1623,110 @@
       </button>
     </div>
     <div class="modal-body">
-      <div *ngIf="isLoadingFirestoreTeams" class="text-center py-4">
-        <i class="fas fa-spinner fa-spin fa-2x"></i>
-        <p class="mt-2">Chargement des équipes...</p>
-      </div>
-      
-      <div *ngIf="!isLoadingFirestoreTeams && firestoreTeams.length === 0" class="text-center py-4">
-        <i class="fas fa-info-circle fa-2x text-muted"></i>
-        <p class="mt-2 text-muted">Aucune équipe disponible dans Firestore</p>
-      </div>
-      
-      <div *ngIf="!isLoadingFirestoreTeams && firestoreTeams.length > 0">
-        <p class="text-muted mb-3">
-          Sélectionnez une ou plusieurs équipes à importer. Tous les matchs de ces équipes seront ajoutés.
-        </p>
+      <!-- Étape 1 : Saisie du code Secret -->
+      <div *ngIf="!importTeamCodeEntered">
+        <div class="text-center mb-4">
+          <i class="fas fa-key fa-3x text-info mb-3"></i>
+          <h6>Veuillez encoder le code Secret</h6>
+          <p class="text-muted small">Ce code permet d'accéder aux équipes partagées</p>
+        </div>
         
-        <div class="team-item mb-2" *ngFor="let team of firestoreTeams">
-          <div class="team-card">
-            <div class="team-info">
-              <div class="form-check">
-                <input type="checkbox" 
-                       class="form-check-input" 
-                       [value]="team.id" 
-                       [(ngModel)]="team.selected"
-                       [id]="'import-team-' + team.id">
-                <label class="form-check-label" [for]="'import-team-' + team.id">
-                  <span class="badge team-badge">{{ team.name }}</span>
-                  <small class="text-muted ms-2">({{ team.matchIds?.length || 0 }} matchs)</small>
-                </label>
+        <div class="mb-3">
+          <label class="form-label">Code Secret</label>
+          <input type="text" 
+                 class="form-control form-control-lg" 
+                 [(ngModel)]="importTeamCode"
+                 [ngModelOptions]="{standalone: true}"
+                 placeholder="Entrez le code Secret"
+                 (keyup.enter)="validateImportTeamCode()">
+        </div>
+        
+        <div class="alert alert-warning" *ngIf="importTeamCodeError">
+          <i class="fas fa-exclamation-circle me-2"></i>
+          {{ importTeamCodeError }}
+        </div>
+      </div>
+      
+      <!-- Étape 2 : Sélection des équipes à importer -->
+      <div *ngIf="importTeamCodeEntered">
+        <div class="mb-3 d-flex align-items-center gap-2">
+          <button class="btn btn-sm btn-outline-secondary" (click)="resetImportTeamCode()">
+            <i class="fas fa-arrow-left me-1"></i>Retour
+          </button>
+          <span class="text-muted small">Code accepté</span>
+        </div>
+        
+        <div *ngIf="isLoadingFirestoreTeams" class="text-center py-4">
+          <i class="fas fa-spinner fa-spin fa-2x"></i>
+          <p class="mt-2">Chargement des équipes...</p>
+        </div>
+        
+        <div *ngIf="!isLoadingFirestoreTeams && firestoreTeams.length === 0" class="text-center py-4">
+          <i class="fas fa-info-circle fa-2x text-muted"></i>
+          <p class="mt-2 text-muted">Aucune équipe disponible</p>
+        </div>
+        
+        <div *ngIf="!isLoadingFirestoreTeams && firestoreTeams.length > 0">
+          <p class="text-muted mb-3">
+            Sélectionnez une ou plusieurs équipes à importer. Tous les matchs de ces équipes seront ajoutés.
+          </p>
+          
+          <div class="team-item mb-2" *ngFor="let team of firestoreTeams">
+            <div class="team-card">
+              <div class="team-info">
+                <div class="form-check">
+                  <input type="checkbox" 
+                         class="form-check-input" 
+                         [value]="team.id" 
+                         [(ngModel)]="team.selected"
+                         [ngModelOptions]="{standalone: true}"
+                         [id]="'import-team-' + team.id">
+                  <label class="form-check-label" [for]="'import-team-' + team.id">
+                    <span class="badge team-badge">{{ team.name }}</span>
+                    <small class="text-muted ms-2">({{ team.matchIds?.length || 0 }} matchs)</small>
+                  </label>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-        
-        <div class="alert alert-info mt-3" *ngIf="importingTeams">
-          <i class="fas fa-spinner fa-spin me-2"></i>
-          Importation en cours...
-          <div class="import-logs mt-2" *ngIf="importLogs.length > 0">
-            <small *ngFor="let log of importLogs" class="d-block">{{ log }}</small>
+          
+          <div class="alert alert-info mt-3" *ngIf="importingTeams">
+            <i class="fas fa-spinner fa-spin me-2"></i>
+            Importation en cours...
+            <div class="import-logs mt-2" *ngIf="importLogs.length > 0">
+              <small *ngFor="let log of importLogs" class="d-block">{{ log }}</small>
+            </div>
           </div>
         </div>
       </div>
     </div>
     <div class="modal-footer">
-      <button type="button" 
-              class="btn btn-primary" 
-              (click)="importSelectedTeams()"
-              [disabled]="importingTeams || getSelectedTeamsCount() === 0">
-        <i class="fas fa-download me-2"></i>
-        Importer {{ getSelectedTeamsCount() > 0 ? '(' + getSelectedTeamsCount() + ')' : '' }}
-      </button>
-      <button type="button" 
-              class="btn btn-secondary" 
-              (click)="closeImportTeamModal()"
-              [disabled]="importingTeams">
-        <i class="fas fa-times me-2"></i>Annuler
-      </button>
+      <!-- Boutons pour étape 1 -->
+      <div *ngIf="!importTeamCodeEntered" class="w-100">
+        <button type="button" 
+                class="btn btn-primary w-100" 
+                (click)="validateImportTeamCode()"
+                [disabled]="!importTeamCode || importTeamCode.trim() === ''">
+          <i class="fas fa-check me-2"></i>Valider le code
+        </button>
+      </div>
+      
+      <!-- Boutons pour étape 2 -->
+      <div *ngIf="importTeamCodeEntered" class="w-100 d-flex gap-2">
+        <button type="button" 
+                class="btn btn-primary flex-grow-1" 
+                (click)="importSelectedTeams()"
+                [disabled]="importingTeams || getSelectedTeamsCount() === 0">
+          <i class="fas fa-download me-2"></i>
+          Importer {{ getSelectedTeamsCount() > 0 ? '(' + getSelectedTeamsCount() + ')' : '' }}
+        </button>
+        <button type="button" 
+                class="btn btn-secondary" 
+                (click)="closeImportTeamModal()"
+                [disabled]="importingTeams">
+          <i class="fas fa-times me-2"></i>Fermer
+        </button>
+      </div>
     </div>
   </div>
 </div>

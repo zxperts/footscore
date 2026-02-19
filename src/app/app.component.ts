@@ -122,6 +122,9 @@ export class AppComponent implements OnInit {
   
   // Propriétés pour l'importation d'équipes depuis Firestore
   showImportTeamModal: boolean = false;
+  importTeamCode: string = '';
+  importTeamCodeEntered: boolean = false;
+  importTeamCodeError: string = '';
   firestoreTeams: any[] = [];
   isLoadingFirestoreTeams: boolean = false;
   importingTeams: boolean = false;
@@ -3897,9 +3900,51 @@ Lien direct vers le match : ${matchUrl}
   // Méthodes pour l'importation d'équipes depuis Firestore
   async openImportTeamModal() {
     this.showImportTeamModal = true;
-    this.isLoadingFirestoreTeams = true;
+    this.importTeamCode = '';
+    this.importTeamCodeEntered = false;
+    this.importTeamCodeError = '';
     this.firestoreTeams = [];
     this.importLogs = [];
+  }
+  
+  closeImportTeamModal() {
+    if (this.importingTeams) return;
+    this.showImportTeamModal = false;
+    this.importTeamCode = '';
+    this.importTeamCodeEntered = false;
+    this.importTeamCodeError = '';
+    this.firestoreTeams = [];
+    this.importLogs = [];
+  }
+  
+  resetImportTeamCode() {
+    this.importTeamCodeEntered = false;
+    this.importTeamCode = '';
+    this.importTeamCodeError = '';
+    this.firestoreTeams = [];
+    this.firestoreTeams.forEach(team => team.selected = false);
+  }
+  
+  async validateImportTeamCode() {
+    this.importTeamCodeError = '';
+    
+    if (!this.importTeamCode || this.importTeamCode.trim() === '') {
+      this.importTeamCodeError = 'Veuillez entrer un code';
+      return;
+    }
+    
+    // Code secret fixe pour valider l'importation d'équipes
+    const SECRET_CODE = 'XTEAMX2024';
+    
+    if (this.importTeamCode.toUpperCase() !== SECRET_CODE) {
+      this.importTeamCodeError = 'Code incorrect';
+      return;
+    }
+    
+    // Code valide, charger les équipes
+    this.importTeamCodeEntered = true;
+    this.isLoadingFirestoreTeams = true;
+    this.firestoreTeams = [];
     
     try {
       // Récupérer toutes les équipes depuis Firestore
@@ -3910,17 +3955,11 @@ Lien direct vers le match : ${matchUrl}
       }));
     } catch (error) {
       console.error('Erreur lors du chargement des équipes:', error);
-      alert('Erreur lors du chargement des équipes depuis Firestore');
+      this.importTeamCodeError = 'Erreur lors du chargement des équipes';
+      this.importTeamCodeEntered = false;
     } finally {
       this.isLoadingFirestoreTeams = false;
     }
-  }
-  
-  closeImportTeamModal() {
-    if (this.importingTeams) return;
-    this.showImportTeamModal = false;
-    this.firestoreTeams = [];
-    this.importLogs = [];
   }
   
   getSelectedTeamsCount(): number {
