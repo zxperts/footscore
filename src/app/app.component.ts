@@ -119,6 +119,13 @@ export class AppComponent implements OnInit {
   ];
   competitionSearch: string = '';
   filteredCompetitions: string[] = [];
+  
+  // Propriétés pour l'importation d'équipes depuis Firestore
+  showImportTeamModal: boolean = false;
+  firestoreTeams: any[] = [];
+  isLoadingFirestoreTeams: boolean = false;
+  importingTeams: boolean = false;
+  importLogs: string[] = [];
 
   // Ajoute ces propriétés pour gérer les buts désactivés
   disabledGoals: { matchId: number, buteurIndex: number }[] = [];
@@ -3885,6 +3892,113 @@ Lien direct vers le match : ${matchUrl}
     }
     this.closeNewTeamModal();
     this.newTeamTargetField = null;
+  }
+  
+  // Méthodes pour l'importation d'équipes depuis Firestore
+  async openImportTeamModal() {
+    this.showImportTeamModal = true;
+    this.isLoadingFirestoreTeams = true;
+    this.firestoreTeams = [];
+    this.importLogs = [];
+    
+    try {
+      // Récupérer toutes les équipes depuis Firestore
+      const teams = await this.firestoreService.getAllTeams();
+      this.firestoreTeams = teams.map(team => ({
+        ...team,
+        selected: false
+      }));
+    } catch (error) {
+      console.error('Erreur lors du chargement des équipes:', error);
+      alert('Erreur lors du chargement des équipes depuis Firestore');
+    } finally {
+      this.isLoadingFirestoreTeams = false;
+    }
+  }
+  
+  closeImportTeamModal() {
+    if (this.importingTeams) return;
+    this.showImportTeamModal = false;
+    this.firestoreTeams = [];
+    this.importLogs = [];
+  }
+  
+  getSelectedTeamsCount(): number {
+    return this.firestoreTeams.filter(team => team.selected).length;
+  }
+  
+  async importSelectedTeams() {
+    const selectedTeams = this.firestoreTeams.filter(team => team.selected);
+    if (selectedTeams.length === 0) {
+      alert('Veuillez sélectionner au moins une équipe');
+      return;
+    }
+    
+    this.importingTeams = true;
+    this.importLogs = [];
+    
+    try {
+      for (const team of selectedTeams) {
+        this.importLogs.push(`Importation de l'équipe "${team.name}"...`);
+        
+        // Vérifier si l'équipe existe déjà localement
+        let localTeam = this.teams.find(t => t.name === team.name);
+        if (!localTeam) {
+          // Créer l'équipe localement
+          localTeam = {
+            id: Date.now() + Math.random(),
+            name: team.name,
+            players: team.players || [],
+            primaryColor: team.primaryColor,
+            secondaryColor: team.secondaryColor
+          };
+          this.teams.push(localTeam);
+          this.importLogs.push(`Équipe "${team.name}" créée localement`);
+        } else {
+          this.importLogs.push(`Équipe "${team.name}" existe déjà`);
+        }
+        
+        // Importer les matchs de l'équipe
+        const matches = await this.firestoreService.getMatchesByTeam(team.id);
+        this.importLogs.push(`${matches.length} match(s) trouvé(s)`);
+        
+        for (const match of matches) {
+          // Vérifier si le match existe déjà (par date et équipes)
+          const matchExists = this.matches.some(m => 
+            m.equipe1 === match.equipe1 && 
+            m.equipe2 === match.equipe2 && 
+            m.heureDebut.getTime() === match.heureDebut.getTime()
+          );
+          
+          if (!matchExists) {
+            // Ajouter l'ID au match
+            const newMatch = {
+              ...match,
+              id: this.matches.length + 1
+            };
+            this.matches.push(newMatch);
+            this.importLogs.push(`Match importé: ${match.equipe1} vs ${match.equipe2}`);
+          } else {
+            this.importLogs.push(`Match déjà existant: ${match.equipe1} vs ${match.equipe2}`);
+          }
+        }
+      }
+      
+      this.saveData();
+      this.importLogs.push('Importation terminée avec succès!');
+      
+      // Fermer la modale après 2 secondes
+      setTimeout(() => {
+        this.closeImportTeamModal();
+        this.importingTeams = false;
+      }, 2000);
+      
+    } catch (error) {
+      console.error('Erreur lors de l\'importation:', error);
+      this.importLogs.push('Erreur lors de l\'importation');
+      alert('Erreur lors de l\'importation des équipes');
+      this.importingTeams = false;
+    }
   }
 
   canCreateNewTeam(): boolean {

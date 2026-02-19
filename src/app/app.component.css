@@ -1309,10 +1309,24 @@ body {
   animation: modalSlideIn 0.3s ease-out;
 }
 
+/* Modale d'importation d'équipes */
+.import-team-modal {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  max-width: 700px;
+  width: 90%;
+  max-height: 90vh;
+  overflow: hidden;
+  z-index: 1050;
+  animation: modalSlideIn 0.3s ease-out;
+}
+
 /* En-têtes des modales */
 .team-modal .modal-header,
 .match-modal .modal-header,
-.ranking-modal .modal-header {
+.ranking-modal .modal-header,
+.import-team-modal .modal-header {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
   padding: 1rem;
@@ -1321,7 +1335,8 @@ body {
 
 .team-modal .modal-title,
 .match-modal .modal-title,
-.ranking-modal .modal-title {
+.ranking-modal .modal-title,
+.import-team-modal .modal-title {
   margin: 0;
   font-size: 1.5rem;
   font-weight: 600;
@@ -1330,7 +1345,8 @@ body {
 /* Boutons de fermeture */
 .team-modal .close-button,
 .match-modal .close-button,
-.ranking-modal .close-button {
+.ranking-modal .close-button,
+.import-team-modal .close-button {
   background: none;
   border: none;
   color: white;
@@ -1348,14 +1364,16 @@ body {
 
 .team-modal .close-button:hover,
 .match-modal .close-button:hover,
-.ranking-modal .close-button:hover {
+.ranking-modal .close-button:hover,
+.import-team-modal .close-button:hover {
   background-color: rgba(255, 255, 255, 0.2);
 }
 
 /* Corps des modales */
 .team-modal .modal-body,
 .match-modal .modal-body,
-.ranking-modal .modal-body {
+.ranking-modal .modal-body,
+.import-team-modal .modal-body {
   padding: 2rem;
   max-height: 70vh;
   overflow-y: auto;
@@ -1364,7 +1382,8 @@ body {
 /* Pieds des modales */
 .team-modal .modal-footer,
 .match-modal .modal-footer,
-.ranking-modal .modal-footer {
+.ranking-modal .modal-footer,
+.import-team-modal .modal-footer {
   padding: 1.5rem;
   border-top: 1px solid #e9ecef;
   background-color: #f8f9fa;
@@ -1437,11 +1456,26 @@ body {
   border: none;
 }
 
+/* Styles pour les logs d'importation */
+.import-logs {
+  background: #f8f9fa;
+  border-radius: 6px;
+  padding: 0.5rem;
+  max-height: 150px;
+  overflow-y: auto;
+}
+
+.import-logs small {
+  color: #6c757d;
+  font-size: 0.85rem;
+}
+
 /* Responsive pour les nouvelles modales */
 @media (max-width: 768px) {
   .team-modal,
   .match-modal,
-  .ranking-modal {
+  .ranking-modal,
+  .import-team-modal {
     width: 95%;
     max-width: none;
     max-height: 95vh;
@@ -1449,7 +1483,8 @@ body {
   
   .team-modal .modal-body,
   .match-modal .modal-body,
-  .ranking-modal .modal-body {
+  .ranking-modal .modal-body,
+  .import-team-modal .modal-body {
     padding: 1rem;
   }
   

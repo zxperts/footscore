@@ -198,6 +198,16 @@ export class FirestoreService {
     return null;
   }
 
+  async getAllTeams(): Promise<SharedTeam[]> {
+    const teamsRef = collection(this.firestore, 'teams');
+    const querySnapshot = await getDocs(teamsRef);
+    
+    return querySnapshot.docs.map(doc => ({
+      ...doc.data(),
+      id: doc.id
+    } as SharedTeam));
+  }
+
   async addMatchToTeam(teamId: string, matchId: string): Promise<void> {
     const teamRef = doc(this.firestore, 'teams', teamId);
     const team = await this.getTeamById(teamId);
