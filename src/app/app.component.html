@@ -1528,7 +1528,7 @@
               <i *ngIf="player.type === 'milieu'" class="fas fa-arrows-alt-h type-icon type-icon-clickable" (click)="cyclePlayerType(player)" title="Changer le type (Milieu)"></i>
               <i *ngIf="player.type === 'defenseur'" class="fas fa-shield type-icon type-icon-clickable" (click)="cyclePlayerType(player)" title="Changer le type (Défenseur)"></i>
             </div>
-            <input class="form-control player-name-input" [(ngModel)]="player.name" [attr.size]="player.name ? player.name.length + 2 : 15" placeholder="Nom du joueur" />
+            <input class="form-control player-name-input" [(ngModel)]="player.name" [attr.size]="player.name && player.name.length > 0 ? player.name.length * 2 : 20" [style.width.ch]="player.name && player.name.length > 0 ? (player.name.length + 1) * 2 : 20" placeholder="Nom du joueur" />
             <input type="number" class="form-control player-number-input" [(ngModel)]="player.number" placeholder="N°" min="1" max="99" />
             <span class="badge bg-primary goals-badge" *ngIf="getGoalsForPlayer(player.name) > 0" (click)="openPlayerGoalsModal(player)">
               {{ getGoalsForPlayer(player.name) }} ⚽
