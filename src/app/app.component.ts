@@ -2449,12 +2449,12 @@ ${match.equipe2}:
 ${this.getGroupedScorers(match, 2).map(b => `- ${b.nom}: ${b.minutes.join(', ')}'${b.assist ? ` (Assist: ${b.assist})` : ''}`).join('\n')}
       `.trim();
 
-      const matchInfoWithLink = `${matchInfo}\n\nLien direct vers le match : ${matchUrl}`;
+      const matchInfoWithLink = `${matchInfo}\n\nLien direct vers le match : `;
 
       if (navigator.share) {
         await navigator.share({
           title: `${match.equipe1} vs ${match.equipe2}`,
-          text: matchInfo,
+          text: matchInfoWithLink,
           url: matchUrl
         });
       } else {
