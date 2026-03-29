@@ -2447,9 +2447,9 @@ ${this.getGroupedScorers(match, 1).map(b => `- ${b.nom}: ${b.minutes.join(', ')}
 
 ${match.equipe2}:
 ${this.getGroupedScorers(match, 2).map(b => `- ${b.nom}: ${b.minutes.join(', ')}'${b.assist ? ` (Assist: ${b.assist})` : ''}`).join('\n')}
-
-Lien direct vers le match : ${matchUrl}
       `.trim();
+
+      const matchInfoWithLink = `${matchInfo}\n\nLien direct vers le match : ${matchUrl}`;
 
       if (navigator.share) {
         await navigator.share({
@@ -2460,7 +2460,7 @@ Lien direct vers le match : ${matchUrl}
       } else {
         // Fallback pour les navigateurs qui ne supportent pas l'API Web Share
         const textArea = document.createElement('textarea');
-        textArea.value = matchInfo;
+        textArea.value = matchInfoWithLink;
         document.body.appendChild(textArea);
         textArea.select();
         try {
