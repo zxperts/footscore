@@ -36,9 +36,8 @@ This typically indicates that your device does not have a healthy Internet conne
 Match : ${e.equipe1} vs ${e.equipe2}
 Score : ${e.score1} - ${e.score2}
 Date : ${e.heureDebut.toLocaleString("fr-FR",{weekday:"long",day:"numeric",month:"long",year:"numeric",hour:"2-digit",minute:"2-digit"})}
-Lieu : ${e.lieu||"Non sp\xE9cifi\xE9"}
-Comp\xE9tition : ${e.competition||"Non sp\xE9cifi\xE9e"}
-
+${e.lieu?"Lieu : "+e.lieu:""}
+${e.competition?"Comp\xE9tition : "+e.competition:""}
 Buteurs :
 ${e.equipe1}:
 ${this.getGroupedScorers(e,1).map(o=>`- ${o.nom}: ${o.minutes.join(", ")}'${o.assist?` (Assist: ${o.assist})`:""}`).join(`
@@ -46,15 +45,6 @@ ${this.getGroupedScorers(e,1).map(o=>`- ${o.nom}: ${o.minutes.join(", ")}'${o.as
 
 ${e.equipe2}:
 ${this.getGroupedScorers(e,2).map(o=>`- ${o.nom}: ${o.minutes.join(", ")}'${o.assist?` (Assist: ${o.assist})`:""}`).join(`
-`)}
-
-Duels gagn\xE9s :
-${e.equipe1}:
-${this.getGroupedDuels(e,1).map(o=>`- ${o.nom}: ${o.minutes.join(", ")}'`).join(`
-`)}
-
-${e.equipe2}:
-${this.getGroupedDuels(e,2).map(o=>`- ${o.nom}: ${o.minutes.join(", ")}'`).join(`
 `)}
 
 Lien direct vers le match : ${i}

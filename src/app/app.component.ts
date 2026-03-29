@@ -2439,22 +2439,14 @@ Date : ${match.heureDebut.toLocaleString('fr-FR', {
   hour: '2-digit',
   minute: '2-digit'
 })}
-Lieu : ${match.lieu || 'Non spécifié'}
-Compétition : ${match.competition || 'Non spécifiée'}
-
+${match.lieu ? 'Lieu : ' + match.lieu : ''}
+${match.competition ? 'Compétition : ' + match.competition : ''}
 Buteurs :
 ${match.equipe1}:
 ${this.getGroupedScorers(match, 1).map(b => `- ${b.nom}: ${b.minutes.join(', ')}'${b.assist ? ` (Assist: ${b.assist})` : ''}`).join('\n')}
 
 ${match.equipe2}:
 ${this.getGroupedScorers(match, 2).map(b => `- ${b.nom}: ${b.minutes.join(', ')}'${b.assist ? ` (Assist: ${b.assist})` : ''}`).join('\n')}
-
-Duels gagnés :
-${match.equipe1}:
-${this.getGroupedDuels(match, 1).map(d => `- ${d.nom}: ${d.minutes.join(', ')}'`).join('\n')}
-
-${match.equipe2}:
-${this.getGroupedDuels(match, 2).map(d => `- ${d.nom}: ${d.minutes.join(', ')}'`).join('\n')}
 
 Lien direct vers le match : ${matchUrl}
       `.trim();
