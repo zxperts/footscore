@@ -2427,34 +2427,51 @@ export class AppComponent implements OnInit {
       
       // Construire l'URL avec l'ID Firestore
       const matchUrl = `${window.location.origin}?matchId=${matchId}`;
+
+      const formattedDate = match.heureDebut.toLocaleString('fr-FR', {
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+
+      const team1Scorers = this.getGroupedScorers(match, 1)
+        .map(b => `• ${b.nom} (${b.minutes.join(', ')}')${b.assist ? ` — Assist: ${b.assist}` : ''}`)
+        .join('\n') || '• Aucun buteur';
+
+      const team2Scorers = this.getGroupedScorers(match, 2)
+        .map(b => `• ${b.nom} (${b.minutes.join(', ')}')${b.assist ? ` — Assist: ${b.assist}` : ''}`)
+        .join('\n') || '• Aucun buteur';
+
+      const optionalInfos = [
+        match.competition ? `🏆 Compétition : ${match.competition}` : '',
+        match.lieu ? `📍 Lieu : ${match.lieu}` : ''
+      ].filter(Boolean).join('\n');
       
-      const matchInfo = `
-Match : ${match.equipe1} vs ${match.equipe2}
-Score : ${match.score1} - ${match.score2}
-Date : ${match.heureDebut.toLocaleString('fr-FR', { 
-  weekday: 'long', 
-  day: 'numeric', 
-  month: 'long', 
-  year: 'numeric',
-  hour: '2-digit',
-  minute: '2-digit'
-})}
-${match.lieu ? 'Lieu : ' + match.lieu : ''}
-${match.competition ? 'Compétition : ' + match.competition : ''}
-Buteurs :
-${match.equipe1}:
-${this.getGroupedScorers(match, 1).map(b => `- ${b.nom}: ${b.minutes.join(', ')}'${b.assist ? ` (Assist: ${b.assist})` : ''}`).join('\n')}
+      const matchInfo = [
+        '⚽ MATCH DAY ⚽',
+        '━━━━━━━━━━━━━━━━━━',
+        `🆚 ${match.equipe1} vs ${match.equipe2}`,
+        `🔢 Score final : ${match.score1} - ${match.score2}`,
+        `🗓️ Date : ${formattedDate}`,
+        optionalInfos,
+        '',
+        '🎯 Buteurs',
+        `${match.equipe1} :`,
+        team1Scorers,
+        '',
+        `${match.equipe2} :`,
+        team2Scorers
+      ].filter(line => line.trim().length > 0).join('\n');
 
-${match.equipe2}:
-${this.getGroupedScorers(match, 2).map(b => `- ${b.nom}: ${b.minutes.join(', ')}'${b.assist ? ` (Assist: ${b.assist})` : ''}`).join('\n')}
-      `.trim();
-
-      const matchInfoWithLink = `${matchInfo}\n\nLien direct vers le match : `;
+      const matchInfoWithLink = `${matchInfo}\n\n🔗 Lien direct vers le match : ${matchUrl}`;
 
       if (navigator.share) {
         await navigator.share({
           title: `${match.equipe1} vs ${match.equipe2}`,
-          text: matchInfoWithLink,
+          text: matchInfo,
           url: matchUrl
         });
       } else {
@@ -2928,49 +2945,29 @@ ${this.getGroupedScorers(match, 2).map(b => `- ${b.nom}: ${b.minutes.join(', ')}
     }
   }
 
-  // Convertit un hex en rgba (alpha entre 0 et 1)
-  private hexToRgba(hex: string, alpha: number): string {
-    if (!hex) return `rgba(0,0,0,${alpha})`;
-    const h = hex.replace('#', '');
-    const bigint = parseInt(h.length === 3 ? h.split('').map(c => c + c).join('') : h, 16);
-    const r = (bigint >> 16) & 255;
-    const g = (bigint >> 8) & 255;
-    const b = bigint & 255;
-    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+  // Retourne un objet de style pour le fond du match
+  getMatchBackground(match: Match): { [key: string]: string } {
+    return {
+      'background': 'linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)'
+    };
   }
 
-  // Retourne un objet de style pour appliquer un dégradé visible sur le fond du match
-  getMatchBackground(match: Match): { [key: string]: string } {
-    // Récupérer les équipes
-    const team1 = this.teams.find(t => t.name === match.equipe1);
-    const team2 = this.teams.find(t => t.name === match.equipe2);
+  // Carré bicolore diagonal selon les couleurs de l'équipe
+  getTeamColorSquareStyle(teamName: string): { [key: string]: string } {
+    const team = this.teams.find(t => t.name === teamName);
+    const primary = team?.primaryColor || '#2c3e50';
+    const secondary = team?.secondaryColor || primary;
 
-    // Couleurs équipe 1 (côté gauche)
-    const primary1 = team1?.primaryColor || '#f8f9fa';
-    const secondary1 = team1?.secondaryColor || primary1;
-    
-    // Couleurs équipe 2 (côté droit)
-    const primary2 = team2?.primaryColor || '#f8f9fa';
-    const secondary2 = team2?.secondaryColor || primary2;
-
-    // Créer deux dégradés très légers avec transition très rapide :
-    // - Équipe 1 : du coin inférieur gauche (45deg), s'estompe très rapidement
-    const gradient1 = `linear-gradient(45deg, 
-      ${this.hexToRgba(primary1, 0.25)} 0%, 
-      ${this.hexToRgba(secondary1, 0.12)} 5%, 
-      ${this.hexToRgba(secondary1, 0.05)} 10%, 
-      transparent 18%)`;
-    
-    // - Équipe 2 : du coin inférieur droit (-45deg), s'estompe très rapidement
-    const gradient2 = `linear-gradient(-45deg, 
-      ${this.hexToRgba(primary2, 0.25)} 0%, 
-      ${this.hexToRgba(secondary2, 0.12)} 5%, 
-      ${this.hexToRgba(secondary2, 0.05)} 10%, 
-      transparent 18%)`;
-    
     return {
-      'background': `${gradient2}, ${gradient1}, linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)`
+      background: `linear-gradient(135deg, ${primary} 0%, ${primary} 50%, ${secondary} 50%, ${secondary} 100%)`
     };
+  }
+
+  hasTeamColorsConfigured(teamName: string): boolean {
+    const team = this.teams.find(t => t.name === teamName);
+    const primary = team?.primaryColor?.trim();
+    const secondary = team?.secondaryColor?.trim();
+    return !!primary && !!secondary;
   }
 
   exportMatches() {

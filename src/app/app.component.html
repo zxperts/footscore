@@ -320,13 +320,17 @@
           </div>
           
           <div class="match-score">
-            <div class="team-name" style="flex: 1; text-align: center;">{{ match.equipe1 }}</div>
+            <div class="team-name" style="flex: 1; text-align: center;">
+              <span *ngIf="hasTeamColorsConfigured(match.equipe1)" class="team-color-square" [ngStyle]="getTeamColorSquareStyle(match.equipe1)"></span>{{ match.equipe1 }}
+            </div>
 
             <button class="btn" [ngClass]="getScoreColor(match)" (click)="selectMatch(match)">
               {{ match.score1 }} - {{ match.score2 }}
             </button>
             
-            <div class="team-name" style="flex: 1; text-align: center;">{{ match.equipe2 }}</div>
+            <div class="team-name" style="flex: 1; text-align: center;">
+              <span *ngIf="hasTeamColorsConfigured(match.equipe2)" class="team-color-square" [ngStyle]="getTeamColorSquareStyle(match.equipe2)"></span>{{ match.equipe2 }}
+            </div>
           </div>
 
           <!-- Section pour afficher les buteurs -->
@@ -496,7 +500,9 @@
       <!-- Ajout du score en haut -->
       <div class="match-score-display mb-4">
         <div class="match-score">
-          <div class="team-name" style="flex: 1; text-align: center;">{{ selectedMatch.equipe1 }}</div>
+          <div class="team-name" style="flex: 1; text-align: center;">
+            <span *ngIf="hasTeamColorsConfigured(selectedMatch.equipe1)" class="team-color-square" [ngStyle]="getTeamColorSquareStyle(selectedMatch.equipe1)"></span>{{ selectedMatch.equipe1 }}
+          </div>
           <div class="score" [ngClass]="getScoreColor(selectedMatch)" style="text-align: center;" (click)="showScoreForm = true">
             <ng-container *ngIf="!showScoreForm">
               {{ selectedMatch.score1 }} - {{ selectedMatch.score2 }}
@@ -525,7 +531,9 @@
               
             </ng-container>
           </div>
-          <div class="team-name" style="flex: 1; text-align: center;">{{ selectedMatch.equipe2 }}</div>
+          <div class="team-name" style="flex: 1; text-align: center;">
+            <span *ngIf="hasTeamColorsConfigured(selectedMatch.equipe2)" class="team-color-square" [ngStyle]="getTeamColorSquareStyle(selectedMatch.equipe2)"></span>{{ selectedMatch.equipe2 }}
+          </div>
         </div>
       </div>
 
@@ -1371,55 +1379,57 @@
   </div>
 
   <!-- Modal d'aide -->
-  <div *ngIf="showHelpModal" class="score-modal">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title">BUUUT et c'est gratuit!</h5>
-          <button type="button" class="btn-close" (click)="showHelpModal = false"></button>
-        </div>
-        <div class="modal-body">
-          <h6>Fonctionnalités principales :</h6>
-          <ul class="list-unstyled">
-            <li class="mb-3">
-              <i class="fas fa-plus-circle text-primary"></i>
-              <strong>Créer un match :</strong> Cliquez sur "Nouveau Match" pour enregistrer un nouveau match.
-            </li>
-            <li class="mb-3">
-              <i class="fas fa-futbol text-primary"></i>
-              <strong>Enregistrer les buts :</strong> Cliquez sur le score pour ajouter les buteurs et leurs minutes.
-            </li>
-            <li class="mb-3">
-              <i class="fas fa-users text-primary"></i>
-              <strong>Gérer les équipes :</strong> Ajoutez des joueurs à vos équipes lors de l'enregistrement des buts.
-            </li>
-            <li class="mb-3">
-              <i class="fas fa-share-alt text-primary"></i>
-              <strong>Partager :</strong> Partagez vos matchs via le bouton de partage.
-            </li>
-            <li class="mb-3">
-              <i class="fas fa-download text-primary"></i>
-              <strong>Exporter :</strong> Exportez vos matchs en TXT, CSV ou JSON.
-            </li>
-            <li class="mb-3">
-              <i class="fas fa-upload text-primary"></i>
-              <strong>Importer :</strong> Importez des matchs depuis différents formats.
-            </li>
-          </ul>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-info me-auto" *ngIf="!showingLocalStorageData" (click)="showLocalStorageData()">Afficher les données sauvegardées</button>
-          <button type="button" class="btn btn-warning me-auto" *ngIf="showingLocalStorageData" (click)="hideLocalStorageData()">Cacher les données sauvegardées</button>
-          <button type="button" class="btn" 
-                  [ngClass]="showDeleteButtons ? 'btn-danger' : 'btn-outline-danger'" 
-                  (click)="toggleDeleteButtons()">
-            <i class="fas" [ngClass]="showDeleteButtons ? 'fa-shield-alt' : 'fa-unlock'"></i>
-            {{ showDeleteButtons ? 'Protéger' : 'Activer suppression' }}
-          </button>
-          <button type="button" class="btn btn-secondary" (click)="showHelpModal = false">Fermer</button>
-        </div>
-        <div *ngIf="showingLocalStorageData" class="p-3 bg-light border mt-2" style="max-height: 300px; overflow: auto; font-size: 0.95em;">
-          <pre>{{ localStorageData | json }}</pre>
+  <div class="modal-overlay" *ngIf="showHelpModal">
+    <div class="score-modal">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">BUUUT et c'est gratuit!</h5>
+            <button type="button" class="btn-close" (click)="showHelpModal = false"></button>
+          </div>
+          <div class="modal-body">
+            <h6>Fonctionnalités principales :</h6>
+            <ul class="list-unstyled">
+              <li class="mb-3">
+                <i class="fas fa-plus-circle text-primary"></i>
+                <strong>Créer un match :</strong> Cliquez sur "Nouveau Match" pour enregistrer un nouveau match.
+              </li>
+              <li class="mb-3">
+                <i class="fas fa-futbol text-primary"></i>
+                <strong>Enregistrer les buts :</strong> Cliquez sur le score pour ajouter les buteurs et leurs minutes.
+              </li>
+              <li class="mb-3">
+                <i class="fas fa-users text-primary"></i>
+                <strong>Gérer les équipes :</strong> Ajoutez des joueurs à vos équipes lors de l'enregistrement des buts.
+              </li>
+              <li class="mb-3">
+                <i class="fas fa-share-alt text-primary"></i>
+                <strong>Partager :</strong> Partagez vos matchs via le bouton de partage.
+              </li>
+              <li class="mb-3">
+                <i class="fas fa-download text-primary"></i>
+                <strong>Exporter :</strong> Exportez vos matchs en TXT, CSV ou JSON.
+              </li>
+              <li class="mb-3">
+                <i class="fas fa-upload text-primary"></i>
+                <strong>Importer :</strong> Importez des matchs depuis différents formats.
+              </li>
+            </ul>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-info me-auto" *ngIf="!showingLocalStorageData" (click)="showLocalStorageData()">Afficher les données sauvegardées</button>
+            <button type="button" class="btn btn-warning me-auto" *ngIf="showingLocalStorageData" (click)="hideLocalStorageData()">Cacher les données sauvegardées</button>
+            <button type="button" class="btn" 
+                    [ngClass]="showDeleteButtons ? 'btn-danger' : 'btn-outline-danger'" 
+                    (click)="toggleDeleteButtons()">
+              <i class="fas" [ngClass]="showDeleteButtons ? 'fa-shield-alt' : 'fa-unlock'"></i>
+              {{ showDeleteButtons ? 'Protéger' : 'Activer suppression' }}
+            </button>
+            <button type="button" class="btn btn-secondary" (click)="showHelpModal = false">Fermer</button>
+          </div>
+          <div *ngIf="showingLocalStorageData" class="p-3 bg-light border mt-2" style="max-height: 300px; overflow: auto; font-size: 0.95em;">
+            <pre>{{ localStorageData | json }}</pre>
+          </div>
         </div>
       </div>
     </div>
