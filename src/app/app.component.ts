@@ -3473,16 +3473,41 @@ export class AppComponent implements OnInit {
     return Math.max(24, Math.min(90, estimatedWidth));
   }
 
+  getGraphTeamName(): string | null {
+    if (this.selectedTeamFilter) {
+      return this.selectedTeamFilter;
+    }
+
+    const counts = new Map<string, number>();
+    this.filteredMatches.forEach(match => {
+      counts.set(match.equipe1, (counts.get(match.equipe1) || 0) + 1);
+      counts.set(match.equipe2, (counts.get(match.equipe2) || 0) + 1);
+    });
+
+    let bestTeam: string | null = null;
+    let bestCount = -1;
+
+    counts.forEach((count, teamName) => {
+      if (count > bestCount || (count === bestCount && bestTeam !== null && teamName.localeCompare(bestTeam) < 0)) {
+        bestTeam = teamName;
+        bestCount = count;
+      }
+    });
+
+    return bestTeam;
+  }
+
   getSelectedTeamGoalAverageChartData(): GoalAverageChartData | null {
-    if (!this.selectedTeamFilter) {
+    const graphTeam = this.getGraphTeamName();
+    if (!graphTeam) {
       return null;
     }
 
     const teamMatches = this.matches
-      .filter(match => !match.isDuplicateDisabled && (match.equipe1 === this.selectedTeamFilter || match.equipe2 === this.selectedTeamFilter))
+      .filter(match => !match.isDuplicateDisabled && (match.equipe1 === graphTeam || match.equipe2 === graphTeam))
       .sort((a, b) => new Date(a.heureDebut).getTime() - new Date(b.heureDebut).getTime());
 
-    const values = teamMatches.map(match => this.getTeamGoalAverageForMatch(match, this.selectedTeamFilter));
+    const values = teamMatches.map(match => this.getTeamGoalAverageForMatch(match, graphTeam));
     if (values.length === 0) {
       return null;
     }
@@ -3516,7 +3541,7 @@ export class AppComponent implements OnInit {
       value,
       matchOrder: index + 1,
       scoreDisplay: `${match.score1}-${match.score2}`,
-      opponentName: match.equipe1 === this.selectedTeamFilter ? match.equipe2 : match.equipe1
+      opponentName: match.equipe1 === graphTeam ? match.equipe2 : match.equipe1
     };
     });
 
@@ -3526,6 +3551,15 @@ export class AppComponent implements OnInit {
       dots,
       zeroY: toY(0)
     };
+  }
+
+  getDisplayableGoalAverageChartData(): GoalAverageChartData | null {
+    const chartData = this.getSelectedTeamGoalAverageChartData();
+    if (!chartData || chartData.dots.length <= 2) {
+      return null;
+    }
+
+    return chartData;
   }
 
   calculateRanking(competition: string): TeamStats[] {

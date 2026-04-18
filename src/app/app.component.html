@@ -300,9 +300,9 @@
 
   <div class="mt-4" *ngIf="filteredMatches.length > 0">
     <h2></h2>
-    <div class="team-history-graph mb-3" *ngIf="selectedTeamFilter && getSelectedTeamGoalAverageChartData() as chart">
+    <div class="team-history-graph mb-3" *ngIf="getDisplayableGoalAverageChartData() as chart">
       <div class="d-flex justify-content-between align-items-center mb-2">
-        <h6 class="mb-0">Historique goal average - {{ selectedTeamFilter }}</h6>
+        <h6 class="mb-0">Historique goal average - {{ getGraphTeamName() }}</h6>
         <small class="text-muted">{{ chart.values.length }} match(s)</small>
       </div>
 
