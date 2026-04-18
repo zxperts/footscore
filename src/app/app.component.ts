@@ -4542,12 +4542,48 @@ export class AppComponent implements OnInit {
 
   showLocalStorageData() {
     const data = localStorage.getItem('footballMatches');
-    this.localStorageData = data ? JSON.parse(data) : 'Aucune donnée trouvée.';
+    if (!data) {
+      this.localStorageData = 'Aucune donnée trouvée.';
+      this.showingLocalStorageData = true;
+      return;
+    }
+
+    try {
+      this.localStorageData = JSON.parse(data);
+    } catch {
+      this.localStorageData = { raw: data, parseError: true };
+    }
+
     this.showingLocalStorageData = true;
   }
 
   hideLocalStorageData() {
     this.showingLocalStorageData = false;
+  }
+
+  hasStructuredLocalStorageData(): boolean {
+    const data = this.localStorageData as any;
+    return !!data && typeof data === 'object' && Array.isArray(data.matches);
+  }
+
+  getLocalStorageMatchesForDisplay(): Match[] {
+    if (!this.hasStructuredLocalStorageData()) return [];
+
+    return [...((this.localStorageData as any).matches || [])]
+      .sort((a, b) => new Date(b.heureDebut).getTime() - new Date(a.heureDebut).getTime());
+  }
+
+  getLocalStorageTeamsCount(): number {
+    const data = this.localStorageData as any;
+    return data && Array.isArray(data.teams) ? data.teams.length : 0;
+  }
+
+  getLocalStorageExpirationDate(): Date | null {
+    const data = this.localStorageData as any;
+    if (!data || !data.expirationDate) return null;
+
+    const expirationDate = new Date(data.expirationDate);
+    return Number.isNaN(expirationDate.getTime()) ? null : expirationDate;
   }
 
   toggleDeleteButtons() {
