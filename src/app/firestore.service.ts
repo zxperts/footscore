@@ -10,6 +10,36 @@ import { SharedTeam } from './models/team.model';
 export class FirestoreService {
   constructor(private firestore: Firestore) {}
 
+  private mapFirestoreMatchData(data: any): Match {
+    const rawStartDate = data['heureDebut'] || data['date'];
+    const parsedStartDate = new Date(rawStartDate);
+    const rawUpdatedAt = data['updatedAt'];
+    const parsedUpdatedAt = rawUpdatedAt ? new Date(rawUpdatedAt) : new Date();
+
+    return {
+      equipe1: data['equipe1'] || '',
+      equipe2: data['equipe2'] || '',
+      score1: data['score1'] || 0,
+      score2: data['score2'] || 0,
+      buteurs: data['buteurs'] || [],
+      heureDebut: Number.isNaN(parsedStartDate.getTime()) ? new Date() : parsedStartDate,
+      lieu: data['lieu'] || '',
+      positions: data['positions'] || {},
+      showElements: data['showElements'] !== undefined ? data['showElements'] : true,
+      updatedAt: Number.isNaN(parsedUpdatedAt.getTime()) ? new Date() : parsedUpdatedAt,
+      duelsGagnes: data['duelsGagnes'] || [],
+      dribbles: data['dribbles'] || [],
+      interceptions: data['interceptions'] || [],
+      frappes: data['frappes'] || [],
+      fautes: data['fautes'] || [],
+      contreAttaques: data['contreAttaques'] || [],
+      tikiTakas: data['tikiTakas'] || [],
+      commentaire: data['commentaire'] || '',
+      competition: data['competition'] || undefined,
+      isDuplicateDisabled: data['isDuplicateDisabled'] === true
+    };
+  }
+
   // Enregistrer un match dans Firestore
   async saveMatch(match: Match): Promise<string> {
     const matchRef = await addDoc(collection(this.firestore, 'matches'), {
@@ -23,31 +53,36 @@ export class FirestoreService {
 
   // Récupérer tous les matchs
   async getAllMatches(): Promise<Match[]> {
+    const allMatches = await this.getAllMatchesForAdmin();
+    return allMatches.map(item => item.match);
+  }
+
+  // Récupérer tous les matchs actifs avec leurs IDs Firestore (pour l'admin)
+  async getAllMatchesForAdmin(): Promise<{ docId: string; match: Match }[]> {
     const matchCollection = collection(this.firestore, 'matches');
     const querySnapshot = await getDocs(matchCollection);
-    return querySnapshot.docs.map(doc => {
-      const data = doc.data();
+    return querySnapshot.docs
+      .map((snapshot) => {
+      const data = snapshot.data();
       return {
-        equipe1: data['equipe1'] || '',
-        equipe2: data['equipe2'] || '',
-        score1: data['score1'] || 0,
-        score2: data['score2'] || 0,
-        buteurs: data['buteurs'] || [],
-        heureDebut: new Date(data['date']),
-        lieu: data['lieu'] || '',
-        positions: data['positions'] || {},
-        showElements: data['showElements'] !== undefined ? data['showElements'] : true,
-        updatedAt: data['updatedAt'] ? new Date(data['updatedAt']) : new Date(),
-        duelsGagnes: data['duelsGagnes'] || [],
-        dribbles: data['dribbles'] || [],
-        interceptions: data['interceptions'] || [],
-        frappes: data['frappes'] || [],
-        fautes: data['fautes'] || [],
-        contreAttaques: data['contreAttaques'] || [],
-        tikiTakas: data['tikiTakas'] || [],
-        competition: data['competition'] || undefined
+        docId: snapshot.id,
+        match: this.mapFirestoreMatchData(data)
       };
-    });
+    })
+      .filter(item => !item.match.isDuplicateDisabled);
+  }
+
+  async disableMatchesByDocIds(matchDocIds: string[]): Promise<void> {
+    if (!matchDocIds.length) return;
+
+    await Promise.all(
+      matchDocIds.map((docId) =>
+        updateDoc(doc(this.firestore, 'matches', docId), {
+          isDuplicateDisabled: true,
+          updatedAt: new Date()
+        })
+      )
+    );
   }
 
   // Récupérer un match par son ID

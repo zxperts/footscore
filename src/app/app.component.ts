@@ -136,6 +136,8 @@ export class AppComponent implements OnInit {
   showingLocalStorageData = false;
   localStorageData: any = null;
   showDeleteButtons: boolean = false; // Par défaut, les boutons de suppression sont cachés
+  isAdminMode: boolean = false;
+  isLoadingAdminMatches: boolean = false;
 
   // Champs d'autocomplétion pour la modale d'édition de match
   editTeam1Search: string = '';
@@ -4368,6 +4370,127 @@ export class AppComponent implements OnInit {
 
   toggleDeleteButtons() {
     this.showDeleteButtons = !this.showDeleteButtons;
+  }
+
+  private toValidDate(value: unknown): Date {
+    const parsedDate = new Date(value as any);
+    return Number.isNaN(parsedDate.getTime()) ? new Date() : parsedDate;
+  }
+
+  private normalizeFirestoreMatch(match: Match, index: number): Match {
+    return {
+      ...match,
+      id: index + 1,
+      heureDebut: this.toValidDate((match as any).heureDebut),
+      updatedAt: this.toValidDate((match as any).updatedAt),
+      buteurs: match.buteurs || [],
+      duelsGagnes: match.duelsGagnes || [],
+      dribbles: match.dribbles || [],
+      interceptions: match.interceptions || [],
+      frappes: match.frappes || [],
+      fautes: match.fautes || [],
+      contreAttaques: match.contreAttaques || [],
+      tikiTakas: match.tikiTakas || [],
+      showElements: match.showElements !== undefined ? match.showElements : true,
+      isDuplicateDisabled: false
+    };
+  }
+
+  private getMatchDeduplicationKey(match: Match): string {
+    const kickoffTime = this.toValidDate(match.heureDebut).getTime();
+    const team1 = (match.equipe1 || '').trim().toLowerCase();
+    const team2 = (match.equipe2 || '').trim().toLowerCase();
+    const location = (match.lieu || '').trim().toLowerCase();
+    const competition = (match.competition || '').trim().toLowerCase();
+
+    return [team1, team2, kickoffTime, match.score1, match.score2, location, competition].join('||');
+  }
+
+  private deduplicateAdminMatches(
+    matches: { docId: string; match: Match }[]
+  ): { deduplicatedMatches: Match[]; disabledCount: number; disabledDocIds: string[] } {
+    const normalizedMatches = matches.map((item, index) => ({
+      docId: item.docId,
+      match: this.normalizeFirestoreMatch(item.match, index)
+    }));
+
+    const keeperIndexByKey = new Map<string, number>();
+    const disabledDocIds = new Set<string>();
+
+    normalizedMatches.forEach((currentEntry, currentIndex) => {
+      const matchKey = this.getMatchDeduplicationKey(currentEntry.match);
+      const existingKeeperIndex = keeperIndexByKey.get(matchKey);
+
+      if (existingKeeperIndex === undefined) {
+        keeperIndexByKey.set(matchKey, currentIndex);
+        return;
+      }
+
+      const existingKeeper = normalizedMatches[existingKeeperIndex];
+      const existingUpdatedAt = this.toValidDate(existingKeeper.match.updatedAt).getTime();
+      const currentUpdatedAt = this.toValidDate(currentEntry.match.updatedAt).getTime();
+      const currentIsNewer = currentUpdatedAt >= existingUpdatedAt;
+
+      if (currentIsNewer) {
+        existingKeeper.match.isDuplicateDisabled = true;
+        existingKeeper.match.showElements = false;
+        disabledDocIds.add(existingKeeper.docId);
+
+        currentEntry.match.isDuplicateDisabled = false;
+        keeperIndexByKey.set(matchKey, currentIndex);
+      } else {
+        currentEntry.match.isDuplicateDisabled = true;
+        currentEntry.match.showElements = false;
+        disabledDocIds.add(currentEntry.docId);
+      }
+    });
+
+    const disabledCount = normalizedMatches.filter(item => item.match.isDuplicateDisabled).length;
+
+    return {
+      deduplicatedMatches: normalizedMatches.map(item => item.match),
+      disabledCount,
+      disabledDocIds: Array.from(disabledDocIds)
+    };
+  }
+
+  async openAdministrationMode() {
+    if (this.isLoadingAdminMatches) return;
+
+    if (!this.isAdminMode) {
+      const inputCode = prompt('Entrez le code administrateur pour afficher tous les matchs Firebase :');
+      if (inputCode === null) return;
+
+      if (inputCode.trim().toUpperCase() !== 'XTEAMX1984') {
+        alert('Code administrateur incorrect.');
+        return;
+      }
+
+      this.isAdminMode = true;
+    }
+
+    this.isLoadingAdminMatches = true;
+
+    try {
+      const firebaseMatches = await this.firestoreService.getAllMatchesForAdmin();
+      const { deduplicatedMatches, disabledCount, disabledDocIds } = this.deduplicateAdminMatches(firebaseMatches);
+
+      if (disabledDocIds.length > 0) {
+        await this.firestoreService.disableMatchesByDocIds(disabledDocIds);
+      }
+
+      this.matches = deduplicatedMatches;
+      this.selectedTeamFilter = '';
+      this.selectedCompetitionFilter = '';
+      this.saveData();
+
+      alert(`${deduplicatedMatches.length} match(s) Firebase chargé(s), dont ${disabledCount} doublon(s) désactivé(s).`);
+    } catch (error) {
+      console.error('Erreur lors du chargement des matchs Firebase en mode admin :', error);
+      alert('Erreur lors du chargement des matchs Firebase.');
+    } finally {
+      this.isLoadingAdminMatches = false;
+    }
   }
 
   updateEditFilteredTeams1() {

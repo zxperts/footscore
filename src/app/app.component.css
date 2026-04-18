@@ -53,6 +53,17 @@ h1 {
   box-shadow: 0 5px 15px #4b29b967;
 }
 
+.match-details.disabled-match {
+  filter: grayscale(100%);
+  opacity: 0.65;
+  pointer-events: none;
+}
+
+.match-details.disabled-match:hover {
+  transform: none;
+  box-shadow: none;
+}
+
 .match-score {
   font-size: 1.2em;
   margin-bottom: 0.5rem;

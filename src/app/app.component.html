@@ -303,7 +303,7 @@
     <div class="list-group">
       <div *ngFor="let match of getSortedMatches()" 
            [attr.data-match-id]="match.id">
-        <div class="match-details" [ngStyle]="getMatchBackground(match)">
+        <div class="match-details" [ngClass]="{'disabled-match': match.isDuplicateDisabled}" [ngStyle]="getMatchBackground(match)">
           <div class="match-info text-muted small text-center">
             <span>{{ match.heureDebut | date:'EEEE dd/MM/yy HH:mm' }}</span>
             <span class="mx-2" *ngIf="match.lieu">•</span>
@@ -321,15 +321,15 @@
           
           <div class="match-score">
             <div class="team-name" style="flex: 1; text-align: center;">
-              <span *ngIf="hasTeamColorsConfigured(match.equipe1)" class="team-color-square" [ngStyle]="getTeamColorSquareStyle(match.equipe1)"></span>{{ match.equipe1 }}
+              <span *ngIf="!match.isDuplicateDisabled && hasTeamColorsConfigured(match.equipe1)" class="team-color-square" [ngStyle]="getTeamColorSquareStyle(match.equipe1)"></span>{{ match.equipe1 }}
             </div>
 
-            <button class="btn" [ngClass]="getScoreColor(match)" (click)="selectMatch(match)">
+            <button class="btn" [ngClass]="match.isDuplicateDisabled ? 'btn-score-light' : getScoreColor(match)" (click)="selectMatch(match)" [disabled]="match.isDuplicateDisabled">
               {{ match.score1 }} - {{ match.score2 }}
             </button>
             
             <div class="team-name" style="flex: 1; text-align: center;">
-              <span *ngIf="hasTeamColorsConfigured(match.equipe2)" class="team-color-square" [ngStyle]="getTeamColorSquareStyle(match.equipe2)"></span>{{ match.equipe2 }}
+              <span *ngIf="!match.isDuplicateDisabled && hasTeamColorsConfigured(match.equipe2)" class="team-color-square" [ngStyle]="getTeamColorSquareStyle(match.equipe2)"></span>{{ match.equipe2 }}
             </div>
           </div>
 
@@ -1417,13 +1417,21 @@
             </ul>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-info me-auto" *ngIf="!showingLocalStorageData" (click)="showLocalStorageData()">Afficher les données sauvegardées</button>
-            <button type="button" class="btn btn-warning me-auto" *ngIf="showingLocalStorageData" (click)="hideLocalStorageData()">Cacher les données sauvegardées</button>
+            <button type="button" class="btn btn-info me-auto" *ngIf="!showingLocalStorageData" (click)="showLocalStorageData()">Afficher les données</button>
+            <button type="button" class="btn btn-warning me-auto" *ngIf="showingLocalStorageData" (click)="hideLocalStorageData()">Cacher les données</button>
             <button type="button" class="btn" 
                     [ngClass]="showDeleteButtons ? 'btn-danger' : 'btn-outline-danger'" 
                     (click)="toggleDeleteButtons()">
               <i class="fas" [ngClass]="showDeleteButtons ? 'fa-shield-alt' : 'fa-unlock'"></i>
               {{ showDeleteButtons ? 'Protéger' : 'Activer suppression' }}
+            </button>
+            <button type="button"
+                    class="btn"
+                    [ngClass]="isAdminMode ? 'btn-dark' : 'btn-outline-dark'"
+                    (click)="openAdministrationMode()"
+                    [disabled]="isLoadingAdminMatches">
+              <i class="fas" [ngClass]="isLoadingAdminMatches ? 'fa-spinner fa-spin' : (isAdminMode ? 'fa-database' : 'fa-user-shield')"></i>
+              {{ isLoadingAdminMatches ? 'Chargement...' : (isAdminMode ? 'Rafraîchir Firebase' : 'Administration') }}
             </button>
             <button type="button" class="btn btn-secondary" (click)="showHelpModal = false">Fermer</button>
           </div>

@@ -65,6 +65,7 @@ export interface Match {
   lieu?: string;
   positions?: { [key: string]: string };
   showElements?: boolean;
+  isDuplicateDisabled?: boolean;
   competition?: string; // Ajout du champ compétition
   commentaire?: string; // Ajout du champ commentaire
   updatedAt: Date;
