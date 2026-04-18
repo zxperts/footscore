@@ -1460,23 +1460,31 @@
             </ul>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-info me-auto" *ngIf="!showingLocalStorageData" (click)="showLocalStorageData()">Afficher les données</button>
-            <button type="button" class="btn btn-warning me-auto" *ngIf="showingLocalStorageData" (click)="hideLocalStorageData()">Cacher les données</button>
-            <button type="button" class="btn" 
-                    [ngClass]="showDeleteButtons ? 'btn-danger' : 'btn-outline-danger'" 
-                    (click)="toggleDeleteButtons()">
-              <i class="fas" [ngClass]="showDeleteButtons ? 'fa-shield-alt' : 'fa-unlock'"></i>
-              {{ showDeleteButtons ? 'Protéger' : 'Activer suppression' }}
-            </button>
-            <button type="button"
-                    class="btn"
-                    [ngClass]="isAdminMode ? 'btn-dark' : 'btn-outline-dark'"
-                    (click)="openAdministrationMode()"
-                    [disabled]="isLoadingAdminMatches">
+            <div class="d-flex gap-2 flex-wrap">
+              <button type="button" class="btn btn-info" *ngIf="!showingLocalStorageData" (click)="showLocalStorageData()">
+              <i class="fas fa-database me-1"></i>Afficher les données
+              </button>
+              <button type="button" class="btn btn-warning" *ngIf="showingLocalStorageData" (click)="hideLocalStorageData()">
+              <i class="fas fa-eye-slash me-1"></i>Cacher les données
+              </button>
+              <button type="button"
+                  class="btn"
+                  [ngClass]="isAdminMode ? 'btn-dark' : 'btn-outline-dark'"
+                  (click)="openAdministrationMode()"
+                  [disabled]="isLoadingAdminMatches">
               <i class="fas" [ngClass]="isLoadingAdminMatches ? 'fa-spinner fa-spin' : (isAdminMode ? 'fa-database' : 'fa-user-shield')"></i>
-              {{ isLoadingAdminMatches ? 'Chargement...' : (isAdminMode ? 'Rafraîchir Firebase' : 'Administration') }}
-            </button>
-            <button type="button" class="btn btn-secondary" (click)="showHelpModal = false">Fermer</button>
+              <span class="ms-1">{{ isLoadingAdminMatches ? 'Chargement...' : (isAdminMode ? 'Firebase' : 'Admin') }}</span>
+              </button>
+              <button type="button" class="btn" 
+                  [ngClass]="showDeleteButtons ? 'btn-danger' : 'btn-outline-danger'" 
+                  (click)="toggleDeleteButtons()">
+              <i class="fas" [ngClass]="showDeleteButtons ? 'fa-shield-alt' : 'fa-unlock'"></i>
+              <span class="ms-1">{{ showDeleteButtons ? 'Désactiver la suppression des matchs' : 'Activer la suppression des matchs' }}</span>
+              </button>
+              <button type="button" class="btn btn-secondary ms-auto" (click)="showHelpModal = false">
+              <i class="fas fa-times me-1"></i>Fermer
+              </button>
+            </div>
           </div>
           <div *ngIf="showingLocalStorageData" class="p-3 bg-light border mt-2" style="max-height: 300px; overflow: auto; font-size: 0.95em;">
             <pre>{{ localStorageData | json }}</pre>
