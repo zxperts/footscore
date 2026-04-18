@@ -313,7 +313,7 @@
         <circle *ngFor="let point of chart.dots"
           [attr.cx]="point.x"
           [attr.cy]="point.y"
-          [attr.r]="isChartPointActive(point) ? 1.2 : 0.8"
+          [attr.r]="isChartPointActive(point) ? 1.6 : 1.2"
           class="ga-point"
           (mouseenter)="onGraphPointHover(point)"
           (mouseleave)="onGraphPointHoverLeave()"
@@ -327,11 +327,11 @@
            [attr.transform]="'translate(' + getChartPointLabelBoxX(activePoint) + ',' + getChartPointLabelBoxY(activePoint) + ')'">
           <rect x="0" y="0"
                 [attr.width]="getChartPointBadgeWidth(activePoint)"
-                height="2.4"
-                rx="1.2"
+                height="4.8"
+                rx="2.4"
                 class="ga-point-badge-svg"
                 [ngClass]="getChartPointOpponentClass(activePoint)"></rect>
-          <text [attr.x]="getChartPointBadgeWidth(activePoint) / 2" y="1.2" text-anchor="middle" class="ga-chip-text">
+          <text [attr.x]="getChartPointBadgeWidth(activePoint) / 2" y="2.4" text-anchor="middle" class="ga-chip-text">
             {{ getChartPointBadgeText(activePoint) }}
           </text>
         </g>

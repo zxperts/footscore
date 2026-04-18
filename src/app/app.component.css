@@ -92,8 +92,8 @@ h1 {
 
 .ga-line {
   fill: none;
-  stroke: var(--bs-dark);
-  stroke-width: 0.9;
+  stroke: #b0b0b0;
+  stroke-width: 2.8;
   stroke-linecap: round;
   stroke-linejoin: round;
   vector-effect: non-scaling-stroke;
@@ -131,7 +131,7 @@ h1 {
 
 .ga-chip-text {
   fill: #fff;
-  font-size: 1.5px;
+  font-size: 3px;
   font-weight: 700;
   dominant-baseline: middle;
 }

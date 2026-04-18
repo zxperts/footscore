@@ -3450,7 +3450,7 @@ export class AppComponent implements OnInit {
   }
 
   getChartPointLabelBoxY(point: GoalAverageChartPoint): number {
-    const boxHeight = 2.4;
+    const boxHeight = 4.8;
     const aboveY = point.y - (boxHeight + 1);
     const belowY = point.y + 1;
     const desiredY = aboveY < 0 ? belowY : aboveY;
@@ -3469,8 +3469,8 @@ export class AppComponent implements OnInit {
 
   getChartPointBadgeWidth(point: GoalAverageChartPoint): number {
     const textLength = this.getChartPointBadgeText(point).length;
-    const estimatedWidth = (textLength * 1.25) + 2;
-    return Math.max(12, Math.min(56, estimatedWidth));
+    const estimatedWidth = ((textLength * 1.25) + 2) * 2;
+    return Math.max(24, Math.min(90, estimatedWidth));
   }
 
   getSelectedTeamGoalAverageChartData(): GoalAverageChartData | null {
