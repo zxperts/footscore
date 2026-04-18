@@ -1638,6 +1638,11 @@ export class AppComponent implements OnInit {
       this.matches.splice(matchIndex, 1);
       this.saveData();
     }
+    if (this.isAdminMode && match.firestoreDocId) {
+      this.firestoreService.disableMatchesByDocIds([match.firestoreDocId]).catch(err =>
+        console.error('Erreur désactivation Firestore lors de la suppression :', err)
+      );
+    }
   }
 
   // Charger les données sauvegardées
@@ -4377,10 +4382,11 @@ export class AppComponent implements OnInit {
     return Number.isNaN(parsedDate.getTime()) ? new Date() : parsedDate;
   }
 
-  private normalizeFirestoreMatch(match: Match, index: number): Match {
+  private normalizeFirestoreMatch(match: Match, index: number, docId?: string): Match {
     return {
       ...match,
       id: index + 1,
+      firestoreDocId: docId,
       heureDebut: this.toValidDate((match as any).heureDebut),
       updatedAt: this.toValidDate((match as any).updatedAt),
       buteurs: match.buteurs || [],
@@ -4411,7 +4417,7 @@ export class AppComponent implements OnInit {
   ): { deduplicatedMatches: Match[]; disabledCount: number; disabledDocIds: string[] } {
     const normalizedMatches = matches.map((item, index) => ({
       docId: item.docId,
-      match: this.normalizeFirestoreMatch(item.match, index)
+      match: this.normalizeFirestoreMatch(item.match, index, item.docId)
     }));
 
     const keeperIndexByKey = new Map<string, number>();
