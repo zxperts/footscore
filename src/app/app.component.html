@@ -313,11 +313,28 @@
         <circle *ngFor="let point of chart.dots"
           [attr.cx]="point.x"
           [attr.cy]="point.y"
-          r="0.8"
+          [attr.r]="isChartPointActive(point) ? 1.2 : 0.8"
           class="ga-point"
+          (mouseenter)="onGraphPointHover(point)"
+          (mouseleave)="onGraphPointHoverLeave()"
+          (click)="onGraphPointSelect(point)"
           [ngClass]="point.value > 0 ? 'ga-point-positive' : (point.value < 0 ? 'ga-point-negative' : 'ga-point-neutral')">
-          <title>Match {{ point.matchOrder }} : {{ point.value > 0 ? '+' + point.value : point.value }}</title>
+          <title>Match {{ point.matchOrder }} · {{ point.scoreDisplay }} · {{ point.opponentName }}</title>
         </circle>
+
+        <g *ngIf="getActiveChartPoint(chart) as activePoint"
+           class="ga-point-label-box"
+           [attr.transform]="'translate(' + getChartPointLabelBoxX(activePoint) + ',' + getChartPointLabelBoxY(activePoint) + ')'">
+          <rect x="0" y="0"
+                [attr.width]="getChartPointBadgeWidth(activePoint)"
+                height="2.4"
+                rx="1.2"
+                class="ga-point-badge-svg"
+                [ngClass]="getChartPointOpponentClass(activePoint)"></rect>
+          <text [attr.x]="getChartPointBadgeWidth(activePoint) / 2" y="1.2" text-anchor="middle" class="ga-chip-text">
+            {{ getChartPointBadgeText(activePoint) }}
+          </text>
+        </g>
       </svg>
 
       <div class="d-flex justify-content-between ga-axis-labels text-muted mt-1">

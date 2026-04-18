@@ -43,6 +43,8 @@ interface GoalAverageChartPoint {
   y: number;
   value: number;
   matchOrder: number;
+  scoreDisplay: string;
+  opponentName: string;
 }
 
 interface GoalAverageChartData {
@@ -152,6 +154,10 @@ export class AppComponent implements OnInit {
   showDeleteButtons: boolean = false; // Par défaut, les boutons de suppression sont cachés
   isAdminMode: boolean = false;
   isLoadingAdminMatches: boolean = false;
+  selectedChartPoint: GoalAverageChartPoint | null = null;
+  hoveredChartPoint: GoalAverageChartPoint | null = null;
+  selectedChartPointOrder: number | null = null;
+  hoveredChartPointOrder: number | null = null;
 
   // Champs d'autocomplétion pour la modale d'édition de match
   editTeam1Search: string = '';
@@ -3411,6 +3417,62 @@ export class AppComponent implements OnInit {
     return 0;
   }
 
+  onGraphPointHover(point: GoalAverageChartPoint): void {
+    this.hoveredChartPoint = point;
+    this.hoveredChartPointOrder = point.matchOrder;
+  }
+
+  onGraphPointHoverLeave(): void {
+    this.hoveredChartPoint = null;
+    this.hoveredChartPointOrder = null;
+  }
+
+  onGraphPointSelect(point: GoalAverageChartPoint): void {
+    this.selectedChartPoint = point;
+    this.selectedChartPointOrder = point.matchOrder;
+  }
+
+  getActiveChartPoint(chart: GoalAverageChartData): GoalAverageChartPoint | null {
+    const activeOrder = this.hoveredChartPointOrder ?? this.selectedChartPointOrder;
+    if (activeOrder === null) return null;
+    return chart.dots.find(point => point.matchOrder === activeOrder) || null;
+  }
+
+  isChartPointActive(point: GoalAverageChartPoint): boolean {
+    return point.matchOrder === this.hoveredChartPointOrder || point.matchOrder === this.selectedChartPointOrder;
+  }
+
+  getChartPointLabelBoxX(point: GoalAverageChartPoint): number {
+    const boxWidth = this.getChartPointBadgeWidth(point);
+    const margin = 1.5;
+    const desiredX = point.x > 56 ? point.x - boxWidth - margin : point.x + margin;
+    return Math.max(0, Math.min(100 - boxWidth, desiredX));
+  }
+
+  getChartPointLabelBoxY(point: GoalAverageChartPoint): number {
+    const boxHeight = 2.4;
+    const aboveY = point.y - (boxHeight + 1);
+    const belowY = point.y + 1;
+    const desiredY = aboveY < 0 ? belowY : aboveY;
+    return Math.max(0, Math.min(36 - boxHeight, desiredY));
+  }
+
+  getChartPointOpponentClass(point: GoalAverageChartPoint): string {
+    if (point.value > 0) return 'ga-opponent-positive';
+    if (point.value < 0) return 'ga-opponent-negative';
+    return 'ga-opponent-neutral';
+  }
+
+  getChartPointBadgeText(point: GoalAverageChartPoint): string {
+    return `${point.scoreDisplay} ${(point.opponentName || '').trim()}`.trim();
+  }
+
+  getChartPointBadgeWidth(point: GoalAverageChartPoint): number {
+    const textLength = this.getChartPointBadgeText(point).length;
+    const estimatedWidth = (textLength * 1.25) + 2;
+    return Math.max(12, Math.min(56, estimatedWidth));
+  }
+
   getSelectedTeamGoalAverageChartData(): GoalAverageChartData | null {
     if (!this.selectedTeamFilter) {
       return null;
@@ -3445,12 +3507,18 @@ export class AppComponent implements OnInit {
       return height - paddingY - ((value - minValue) / valueRange) * (height - (paddingY * 2));
     };
 
-    const dots = values.map((value, index) => ({
+    const dots = values.map((value, index) => {
+      const match = teamMatches[index];
+
+      return {
       x: toX(index),
       y: toY(value),
       value,
-      matchOrder: index + 1
-    }));
+      matchOrder: index + 1,
+      scoreDisplay: `${match.score1}-${match.score2}`,
+      opponentName: match.equipe1 === this.selectedTeamFilter ? match.equipe2 : match.equipe1
+    };
+    });
 
     return {
       values,
