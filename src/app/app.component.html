@@ -300,6 +300,32 @@
 
   <div class="mt-4" *ngIf="filteredMatches.length > 0">
     <h2></h2>
+    <div class="team-history-graph mb-3" *ngIf="selectedTeamFilter && getSelectedTeamGoalAverageChartData() as chart">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <h6 class="mb-0">Historique goal average - {{ selectedTeamFilter }}</h6>
+        <small class="text-muted">{{ chart.values.length }} match(s)</small>
+      </div>
+
+      <svg viewBox="0 0 100 36" class="w-100" preserveAspectRatio="none" role="img" aria-label="Historique du goal average">
+        <line x1="0" [attr.y1]="chart.zeroY" x2="100" [attr.y2]="chart.zeroY" class="ga-zero-line-bg"></line>
+        <line x1="0" [attr.y1]="chart.zeroY" x2="100" [attr.y2]="chart.zeroY" class="ga-zero-line"></line>
+        <polyline [attr.points]="chart.points" class="ga-line"></polyline>
+        <circle *ngFor="let point of chart.dots"
+          [attr.cx]="point.x"
+          [attr.cy]="point.y"
+          r="0.8"
+          class="ga-point"
+          [ngClass]="point.value > 0 ? 'ga-point-positive' : (point.value < 0 ? 'ga-point-negative' : 'ga-point-neutral')">
+          <title>Match {{ point.matchOrder }} : {{ point.value > 0 ? '+' + point.value : point.value }}</title>
+        </circle>
+      </svg>
+
+      <div class="d-flex justify-content-between ga-axis-labels text-muted mt-1">
+        <span>Plus ancien</span>
+        <span>Plus récent</span>
+      </div>
+    </div>
+
     <div class="list-group">
       <div *ngFor="let match of getSortedMatches()" 
            [attr.data-match-id]="match.id">

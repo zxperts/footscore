@@ -38,6 +38,20 @@ interface TeamStats {
   goalDifference: number;
 }
 
+interface GoalAverageChartPoint {
+  x: number;
+  y: number;
+  value: number;
+  matchOrder: number;
+}
+
+interface GoalAverageChartData {
+  values: number[];
+  points: string;
+  dots: GoalAverageChartPoint[];
+  zeroY: number;
+}
+
 @Component({
   selector: 'app-root',
   standalone: true,
@@ -3383,6 +3397,67 @@ export class AppComponent implements OnInit {
 
   getSortedMatches(): Match[] {
     return this.filteredMatches.slice().sort((a, b) => new Date(b.heureDebut).getTime() - new Date(a.heureDebut).getTime());
+  }
+
+  private getTeamGoalAverageForMatch(match: Match, teamName: string): number {
+    if (match.equipe1 === teamName) {
+      return match.score1 - match.score2;
+    }
+
+    if (match.equipe2 === teamName) {
+      return match.score2 - match.score1;
+    }
+
+    return 0;
+  }
+
+  getSelectedTeamGoalAverageChartData(): GoalAverageChartData | null {
+    if (!this.selectedTeamFilter) {
+      return null;
+    }
+
+    const teamMatches = this.matches
+      .filter(match => !match.isDuplicateDisabled && (match.equipe1 === this.selectedTeamFilter || match.equipe2 === this.selectedTeamFilter))
+      .sort((a, b) => new Date(a.heureDebut).getTime() - new Date(b.heureDebut).getTime());
+
+    const values = teamMatches.map(match => this.getTeamGoalAverageForMatch(match, this.selectedTeamFilter));
+    if (values.length === 0) {
+      return null;
+    }
+
+    const width = 100;
+    const height = 36;
+    const paddingX = 5;
+    const paddingY = 4;
+    const minValue = Math.min(...values, 0);
+    const maxValue = Math.max(...values, 0);
+    const valueRange = maxValue - minValue || 1;
+
+    const toX = (index: number): number => {
+      if (values.length === 1) {
+        return width / 2;
+      }
+
+      return paddingX + (index * (width - (paddingX * 2))) / (values.length - 1);
+    };
+
+    const toY = (value: number): number => {
+      return height - paddingY - ((value - minValue) / valueRange) * (height - (paddingY * 2));
+    };
+
+    const dots = values.map((value, index) => ({
+      x: toX(index),
+      y: toY(value),
+      value,
+      matchOrder: index + 1
+    }));
+
+    return {
+      values,
+      points: dots.map(point => `${point.x.toFixed(2)},${point.y.toFixed(2)}`).join(' '),
+      dots,
+      zeroY: toY(0)
+    };
   }
 
   calculateRanking(competition: string): TeamStats[] {

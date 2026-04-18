@@ -64,6 +64,62 @@ h1 {
   box-shadow: none;
 }
 
+.team-history-graph {
+  background-color: var(--bs-light);
+  border: 1px solid var(--bs-border-color);
+  border-radius: 10px;
+  padding: 0.75rem;
+}
+
+.ga-zero-line-bg {
+  stroke: var(--bs-body-bg);
+  stroke-width: 2.4;
+  vector-effect: non-scaling-stroke;
+}
+
+.ga-zero-line {
+  stroke: var(--bs-dark);
+  stroke-width: 1.1;
+  stroke-dasharray: none;
+  vector-effect: non-scaling-stroke;
+}
+
+.ga-zero-label {
+  fill: var(--bs-secondary-color);
+  font-size: 2.8px;
+  font-weight: 600;
+}
+
+.ga-line {
+  fill: none;
+  stroke: var(--bs-dark);
+  stroke-width: 0.9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.ga-point {
+  stroke: var(--bs-body-bg);
+  stroke-width: 0.2;
+}
+
+.ga-point-positive {
+  fill: var(--bs-success);
+}
+
+.ga-point-negative {
+  fill: var(--bs-danger);
+}
+
+.ga-point-neutral {
+  fill: var(--bs-secondary-color);
+}
+
+.ga-axis-labels {
+  font-size: 0.75rem;
+}
+
 .match-score {
   font-size: 1.2em;
   margin-bottom: 0.5rem;
