@@ -2334,7 +2334,7 @@ export class AppComponent implements OnInit {
     this.matchEditForm.patchValue({
       equipe1: match.equipe1,
       equipe2: match.equipe2,
-      heureDebut: this.getNearestValidTime(match.heureDebut),
+      heureDebut: this.toDateTimeLocalValue(match.heureDebut),
       lieu: match.lieu,
       competition: match.competition,
       commentaire: match.commentaire
@@ -2348,15 +2348,11 @@ export class AppComponent implements OnInit {
     this.showMatchEditForm = !this.showMatchEditForm;
   }
 
-  private getNearestValidTime(date: Date): string {
+  private toDateTimeLocalValue(date: Date): string {
     const d = new Date(date);
-    const minutes = d.getMinutes();
-    if (minutes < 30) {
-      d.setMinutes(0);
-    } else {
-      d.setMinutes(30);
-    }
-    return d.toISOString().slice(0, 16);
+    const timezoneOffset = d.getTimezoneOffset() * 60000;
+    const localDate = new Date(d.getTime() - timezoneOffset);
+    return localDate.toISOString().slice(0, 16);
   }
 
   onSubmitMatchEdit() {
