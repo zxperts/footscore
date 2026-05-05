@@ -1394,6 +1394,11 @@ body {
   z-index: 1055 !important;
 }
 
+/* Overlay au-dessus de la modal score pour l'édition de buteur */
+.nested-modal-overlay {
+  z-index: 1060 !important;
+}
+
 /* Modale des équipes */
 .team-modal {
   background: white;

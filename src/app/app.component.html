@@ -589,87 +589,6 @@
         </div>
       </div>
 
-      <!-- Modal pour ajouter/modifier un buteur -->
-      <div class="score-modal" tabindex="-1" *ngIf="showButeurForm">
-        <div class="modal-dialog">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h5 class="modal-title">{{ editingButeur ? 'Modifier le buteur' : 'Nouveau buteur' }}</h5>
-              <button type="button" class="btn-close" (click)="showButeurForm = false"></button>
-            </div>
-            <div class="modal-body">
-              <form [formGroup]="buteurForm" (ngSubmit)="ajouterButeur()">
-                <div class="row g-3">
-                  <div class="col-md-5 position-relative">
-                    <label class="form-label small">Nom du buteur</label>
-                    <input type="text" class="form-control" placeholder="Nom du buteur"
-                           [(ngModel)]="buteurNameSearch" [ngModelOptions]="{standalone: true}"
-                           (input)="updateFilteredButeurNames()" (focus)="updateFilteredButeurNames()" autocomplete="off">
-                    <input type="hidden" formControlName="nom">
-                    <div class="list-group position-absolute w-100" *ngIf="filteredButeurNames.length > 0 && buteurNameSearch">
-                      <button type="button" class="list-group-item list-group-item-action"
-                              *ngFor="let name of filteredButeurNames"
-                              (click)="selectButeurName(name)">{{ name }}</button>
-                    </div>
-                    <div *ngIf="shouldShowCreateButeur()" class="mt-1">
-                      <button type="button" class="btn btn-link p-0" (click)="selectButeurName(buteurNameSearch)">
-                        Créer "{{ buteurNameSearch }}"
-                      </button>
-                    </div>
-                  </div>
-                  <div class="col-md-3">
-                    <label class="form-label small">Minute</label>
-                    <input type="number" 
-                           class="form-control" 
-                           placeholder="Minute" 
-                           formControlName="minute" 
-                           min="1" 
-                           max="90">
-                  </div>
-                  <div class="col-md-4">
-                    <label class="form-label small">Équipe</label>
-                    <select class="form-select" formControlName="equipe" (change)="onButeurEquipeChange()">
-                      <option [value]="1">{{ selectedMatch.equipe1 }}</option>
-                      <option [value]="2">{{ selectedMatch.equipe2 }}</option>
-                    </select>
-                  </div>
-                  <div class="col-md-12 position-relative">
-                    <label class="form-label small">Assist (optionnel)</label>
-                    <input type="text" class="form-control" placeholder="Nom du passeur (optionnel)"
-                           [(ngModel)]="assistSearch" [ngModelOptions]="{standalone: true}"
-                           (input)="updateFilteredAssistNames()" (focus)="updateFilteredAssistNames()" autocomplete="off">
-                    <input type="hidden" formControlName="assist">
-                    <div class="list-group position-absolute w-100" *ngIf="filteredAssistNames.length > 0 && assistSearch">
-                      <button type="button" class="list-group-item list-group-item-action"
-                              *ngFor="let name of filteredAssistNames"
-                              (click)="selectAssistName(name)">{{ name }}</button>
-                    </div>
-                    <div *ngIf="shouldShowCreateAssist()" class="mt-1">
-                      <button type="button" class="btn btn-link p-0" (click)="selectAssistName(assistSearch)">
-                        Créer "{{ assistSearch }}"
-                      </button>
-                    </div>
-                  </div>
-                </div>
-                <div class="mt-2">
-                  <button type="submit" 
-                          class="btn btn-primary me-2" 
-                          [disabled]="!buteurForm.valid"
-                          (click)="addNewPlayer(buteurForm.get('nom')?.value)">
-                    {{ editingButeur ? 'Enregistrer' : 'Ajouter' }}
-                  </button>
-                  <button type="button" 
-                          class="btn btn-secondary" 
-                          (click)="annulerEditionButeur()">
-                    Annuler
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        </div>
-      </div>
-
       <!-- Section de contrôle et sélection -->
       <div class="mt-4">
         <div class="d-flex justify-content-between align-items-center mb-2">
@@ -931,6 +850,89 @@
         <i class="fas fa-times me-2"></i>Fermer
       </button>
     </div>
+    </div>
+  </div>
+
+  <!-- Modal pour ajouter/modifier un buteur (superposée à la modal score) -->
+  <div class="modal-overlay nested-modal-overlay" *ngIf="showButeurForm && selectedMatch">
+    <div class="score-modal" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">{{ editingButeur ? 'Modifier le buteur' : 'Nouveau buteur' }}</h5>
+            <button type="button" class="btn-close" (click)="annulerEditionButeur()"></button>
+          </div>
+          <div class="modal-body">
+            <form [formGroup]="buteurForm" (ngSubmit)="ajouterButeur()">
+              <div class="row g-3">
+                <div class="col-md-5 position-relative">
+                  <label class="form-label small">Nom du buteur</label>
+                  <input type="text" class="form-control" placeholder="Nom du buteur"
+                         [(ngModel)]="buteurNameSearch" [ngModelOptions]="{standalone: true}"
+                         (input)="updateFilteredButeurNames()" (focus)="updateFilteredButeurNames()" autocomplete="off">
+                  <input type="hidden" formControlName="nom">
+                  <div class="list-group position-absolute w-100" *ngIf="filteredButeurNames.length > 0 && buteurNameSearch">
+                    <button type="button" class="list-group-item list-group-item-action"
+                            *ngFor="let name of filteredButeurNames"
+                            (click)="selectButeurName(name)">{{ name }}</button>
+                  </div>
+                  <div *ngIf="shouldShowCreateButeur()" class="mt-1">
+                    <button type="button" class="btn btn-link p-0" (click)="selectButeurName(buteurNameSearch)">
+                      Créer "{{ buteurNameSearch }}"
+                    </button>
+                  </div>
+                </div>
+                <div class="col-md-3">
+                  <label class="form-label small">Minute</label>
+                  <input type="number"
+                         class="form-control"
+                         placeholder="Minute"
+                         formControlName="minute"
+                         min="1"
+                         max="90">
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label small">Équipe</label>
+                  <select class="form-select" formControlName="equipe" (change)="onButeurEquipeChange()">
+                    <option [value]="1">{{ selectedMatch.equipe1 }}</option>
+                    <option [value]="2">{{ selectedMatch.equipe2 }}</option>
+                  </select>
+                </div>
+                <div class="col-md-12 position-relative">
+                  <label class="form-label small">Assist (optionnel)</label>
+                  <input type="text" class="form-control" placeholder="Nom du passeur (optionnel)"
+                         [(ngModel)]="assistSearch" [ngModelOptions]="{standalone: true}"
+                         (input)="updateFilteredAssistNames()" (focus)="updateFilteredAssistNames()" autocomplete="off">
+                  <input type="hidden" formControlName="assist">
+                  <div class="list-group position-absolute w-100" *ngIf="filteredAssistNames.length > 0 && assistSearch">
+                    <button type="button" class="list-group-item list-group-item-action"
+                            *ngFor="let name of filteredAssistNames"
+                            (click)="selectAssistName(name)">{{ name }}</button>
+                  </div>
+                  <div *ngIf="shouldShowCreateAssist()" class="mt-1">
+                    <button type="button" class="btn btn-link p-0" (click)="selectAssistName(assistSearch)">
+                      Créer "{{ assistSearch }}"
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <div class="mt-2">
+                <button type="submit"
+                        class="btn btn-primary me-2"
+                        [disabled]="!buteurForm.valid"
+                        (click)="addNewPlayer(buteurForm.get('nom')?.value)">
+                  {{ editingButeur ? 'Enregistrer' : 'Ajouter' }}
+                </button>
+                <button type="button"
+                        class="btn btn-secondary"
+                        (click)="annulerEditionButeur()">
+                  Annuler
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
