@@ -193,6 +193,7 @@
 <div class="mb-2 position-relative">
   <label for="equipe1" class="form-label">Équipe 1</label>
   <input id="equipe1" type="text" class="form-control" placeholder="Rechercher ou créer une équipe..."
+    [ngClass]="{'match-field-invalid': isMatchControlInvalid('equipe1')}"
          [(ngModel)]="team1Search" [ngModelOptions]="{standalone: true}" (input)="updateFilteredTeams1()" name="team1Search"
          (focus)="updateFilteredTeams1()" autocomplete="off">
   <input type="hidden" formControlName="equipe1">
@@ -206,11 +207,15 @@
       Créer "{{ team1Search }}"
     </button>
   </div>
+  <div class="match-field-feedback" *ngIf="isMatchControlInvalid('equipe1')">
+    Le nom de l'équipe 1 est requis.
+  </div>
 </div>
 <!-- Équipe 2 -->
 <div class="mb-2 position-relative">
   <label for="equipe2" class="form-label">Équipe 2</label>
   <input id="equipe2" type="text" class="form-control" placeholder="Rechercher ou créer une équipe..."
+         [ngClass]="{'match-field-invalid': isMatchControlInvalid('equipe2')}"
          [(ngModel)]="team2Search" [ngModelOptions]="{standalone: true}" (input)="updateFilteredTeams2()" name="team2Search"
          (focus)="updateFilteredTeams2()" autocomplete="off">
   <input type="hidden" formControlName="equipe2">
@@ -224,13 +229,20 @@
       Créer "{{ team2Search }}"
     </button>
   </div>
+  <div class="match-field-feedback" *ngIf="isMatchControlInvalid('equipe2')">
+    Le nom de l'équipe 2 est requis.
+  </div>
 </div>
             </div>
             <!-- Informations secondaires -->
             <div class="col-md-6">
               <div class="mb-2">
                 <label for="heureDebut" class="form-label text-muted">Heure de début</label>
-                <input type="datetime-local" step="3600" class="form-control form-control-sm" id="heureDebut" formControlName="heureDebut">
+                <input type="datetime-local" step="3600" class="form-control form-control-sm" id="heureDebut" formControlName="heureDebut"
+                       [ngClass]="{'match-field-invalid': isMatchControlInvalid('heureDebut')}">
+                <div class="match-field-feedback" *ngIf="isMatchControlInvalid('heureDebut')">
+                  L'heure de début est requise.
+                </div>
               </div>
               
               <!-- Bouton pour afficher/masquer les champs optionnels -->
@@ -271,6 +283,9 @@
                 </div>
               </div>
             </div>
+          </div>
+          <div class="match-form-feedback" *ngIf="matchFormSubmitted && matchForm.invalid">
+            Veuillez corriger les champs en rouge avant de créer le match.
           </div>
           <div class="d-flex gap-2 ms-2 mt-2">
             <button type="submit" class="btn btn-primary px-4" >

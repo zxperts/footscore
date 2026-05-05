@@ -71,6 +71,7 @@ interface GoalAverageChartData {
 })
 export class AppComponent implements OnInit {
   matchForm: FormGroup;
+  matchFormSubmitted = false;
   scoreForm: FormGroup;
   buteurForm: FormGroup;
   matches: Match[] = [];
@@ -494,6 +495,7 @@ export class AppComponent implements OnInit {
   }
 
   onSubmit() {
+    this.matchFormSubmitted = true;
     
     if (this.matchForm.valid) {
       const matchStartTime = new Date(this.matchForm.value.heureDebut);
@@ -522,11 +524,18 @@ export class AppComponent implements OnInit {
       this.matchForm.reset({
         heureDebut: this.getCurrentDateTime()
       });
+      this.matchFormSubmitted = false;
       this.showMatchForm = false;
       this.showOptionalFields = false; // Réinitialiser l'affichage des champs optionnels
     } else {
+      this.matchForm.markAllAsTouched();
       console.log('MatchForm invalide - soumission annulée');
     }
+  }
+
+  isMatchControlInvalid(controlName: string): boolean {
+    const control = this.matchForm.get(controlName);
+    return !!control && control.invalid && (control.touched || control.dirty || this.matchFormSubmitted);
   }
 
   calculateElapsedMinutes(matchStartTime: Date): number {
@@ -1392,6 +1401,7 @@ export class AppComponent implements OnInit {
 
   // Méthode pour ouvrir la modale d'ajout de match
   openMatchForm() {
+    this.matchFormSubmitted = false;
     this.showMatchForm = true;
     this.showOptionalFields = false; // Réinitialiser les champs optionnels
     console.log('Modale d\'ajout de match ouverte');
@@ -1399,6 +1409,7 @@ export class AppComponent implements OnInit {
 
   // Méthode pour fermer la modale d'ajout de match
   closeMatchForm() {
+    this.matchFormSubmitted = false;
     this.showMatchForm = false;
     this.showOptionalFields = false; // Réinitialiser les champs optionnels
     console.log('Modale d\'ajout de match fermée');

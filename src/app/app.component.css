@@ -273,6 +273,25 @@ h1 {
   box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
 }
 
+.match-field-invalid {
+  border-color: #dc3545 !important;
+  box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.2) !important;
+}
+
+.match-field-feedback {
+  margin-top: 0.25rem;
+  color: #dc3545;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.match-form-feedback {
+  margin: 0.5rem 0 0 0.5rem;
+  color: #dc3545;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
 /* Style des buteurs */
 .buteurs-list {
   background-color: #f8f9fa;
