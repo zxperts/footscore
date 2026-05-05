@@ -150,6 +150,9 @@ export class AppComponent implements OnInit {
   // Ajoute ces propriétés pour gérer les buts désactivés
   disabledGoals: { matchId: number, buteurIndex: number }[] = [];
 
+  // Propriétés pour la preview avec aucun match
+  previewMatches: Match[] = [];
+
   showingLocalStorageData = false;
   localStorageData: any = null;
   showDeleteButtons: boolean = false; // Par défaut, les boutons de suppression sont cachés
@@ -3406,6 +3409,100 @@ export class AppComponent implements OnInit {
     }
     
     return duels;
+  }
+
+  getPreviewMatches(): Match[] {
+    const today = new Date();
+    const matches: Match[] = [
+      {
+        id: 1,
+        equipe1: 'FC Youth Academy',
+        equipe2: 'City United',
+        score1: 3,
+        score2: 1,
+        heureDebut: new Date(today.getFullYear(), today.getMonth(), today.getDate() - 7),
+        lieu: 'Stade Municipal',
+        competition: 'Championnat U10',
+        commentaire: '',
+        buteurs: [
+          { nom: 'Alex Martin', minute: 12, equipe: 1 },
+          { nom: 'Alex Martin', minute: 34, equipe: 1, assist: 'Tom Wilson' },
+          { nom: 'Lucas Durand', minute: 45, equipe: 1 },
+          { nom: 'Jamie Scott', minute: 28, equipe: 2 }
+        ],
+        duelsGagnes: [],
+        dribbles: [],
+        interceptions: [],
+        frappes: [],
+        fautes: [],
+        contreAttaques: [],
+        tikiTakas: [],
+        positions: {},
+        showElements: true,
+        updatedAt: new Date()
+      },
+      {
+        id: 2,
+        equipe1: 'City United',
+        equipe2: 'Elite Strikers',
+        score1: 2,
+        score2: 2,
+        heureDebut: new Date(today.getFullYear(), today.getMonth(), today.getDate() - 3),
+        lieu: 'Stade des Pins',
+        competition: 'Championnat U10',
+        commentaire: '',
+        buteurs: [
+          { nom: 'Jamie Scott', minute: 18, equipe: 1 },
+          { nom: 'Jamie Scott', minute: 56, equipe: 1 },
+          { nom: 'Sophie Chen', minute: 22, equipe: 2, assist: 'Marcus Johnson' },
+          { nom: 'Emma Davis', minute: 71, equipe: 2 }
+        ],
+        duelsGagnes: [],
+        dribbles: [],
+        interceptions: [],
+        frappes: [],
+        fautes: [],
+        contreAttaques: [],
+        tikiTakas: [],
+        positions: {},
+        showElements: true,
+        updatedAt: new Date()
+      },
+      {
+        id: 3,
+        equipe1: 'FC Youth Academy',
+        equipe2: 'Elite Strikers',
+        score1: 4,
+        score2: 2,
+        heureDebut: new Date(today.getFullYear(), today.getMonth(), today.getDate() - 1),
+        lieu: 'Stade Municipal',
+        competition: 'Championnat U10',
+        commentaire: '',
+        buteurs: [
+          { nom: 'Tom Wilson', minute: 8, equipe: 1 },
+          { nom: 'Alex Martin', minute: 25, equipe: 1 },
+          { nom: 'Lucas Durand', minute: 47, equipe: 1, assist: 'Tom Wilson' },
+          { nom: 'Alex Martin', minute: 82, equipe: 1 },
+          { nom: 'Sophie Chen', minute: 33, equipe: 2 },
+          { nom: 'Marcus Johnson', minute: 65, equipe: 2 }
+        ],
+        duelsGagnes: [],
+        dribbles: [],
+        interceptions: [],
+        frappes: [],
+        fautes: [],
+        contreAttaques: [],
+        tikiTakas: [],
+        positions: {},
+        showElements: true,
+        updatedAt: new Date()
+      }
+    ];
+    return matches;
+  }
+
+  getPreviewButeursByTeam(match: Match, equipe: number): Buteur[] {
+    return match.buteurs.filter(b => b.equipe === equipe);
   }
 
   getSortedMatches(): Match[] {
