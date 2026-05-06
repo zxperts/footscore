@@ -101,6 +101,14 @@ h1 {
   cursor: pointer;
 }
 
+@media (min-width: 769px) {
+  .team-history-graph .ga-point {
+    transform: scale(0.5);
+    transform-origin: center;
+    transform-box: fill-box;
+  }
+}
+
 .ga-point-positive {
   fill: var(--bs-success);
 }
