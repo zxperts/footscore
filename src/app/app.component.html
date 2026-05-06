@@ -355,7 +355,7 @@
     <div class="list-group">
       <div *ngFor="let match of getSortedMatches()" 
            [attr.data-match-id]="match.id">
-        <div class="match-details" [ngClass]="{'disabled-match': match.isDuplicateDisabled}" [ngStyle]="getMatchBackground(match)">
+        <div class="match-details" [ngClass]="{'disabled-match': match.isDuplicateDisabled}" [ngStyle]="getMatchBackground(match)" (click)="toggleVisibility(match)">
           <div class="match-info text-muted small text-center">
             <span>{{ match.heureDebut | date:'EEEE dd/MM/yy HH:mm' }}</span>
             <span class="mx-2" *ngIf="match.lieu">•</span>
@@ -365,9 +365,8 @@
               <span class="badge" [ngClass]="getCompetitionBadgeColor(match.competition)">{{ match.competition }}</span>
             </span>
             
-            <!-- Ajouter le bouton de toggle ici -->
-            <button class="btn btn-link p-0" (click)="toggleVisibility(match)" style="font-size: 1.2em; cursor: pointer;" title="Afficher/Masquer les détails">
-              <i class="fas text-secondary" [ngClass]="match.showElements ? 'fa-eye-slash' : 'fa-circle-info'"></i>
+            <button class="btn btn-link p-0" type="button" (click)="$event.stopPropagation()" style="font-size: 1.2em; cursor: default;" title="Indicateur de verrouillage">
+              <i class="fas fa-lock-open text-secondary"></i>
             </button>
           </div>
           
@@ -376,7 +375,7 @@
               <span *ngIf="!match.isDuplicateDisabled && hasTeamColorsConfigured(match.equipe1)" class="team-color-square" [ngStyle]="getTeamColorSquareStyle(match.equipe1)"></span>{{ match.equipe1 }}
             </div>
 
-            <button class="btn" [ngClass]="match.isDuplicateDisabled ? 'btn-score-light' : getScoreColor(match)" (click)="selectMatch(match)" [disabled]="match.isDuplicateDisabled">
+            <button class="btn" [ngClass]="match.isDuplicateDisabled ? 'btn-score-light' : getScoreColor(match)" (click)="selectMatch(match); $event.stopPropagation()" [disabled]="match.isDuplicateDisabled">
               {{ match.score1 }} - {{ match.score2 }}
             </button>
             
@@ -495,24 +494,24 @@
           
           <div class="match-actions d-flex gap-2 justify-content-center mt-3" *ngIf="match.showElements">
             <button class="btn btn-sm btn-primary d-flex align-items-center" 
-                    (click)="selectMatch(match)"
+                    (click)="selectMatch(match); $event.stopPropagation()"
                     title="Ajouter un but">
               <i class="fas fa-futbol"></i>
               <span class="ms-1">But</span>
             </button>
             <button class="btn btn-sm btn-primary d-flex align-items-center" 
-                    (click)="openDispositionModal(match)"
+                    (click)="openDispositionModal(match); $event.stopPropagation()"
                     title="Disposition tactique">
               <i class="fas fa-tshirt"></i>
             </button>            
             <button class="btn btn-sm btn-primary d-flex align-items-center" 
-                    (click)="toggleMatchEditForm(match)"
+                    (click)="toggleMatchEditForm(match); $event.stopPropagation()"
                     title="Modifier le match">
               <i class="fas" [ngClass]="showMatchEditForm ? 'fa-pen-fancy' : 'fa-edit'"></i>
               <span class="ms-1">Match</span>
             </button>
             <button class="btn btn-sm btn-primary d-flex align-items-center" 
-                    (click)="shareMatch(match)"
+                    (click)="shareMatch(match); $event.stopPropagation()"
                     title="Partager le match"
                     [disabled]="isSharingMatch">
               <i class="fas" [ngClass]="isSharingMatch ? 'fa-spinner fa-spin' : 'fa-share-alt'"></i>

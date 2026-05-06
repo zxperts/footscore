@@ -46,11 +46,7 @@ h1 {
   padding: 0.5rem;
   margin-bottom: 1rem;
   transition: all 0.3s ease;
-}
-
-.match-details:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 5px 15px #4b29b967;
+  cursor: pointer;
 }
 
 .match-details.disabled-match {
