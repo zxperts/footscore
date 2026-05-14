@@ -1,7 +1,13 @@
 <!-- <app-navbar></app-navbar>
  --><div class="container">
   <div class="text-center">
-    <h2 class="display-4 sport-title">
+    <h2 class="display-4 sport-title"
+        role="button"
+        tabindex="0"
+        aria-label="Retour à l'accueil"
+        (click)="goToRootAndClearFilters()"
+        (keydown.enter)="goToRootAndClearFilters()"
+        (keydown.space)="goToRootAndClearFilters()">
       <span class="sport-text">BUUUT</span>
       <span class="domain-text">.be</span>
     </h2>

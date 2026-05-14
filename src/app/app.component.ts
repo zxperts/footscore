@@ -8,7 +8,7 @@ import { FormsModule } from '@angular/forms';
 import { PlayerSelectorComponent } from './player-selector/player-selector.component';
 import { NavbarComponent } from './component/navbar/navbar.component';
 import { FirestoreService } from './firestore.service';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { CompetitionFilterModalComponent, Competition, CompetitionUpdate } from './modals/competition-filter-modal/competition-filter-modal.component';
 // Déplacer l'interface en dehors de la classe, au début du fichier
 interface GroupedScorer {
@@ -217,7 +217,8 @@ export class AppComponent implements OnInit {
 
   constructor(
     private fb: FormBuilder,
-    private firestoreService: FirestoreService
+    private firestoreService: FirestoreService,
+    private router: Router
   ) {
     this.matchForm = this.fb.group({
       equipe1: [this.teams[0].name, Validators.required],
@@ -2401,6 +2402,15 @@ export class AppComponent implements OnInit {
   // Method to close the team filter modal
   closeTeamFilterModal() {
     this.showTeamFilterModal = false;
+  }
+
+  goToRootAndClearFilters() {
+    this.selectedTeamFilter = '';
+    this.selectedCompetitionFilter = '';
+    this.showTeamFilterModal = false;
+    this.showCompetitionFilterModal = false;
+
+    this.router.navigateByUrl('/', { replaceUrl: true });
   }
 
   onTeamFilterSelected(teamName: string) {

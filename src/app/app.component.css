@@ -1194,6 +1194,7 @@ body {
   letter-spacing: 2px;
   margin-bottom: 1rem;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
 }
 
 .sport-text {
