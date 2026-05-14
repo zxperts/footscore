@@ -10,11 +10,29 @@ import { SharedTeam } from './models/team.model';
 export class FirestoreService {
   constructor(private firestore: Firestore) {}
 
+  private normalizeDate(value: any, fallback: Date = new Date()): Date {
+    if (value instanceof Date) {
+      return Number.isNaN(value.getTime()) ? fallback : value;
+    }
+
+    if (value && typeof value.toDate === 'function') {
+      const converted = value.toDate();
+      if (converted instanceof Date && !Number.isNaN(converted.getTime())) {
+        return converted;
+      }
+    }
+
+    const parsed = new Date(value);
+    return Number.isNaN(parsed.getTime()) ? fallback : parsed;
+  }
+
+  private toIsoDateString(value: any): string {
+    return this.normalizeDate(value).toISOString();
+  }
+
   private mapFirestoreMatchData(data: any): Match {
-    const rawStartDate = data['heureDebut'] || data['date'];
-    const parsedStartDate = new Date(rawStartDate);
-    const rawUpdatedAt = data['updatedAt'];
-    const parsedUpdatedAt = rawUpdatedAt ? new Date(rawUpdatedAt) : new Date();
+    const parsedStartDate = this.normalizeDate(data['heureDebut'] || data['date']);
+    const parsedUpdatedAt = this.normalizeDate(data['updatedAt']);
 
     return {
       equipe1: data['equipe1'] || '',
@@ -22,11 +40,11 @@ export class FirestoreService {
       score1: data['score1'] || 0,
       score2: data['score2'] || 0,
       buteurs: data['buteurs'] || [],
-      heureDebut: Number.isNaN(parsedStartDate.getTime()) ? new Date() : parsedStartDate,
+      heureDebut: parsedStartDate,
       lieu: data['lieu'] || '',
       positions: data['positions'] || {},
       showElements: data['showElements'] !== undefined ? data['showElements'] : true,
-      updatedAt: Number.isNaN(parsedUpdatedAt.getTime()) ? new Date() : parsedUpdatedAt,
+      updatedAt: parsedUpdatedAt,
       duelsGagnes: data['duelsGagnes'] || [],
       dribbles: data['dribbles'] || [],
       interceptions: data['interceptions'] || [],
@@ -44,7 +62,7 @@ export class FirestoreService {
   async saveMatch(match: Match): Promise<string> {
     const matchRef = await addDoc(collection(this.firestore, 'matches'), {
       ...match,
-      heureDebut: match.heureDebut.toISOString(),
+      heureDebut: this.toIsoDateString(match.heureDebut),
       updatedAt: new Date()
     });
     console.log('Match saved:', matchRef.id);
@@ -96,12 +114,12 @@ export class FirestoreService {
         score1: data['score1'] || 0,
         score2: data['score2'] || 0,
         buteurs: data['buteurs'] || [],
-        heureDebut: new Date(data['heureDebut']),
+        heureDebut: this.normalizeDate(data['heureDebut'] || data['date']),
         lieu: data['lieu'] || '',
         positions: data['positions'] || {},
         showElements: data['showElements'] !== undefined ? data['showElements'] : true,
         competition: data['competition'] || undefined,
-        updatedAt: data['updatedAt'] ? new Date(data['updatedAt']) : new Date(),
+        updatedAt: this.normalizeDate(data['updatedAt']),
         duelsGagnes: data['duelsGagnes'] || [],
         dribbles: data['dribbles'] || [],
         interceptions: data['interceptions'] || [],
