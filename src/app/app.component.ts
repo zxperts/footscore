@@ -2403,6 +2403,11 @@ export class AppComponent implements OnInit {
     this.showTeamFilterModal = false;
   }
 
+  onTeamFilterSelected(teamName: string) {
+    this.selectedTeamFilter = teamName;
+    this.closeTeamFilterModal();
+  }
+
   // Méthode pour calculer le nombre de matchs joués par une équipe
   getMatchesPlayedByTeam(teamName: string): number {
     return this.matches.filter(match => 

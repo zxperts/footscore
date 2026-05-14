@@ -83,7 +83,8 @@
                     <input type="radio" 
                            class="form-check-input" 
                            [value]="''" 
-                           [(ngModel)]="selectedTeamFilter" 
+                            [(ngModel)]="selectedTeamFilter"
+                            (ngModelChange)="onTeamFilterSelected($event)"
                            id="allTeams">
                     <label class="form-check-label" for="allTeams">
                       <span class="badge bg-secondary">
@@ -109,7 +110,8 @@
                     <input type="radio" 
                            class="form-check-input" 
                            [value]="team.name" 
-                           [(ngModel)]="selectedTeamFilter" 
+                            [(ngModel)]="selectedTeamFilter"
+                            (ngModelChange)="onTeamFilterSelected($event)"
                            [id]="'team-' + team.name">
                     <label class="form-check-label" for="'team-' + team.name">
                       <span class="badge team-badge">{{ team.name }}</span>
