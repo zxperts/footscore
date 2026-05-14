@@ -414,6 +414,34 @@ export class AppComponent implements OnInit {
   }
 
   // Méthode pour charger les données depuis les paramètres URL
+  private getMatchIdentity(match: Match): string {
+    const kickoffTime = match.heureDebut instanceof Date
+      ? match.heureDebut.getTime()
+      : new Date(match.heureDebut).getTime();
+
+    return `${match.equipe1}__${match.equipe2}__${kickoffTime}`;
+  }
+
+  private mergeSharedMatches(matchesToMerge: Match[]): number {
+    const existingKeys = new Set(this.matches.map(match => this.getMatchIdentity(match)));
+    let addedCount = 0;
+
+    for (const sharedMatch of matchesToMerge) {
+      const key = this.getMatchIdentity(sharedMatch);
+      if (!existingKeys.has(key)) {
+        this.matches.push(sharedMatch);
+        existingKeys.add(key);
+        addedCount++;
+      }
+    }
+
+    if (addedCount > 0) {
+      this.saveData();
+    }
+
+    return addedCount;
+  }
+
   async loadMatchFromUrl() {
     const params = new URLSearchParams(window.location.search);
     const teamId = params.get('teamId');
@@ -432,12 +460,13 @@ export class AppComponent implements OnInit {
           const teamMatches = await this.firestoreService.getMatchesByTeam(teamId);
           if (teamMatches.length > 0) {
             console.log(`${teamMatches.length} matchs trouvés pour l'équipe ${team.name}`);
-            // Remplacer les matchs locaux par ceux de l'équipe partagée
-            this.matches = teamMatches;
-            // Appliquer le filtre d'équipe
-            this.selectedTeamFilter = team.name;
-            console.log(`Filtre d'équipe appliqué: ${team.name}`);
+            const addedCount = this.mergeSharedMatches(teamMatches);
+            console.log(`${addedCount} nouveau(x) match(s) ajouté(s) depuis le partage d'équipe`);
           }
+
+          // Appliquer le filtre d'équipe (focus) sans écraser les données locales
+          this.selectedTeamFilter = team.name;
+          console.log(`Filtre d'équipe appliqué: ${team.name}`);
         } else {
           console.warn('Équipe non trouvée avec l\'ID:', teamId);
         }
@@ -451,12 +480,13 @@ export class AppComponent implements OnInit {
           const competitionMatches = await this.firestoreService.getMatchesByCompetition(competitionId);
           if (competitionMatches.length > 0) {
             console.log(`${competitionMatches.length} matchs trouvés pour la compétition ${competition.name}`);
-            // Remplacer les matchs locaux par ceux de la compétition partagée
-            this.matches = competitionMatches;
-            // Appliquer le filtre de compétition
-            this.selectedCompetitionFilter = competition.name;
-            console.log(`Filtre de compétition appliqué: ${competition.name}`);
+            const addedCount = this.mergeSharedMatches(competitionMatches);
+            console.log(`${addedCount} nouveau(x) match(s) ajouté(s) depuis le partage de compétition`);
           }
+
+          // Appliquer le filtre de compétition (focus) sans écraser les données locales
+          this.selectedCompetitionFilter = competition.name;
+          console.log(`Filtre de compétition appliqué: ${competition.name}`);
         } else {
           console.warn('Compétition non trouvée avec l\'ID:', competitionId);
         }
@@ -466,14 +496,8 @@ export class AppComponent implements OnInit {
         const match = await this.firestoreService.getMatchById(matchId);
         if (match) {
           console.log('Match trouvé:', `${match.equipe1} vs ${match.equipe2}`);
-          // Ajouter le match aux matchs locaux s'il n'existe pas déjà
-          const existingMatch = this.matches.find(m => 
-            m.equipe1 === match.equipe1 && 
-            m.equipe2 === match.equipe2 && 
-            m.heureDebut.getTime() === match.heureDebut.getTime()
-          );
-          if (!existingMatch) {
-            this.matches.push(match);
+          const addedCount = this.mergeSharedMatches([match]);
+          if (addedCount > 0) {
             console.log('Match ajouté aux matchs locaux');
           }
         } else {
