@@ -39,6 +39,11 @@ h1 {
   transform: scale(1.1);
 }
 
+.team-filter-color-btn {
+  border-width: 1px;
+  border-style: solid;
+}
+
 /* Style des matchs */
 .match-details {
   background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);

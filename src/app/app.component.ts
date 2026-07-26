@@ -3042,6 +3042,26 @@ export class AppComponent implements OnInit {
     };
   }
 
+  getSelectedTeamFilterButtonStyle(): { [key: string]: string } {
+    if (!this.selectedTeamFilter) {
+      return {};
+    }
+
+    const team = this.teams.find(t => t.name === this.selectedTeamFilter);
+    if (!team) {
+      return {};
+    }
+
+    const primary = team.primaryColor?.trim() || '#3498db';
+    const secondary = team.secondaryColor?.trim() || primary;
+
+    return {
+      background: `linear-gradient(135deg, ${primary} 0%, ${primary} 50%, ${secondary} 50%, ${secondary} 100%)`,
+      borderColor: secondary,
+      color: '#ffffff'
+    };
+  }
+
   hasTeamColorsConfigured(teamName: string): boolean {
     const team = this.teams.find(t => t.name === teamName);
     const primary = team?.primaryColor?.trim();

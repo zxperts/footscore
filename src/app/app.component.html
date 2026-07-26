@@ -30,7 +30,9 @@
     </button>
 
     <button *ngIf="!showMatchForm && !showTeamFilterModal && !showCompetitionFilterModal" 
-            class="btn btn-primary mt-2" 
+          class="btn mt-2"
+          [ngClass]="selectedTeamFilter ? 'team-filter-color-btn' : 'btn-primary'"
+          [ngStyle]="getSelectedTeamFilterButtonStyle()"
             (click)="showTeamFilterModal = true">
             <i class="fas fa-users text-white"></i>
             <span [hidden]="!selectedCompetitionFilter.includes('-')"> {{ selectedTeamFilter || 'TEAMS' }}</span>
