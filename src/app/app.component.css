@@ -67,6 +67,14 @@ h1 {
   padding: 0.75rem;
 }
 
+.sticky-history-top {
+  position: sticky;
+  top: 0.5rem;
+  z-index: 20;
+  background-color: rgba(248, 249, 250, 0.96);
+  backdrop-filter: blur(3px);
+}
+
 .ga-zero-line-bg {
   stroke: var(--bs-body-bg);
   stroke-width: 2.4;
@@ -259,6 +267,14 @@ h1 {
   padding: 0.5rem;
   border-top: 1px solid #e9ecef;
   background-color: #f8f9fa;
+}
+
+.help-options-panel {
+  min-width: 320px;
+  background: #ffffff;
+  border: 1px solid #dee2e6;
+  border-radius: 0.5rem;
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
 }
 
 .modal-body {

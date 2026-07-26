@@ -111,6 +111,8 @@ export class AppComponent implements OnInit {
     json: false
   };
   showHelpModal = false;
+  showHelpDisplayMenu = false;
+  showPersistentHistoryPreview = false;
   showRankingModal = false;
   currentRanking: TeamStats[] = [];
   isSharingCompetition: boolean = false;
@@ -4731,6 +4733,15 @@ export class AppComponent implements OnInit {
 
   toggleDeleteButtons() {
     this.showDeleteButtons = !this.showDeleteButtons;
+  }
+
+  closeHelpModal() {
+    this.showHelpModal = false;
+    this.showHelpDisplayMenu = false;
+  }
+
+  togglePersistentHistoryPreview() {
+    this.showPersistentHistoryPreview = !this.showPersistentHistoryPreview;
   }
 
   private toValidDate(value: unknown): Date {

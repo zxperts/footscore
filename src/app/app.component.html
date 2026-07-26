@@ -181,6 +181,70 @@
 
   </div>
 
+  <div class="team-history-graph mb-3" [class.sticky-history-top]="showPersistentHistoryPreview">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+      <h6 class="mb-0">Aperçu - Historique des matchs</h6>
+      <small class="text-muted" *ngIf="getDisplayableGoalAverageChartData() as chart; else previewCount">
+        {{ chart.values.length }} match(s)
+      </small>
+      <ng-template #previewCount>
+        <small class="text-muted">3 matchs d'exemple</small>
+      </ng-template>
+    </div>
+
+    <ng-container *ngIf="getDisplayableGoalAverageChartData() as chart; else previewHistoryGraph">
+      <svg viewBox="0 0 100 36" class="w-100" preserveAspectRatio="none" role="img" aria-label="Historique du goal average">
+        <line x1="0" [attr.y1]="chart.zeroY" x2="100" [attr.y2]="chart.zeroY" class="ga-zero-line-bg"></line>
+        <line x1="0" [attr.y1]="chart.zeroY" x2="100" [attr.y2]="chart.zeroY" class="ga-zero-line"></line>
+        <polyline [attr.points]="chart.points" class="ga-line"></polyline>
+        <circle *ngFor="let point of chart.dots"
+          [attr.cx]="point.x"
+          [attr.cy]="point.y"
+          [attr.r]="isChartPointActive(point) ? 1.6 : 1.2"
+          class="ga-point"
+          (mouseenter)="onGraphPointHover(point)"
+          (mouseleave)="onGraphPointHoverLeave()"
+          (click)="onGraphPointSelect(point)"
+          [ngClass]="point.value > 0 ? 'ga-point-positive' : (point.value < 0 ? 'ga-point-negative' : 'ga-point-neutral')">
+          <title>Match {{ point.matchOrder }} · {{ point.scoreDisplay }} · {{ point.opponentName }}</title>
+        </circle>
+
+        <g *ngIf="getActiveChartPoint(chart) as activePoint"
+           class="ga-point-label-box"
+           [attr.transform]="'translate(' + getChartPointLabelBoxX(activePoint) + ',' + getChartPointLabelBoxY(activePoint) + ')'">
+          <rect x="0" y="0"
+                [attr.width]="getChartPointBadgeWidth(activePoint)"
+                height="4.8"
+                rx="2.4"
+                class="ga-point-badge-svg"
+                [ngClass]="getChartPointOpponentClass(activePoint)"></rect>
+          <text [attr.x]="getChartPointBadgeWidth(activePoint) / 2" y="2.4" text-anchor="middle" class="ga-chip-text">
+            {{ getChartPointBadgeText(activePoint) }}
+          </text>
+        </g>
+      </svg>
+    </ng-container>
+
+    <ng-template #previewHistoryGraph>
+      <svg viewBox="0 0 100 36" class="w-100" preserveAspectRatio="none" role="img" aria-label="Aperçu - Historique du goal average" style="opacity: 0.6;">
+        <line x1="0" y1="18" x2="100" y2="18" class="ga-zero-line-bg"></line>
+        <line x1="0" y1="18" x2="100" y2="18" class="ga-zero-line"></line>
+        <polyline points="10,25 35,12 60,8 85,15" class="ga-line"></polyline>
+        <circle cx="10" cy="25" r="1.2" class="ga-point ga-point-negative"></circle>
+        <circle cx="35" cy="12" r="1.2" class="ga-point ga-point-positive"></circle>
+        <circle cx="60" cy="8" r="1.2" class="ga-point ga-point-positive"></circle>
+        <circle cx="85" cy="15" r="1.2" class="ga-point ga-point-neutral"></circle>
+      </svg>
+    </ng-template>
+
+    <div class="d-flex justify-content-between ga-axis-labels text-muted mt-1">
+      <span>Sont visibles, uniquement les matchs partagés.</span>
+      <div class="text-center small text-muted mt-2">
+        <span>© Buut.be by P.MUNSI</span>
+      </div>
+    </div>
+  </div>
+
   <!-- Modale d'ajout de match -->
 <div class="modal-overlay" *ngIf="showMatchForm">
   <div class="match-modal">
@@ -315,51 +379,6 @@
 
   <div class="mt-4" *ngIf="filteredMatches.length > 0">
     <h2></h2>
-    <div class="team-history-graph mb-3" *ngIf="getDisplayableGoalAverageChartData() as chart">
-      <div class="d-flex justify-content-between align-items-center mb-2">
-        <h6 class="mb-0">Historique - {{ getGraphTeamName() }}</h6>
-        <small class="text-muted">{{ chart.values.length }} match(s)</small>
-      </div>
-
-      <svg viewBox="0 0 100 36" class="w-100" preserveAspectRatio="none" role="img" aria-label="Historique du goal average">
-        <line x1="0" [attr.y1]="chart.zeroY" x2="100" [attr.y2]="chart.zeroY" class="ga-zero-line-bg"></line>
-        <line x1="0" [attr.y1]="chart.zeroY" x2="100" [attr.y2]="chart.zeroY" class="ga-zero-line"></line>
-        <polyline [attr.points]="chart.points" class="ga-line"></polyline>
-        <circle *ngFor="let point of chart.dots"
-          [attr.cx]="point.x"
-          [attr.cy]="point.y"
-          [attr.r]="isChartPointActive(point) ? 1.6 : 1.2"
-          class="ga-point"
-          (mouseenter)="onGraphPointHover(point)"
-          (mouseleave)="onGraphPointHoverLeave()"
-          (click)="onGraphPointSelect(point)"
-          [ngClass]="point.value > 0 ? 'ga-point-positive' : (point.value < 0 ? 'ga-point-negative' : 'ga-point-neutral')">
-          <title>Match {{ point.matchOrder }} · {{ point.scoreDisplay }} · {{ point.opponentName }}</title>
-        </circle>
-
-        <g *ngIf="getActiveChartPoint(chart) as activePoint"
-           class="ga-point-label-box"
-           [attr.transform]="'translate(' + getChartPointLabelBoxX(activePoint) + ',' + getChartPointLabelBoxY(activePoint) + ')'">
-          <rect x="0" y="0"
-                [attr.width]="getChartPointBadgeWidth(activePoint)"
-                height="4.8"
-                rx="2.4"
-                class="ga-point-badge-svg"
-                [ngClass]="getChartPointOpponentClass(activePoint)"></rect>
-          <text [attr.x]="getChartPointBadgeWidth(activePoint) / 2" y="2.4" text-anchor="middle" class="ga-chip-text">
-            {{ getChartPointBadgeText(activePoint) }}
-          </text>
-        </g>
-      </svg>
-
-      <div class="d-flex justify-content-between ga-axis-labels text-muted mt-1">
-        <span>Sont visibles, uniquement les matchs partagés.</span>
-        <div class="text-center small text-muted mt-2">
-          <span>© Buut.be by P.MUNSI</span>
-        </div>
-      </div>
-    </div>
-
     <div class="list-group">
       <div *ngFor="let match of getSortedMatches()" 
            [attr.data-match-id]="match.id">
@@ -541,31 +560,6 @@
         <p class="text-muted mb-0">
           Créez votre premier match pour commencer à suivre les statistiques de vos équipes
         </p>
-      </div>
-    </div>
-
-    <!-- Graphique d'exemple -->
-    <div class="team-history-graph mb-3">
-      <div class="d-flex justify-content-between align-items-center mb-2">
-        <h6 class="mb-0">Aperçu - Historique des matchs</h6>
-        <small class="text-muted">3 matchs d'exemple</small>
-      </div>
-
-      <svg viewBox="0 0 100 36" class="w-100" preserveAspectRatio="none" role="img" aria-label="Aperçu - Historique du goal average" style="opacity: 0.6;">
-        <line x1="0" y1="18" x2="100" y2="18" class="ga-zero-line-bg"></line>
-        <line x1="0" y1="18" x2="100" y2="18" class="ga-zero-line"></line>
-        <polyline points="10,25 35,12 60,8 85,15" class="ga-line"></polyline>
-        <circle cx="10" cy="25" r="1.2" class="ga-point ga-point-negative"></circle>
-        <circle cx="35" cy="12" r="1.2" class="ga-point ga-point-positive"></circle>
-        <circle cx="60" cy="8" r="1.2" class="ga-point ga-point-positive"></circle>
-        <circle cx="85" cy="15" r="1.2" class="ga-point ga-point-neutral"></circle>
-      </svg>
-
-      <div class="d-flex justify-content-between ga-axis-labels text-muted mt-1">
-        <span>Matchs partagés uniquement visibles</span>
-        <div class="text-center small text-muted mt-2">
-          <span>© Buut.be by P.MUNSI</span>
-        </div>
       </div>
     </div>
 
@@ -1602,7 +1596,21 @@
               <i class="fas" [ngClass]="showDeleteButtons ? 'fa-shield-alt' : 'fa-unlock'"></i>
               <span class="ms-1">{{ showDeleteButtons ? 'Désactiver la suppression des matchs' : 'Activer la suppression des matchs' }}</span>
               </button>
-              <button type="button" class="btn btn-secondary ms-auto" (click)="showHelpModal = false">
+              <div class="position-relative">
+                <button type="button" class="btn btn-outline-primary" (click)="showHelpDisplayMenu = !showHelpDisplayMenu">
+                  <i class="fas fa-sliders-h me-1"></i>Options d'affichage
+                </button>
+                <div class="help-options-panel mt-2 p-2" *ngIf="showHelpDisplayMenu">
+                  <button type="button" class="dropdown-item d-flex align-items-center justify-content-between" (click)="togglePersistentHistoryPreview(); showHelpDisplayMenu = false">
+                    <span>Historique permanent</span>
+                    <i class="fas" [ngClass]="showPersistentHistoryPreview ? 'fa-toggle-on text-success' : 'fa-toggle-off text-muted'"></i>
+                  </button>
+                  <small class="text-muted d-block px-3 pt-1">
+                    Affiche ou masque la barre "Aperçu - Historique des matchs" en haut de la page.
+                  </small>
+                </div>
+              </div>
+              <button type="button" class="btn btn-secondary ms-auto" (click)="closeHelpModal()">
               <i class="fas fa-times me-1"></i>Fermer
               </button>
             </div>
