@@ -45,6 +45,7 @@ interface GoalAverageChartPoint {
   matchOrder: number;
   scoreDisplay: string;
   opponentName: string;
+  matchId: number | null;
 }
 
 interface GoalAverageChartData {
@@ -3565,6 +3566,7 @@ export class AppComponent implements OnInit {
   onGraphPointHover(point: GoalAverageChartPoint): void {
     this.hoveredChartPoint = point;
     this.hoveredChartPointOrder = point.matchOrder;
+    this.onGraphPointSelect(point);
   }
 
   onGraphPointHoverLeave(): void {
@@ -3573,8 +3575,32 @@ export class AppComponent implements OnInit {
   }
 
   onGraphPointSelect(point: GoalAverageChartPoint): void {
+    //console.log('onGraphPointSelect', point);
     this.selectedChartPoint = point;
     this.selectedChartPointOrder = point.matchOrder;
+    this.focusMatchFromGraph(point.matchId);
+  }
+
+  private focusMatchFromGraph(matchId: number | null): void {
+    //console.log('focusMatchFromGraph'+matchId);
+    if (!matchId ||!this.showPersistentHistoryPreview) {
+      return;
+    }
+
+    // Wait for any pending view updates before querying the match card in the DOM.
+    setTimeout(() => {
+      const matchElement = document.querySelector(`[data-match-id="${matchId}"]`) as HTMLElement | null;
+      if (!matchElement) {
+        return;
+      }
+
+      matchElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      matchElement.classList.add('match-focused-from-graph');
+
+      setTimeout(() => {
+        matchElement.classList.remove('match-focused-from-graph');
+      }, 1200);
+    }, 0);
   }
 
   getActiveChartPoint(chart: GoalAverageChartData): GoalAverageChartPoint | null {
@@ -3648,7 +3674,7 @@ export class AppComponent implements OnInit {
       return null;
     }
 
-    const teamMatches = this.matches
+    const teamMatches = this.filteredMatches
       .filter(match => !match.isDuplicateDisabled && (match.equipe1 === graphTeam || match.equipe2 === graphTeam))
       .sort((a, b) => new Date(a.heureDebut).getTime() - new Date(b.heureDebut).getTime());
 
@@ -3686,7 +3712,8 @@ export class AppComponent implements OnInit {
       value,
       matchOrder: index + 1,
       scoreDisplay: `${match.score1}-${match.score2}`,
-      opponentName: match.equipe1 === graphTeam ? match.equipe2 : match.equipe1
+      opponentName: match.equipe1 === graphTeam ? match.equipe2 : match.equipe1,
+      matchId: match.id ?? null
     };
     });
 

@@ -1315,7 +1315,7 @@
                 </div>
               </div>
               </div>
-                <div *ngIf="showDefendersAndMidfielders">
+              <div *ngIf="showDefendersAndMidfielders">
               <div class="player-position defenseur-droit" (click)="selectPosition(1, 'defenseur-droit')">
                 <div class="player-dot" [class.selected]="selectedPosition?.team === 1 && selectedPosition?.position === 'defenseur-droit'">
                   <span class="position-name">DD</span>
@@ -1464,8 +1464,6 @@
                     </ng-container>
                   </span>
                 </div>
-              </div>
-              <div *ngIf="showDefendersAndMidfielders">
               </div>
             </div>
           </div>
