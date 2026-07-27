@@ -241,9 +241,14 @@
 
     <div class="d-flex justify-content-between ga-axis-labels text-muted mt-1">
       <span>Sont visibles, uniquement les matchs partagés.</span>
-      <div class="text-center small text-muted mt-2">
-        <span>© Buut.be by P.MUNSI</span>
-      </div>
+      <button
+        type="button"
+        class="btn btn-link p-0 text-muted"
+        (click)="togglePersistentHistoryPreview()"
+        [attr.aria-label]="showPersistentHistoryPreview ? 'Désactiver la visibilité permanente' : 'Activer la visibilité permanente'"
+        [title]="showPersistentHistoryPreview ? 'Visibilité permanente active' : 'Visibilité permanente inactive'">
+        <i class="fas" [ngClass]="showPersistentHistoryPreview ? 'fa-lock' : 'fa-lock-open'"></i>
+      </button>
     </div>
   </div>
 
@@ -395,7 +400,7 @@
             </span>
             
             <button class="btn btn-link p-0" type="button" (click)="$event.stopPropagation()" style="font-size: 1.2em; cursor: default;" title="Indicateur de verrouillage">
-              <i class="fas fa-lock-open text-secondary"></i>
+              <i class="fas fa-pen text-secondary"></i>
             </button>
           </div>
           
