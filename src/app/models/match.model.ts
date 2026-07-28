@@ -64,6 +64,8 @@ export interface Match {
   heureDebut: Date;
   lieu?: string;
   positions?: { [key: string]: string };
+  matchSheetTeam1?: string[];
+  matchSheetTeam2?: string[];
   showElements?: boolean;
   isDuplicateDisabled?: boolean;
   firestoreDocId?: string;

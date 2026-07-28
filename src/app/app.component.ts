@@ -189,6 +189,10 @@ export class AppComponent implements OnInit {
   
   // === GESTION DE LA SÉLECTION D'ACTION ===
   showActionSelectionModal: boolean = false;
+  showMatchSheetPanel: boolean = false;
+  showNonSheetPlayersInActionModal: boolean = false;
+  readonly matchSheetMaxPlayers: number = 12;
+  readonly matchSheetMinPlayersForPriority: number = 8;
   
   // === NOUVELLE GESTION D'ACTIONS ===
   showTeamActionModal: boolean = false;
@@ -546,6 +550,8 @@ export class AppComponent implements OnInit {
         fautes: [], // Initialiser le tableau des fautes
         contreAttaques: [], // Initialiser le tableau des contre-attaques
         tikiTakas: [], // Initialiser le tableau des tiki-taka
+        matchSheetTeam1: [],
+        matchSheetTeam2: [],
         showElements: true, // Initialiser la visibilité
         updatedAt: new Date()
       };
@@ -945,6 +951,98 @@ export class AppComponent implements OnInit {
     const teamName = teamNumber === 1 ? this.selectedMatch.equipe1 : this.selectedMatch.equipe2;
     const team = this.teams.find(t => t.name === teamName);
     return team?.players || [];
+  }
+
+  toggleMatchSheetPanel() {
+    this.showMatchSheetPanel = !this.showMatchSheetPanel;
+  }
+
+  getMatchSheetSelectedCount(teamNumber: 1 | 2): number {
+    return this.getMatchSheetNames(teamNumber).length;
+  }
+
+  isPlayerInMatchSheet(teamNumber: 1 | 2, playerName: string): boolean {
+    return this.getMatchSheetNames(teamNumber).includes(playerName);
+  }
+
+  isMatchSheetSelectionDisabled(teamNumber: 1 | 2, playerName: string): boolean {
+    const selected = this.getMatchSheetNames(teamNumber);
+    return selected.length >= this.matchSheetMaxPlayers && !selected.includes(playerName);
+  }
+
+  togglePlayerInMatchSheet(teamNumber: 1 | 2, playerName: string): void {
+    if (!this.selectedMatch) {
+      return;
+    }
+
+    const selected = this.getMatchSheetNames(teamNumber);
+    const index = selected.indexOf(playerName);
+
+    if (index >= 0) {
+      selected.splice(index, 1);
+      this.saveData();
+      return;
+    }
+
+    if (selected.length >= this.matchSheetMaxPlayers) {
+      alert(`Maximum ${this.matchSheetMaxPlayers} joueurs sur la feuille de match.`);
+      return;
+    }
+
+    selected.push(playerName);
+    this.saveData();
+  }
+
+  shouldPrioritizeMatchSheetPlayers(teamNumber: 1 | 2 | null): boolean {
+    if (!teamNumber) {
+      return false;
+    }
+
+    return this.getMatchSheetNames(teamNumber).length >= this.matchSheetMinPlayersForPriority;
+  }
+
+  getPrimaryPlayersForActionModal(): Player[] {
+    if (!this.pendingActionTeam) {
+      return [];
+    }
+
+    const allPlayers = this.getTeamPlayers(this.pendingActionTeam);
+    if (!this.shouldPrioritizeMatchSheetPlayers(this.pendingActionTeam)) {
+      return allPlayers;
+    }
+
+    const selectedNames = new Set(this.getMatchSheetNames(this.pendingActionTeam));
+    return allPlayers.filter(player => selectedNames.has(player.name));
+  }
+
+  getNonSheetPlayersForActionModal(): Player[] {
+    if (!this.pendingActionTeam || !this.shouldPrioritizeMatchSheetPlayers(this.pendingActionTeam)) {
+      return [];
+    }
+
+    const selectedNames = new Set(this.getMatchSheetNames(this.pendingActionTeam));
+    return this.getTeamPlayers(this.pendingActionTeam).filter(player => !selectedNames.has(player.name));
+  }
+
+  getMissingMatchSheetPlayersForPriority(teamNumber: 1 | 2): number {
+    return Math.max(0, this.matchSheetMinPlayersForPriority - this.getMatchSheetSelectedCount(teamNumber));
+  }
+
+  toggleNonSheetPlayersInActionModal(): void {
+    this.showNonSheetPlayersInActionModal = !this.showNonSheetPlayersInActionModal;
+  }
+
+  private getMatchSheetNames(teamNumber: 1 | 2): string[] {
+    if (!this.selectedMatch) {
+      return [];
+    }
+
+    const key = teamNumber === 1 ? 'matchSheetTeam1' : 'matchSheetTeam2';
+    if (!this.selectedMatch[key]) {
+      this.selectedMatch[key] = [];
+    }
+
+    return this.selectedMatch[key] || [];
   }
 
   // Méthode pour obtenir le texte à afficher pour un joueur (nom ou numéro)
@@ -1719,7 +1817,9 @@ export class AppComponent implements OnInit {
         this.matches = data.matches.map((match: any) => ({
           ...match,
           heureDebut: new Date(match.heureDebut),
-          duelsGagnes: match.duelsGagnes || [] // Initialiser les duels gagnés pour les anciens matchs
+          duelsGagnes: match.duelsGagnes || [], // Initialiser les duels gagnés pour les anciens matchs
+          matchSheetTeam1: (match.matchSheetTeam1 || []).slice(0, this.matchSheetMaxPlayers),
+          matchSheetTeam2: (match.matchSheetTeam2 || []).slice(0, this.matchSheetMaxPlayers)
         }));
         if (data.teams) {
           this.teams = data.teams;
@@ -2344,10 +2444,14 @@ export class AppComponent implements OnInit {
 
   openDispositionModal(match: Match) {
     this.selectedMatch = match;
+    this.selectedMatch.matchSheetTeam1 = (this.selectedMatch.matchSheetTeam1 || []).slice(0, this.matchSheetMaxPlayers);
+    this.selectedMatch.matchSheetTeam2 = (this.selectedMatch.matchSheetTeam2 || []).slice(0, this.matchSheetMaxPlayers);
+    this.showMatchSheetPanel = false;
     this.showDispositionModal = true;
   }
 
   closeDispositionModal() {
+    this.showMatchSheetPanel = false;
     this.showDispositionModal = false;
     this.selectedMatch = null;
   }
@@ -2631,6 +2735,8 @@ export class AppComponent implements OnInit {
         heureDebut: new Date(),
         lieu: '',
         positions: {},
+        matchSheetTeam1: [],
+        matchSheetTeam2: [],
         showElements: true,
         competition: competition.name,
         updatedAt: new Date(),
@@ -5199,12 +5305,14 @@ export class AppComponent implements OnInit {
     this.selectedAction = action;
     this.pendingActionTeam = teamNumber;
     this.showTeamActionModal = false;
+    this.showNonSheetPlayersInActionModal = false;
     this.showPlayerSelectionModal = true;
   }
 
   // Fermer la modale de sélection de joueur
   closePlayerSelectionModal() {
     this.showPlayerSelectionModal = false;
+    this.showNonSheetPlayersInActionModal = false;
     this.selectedAction = '';
     this.pendingActionTeam = null;
   }
