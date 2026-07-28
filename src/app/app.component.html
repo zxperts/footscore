@@ -1890,9 +1890,17 @@
             </div>
             <input class="form-control player-name-input" [(ngModel)]="player.name" placeholder="Nom du joueur" />
             <input type="number" class="form-control player-number-input" [(ngModel)]="player.number" placeholder="N°" min="1" max="99" />
-            <span class="badge bg-primary goals-badge" *ngIf="getGoalsForPlayer(player.name) > 0" (click)="openPlayerGoalsModal(player)">
-              {{ getGoalsForPlayer(player.name) }} ⚽
-            </span>
+            <div class="player-stats-badges">
+              <span class="badge bg-primary goals-badge" *ngIf="getGoalsForPlayer(player.name) > 0" (click)="openPlayerGoalsModal(player, 'goals')">
+                {{ getGoalsForPlayer(player.name) }} ⚽
+              </span>
+              <span class="badge bg-info text-dark goals-badge" *ngIf="getAssistsForPlayer(player.name) > 0" (click)="openPlayerGoalsModal(player, 'assists')">
+                {{ getAssistsForPlayer(player.name) }} 👟
+              </span>
+              <span class="badge bg-secondary goals-badge" *ngIf="getOtherStatsForPlayer(player.name) > 0" (click)="openPlayerGoalsModal(player, 'otherStats')">
+                {{ getOtherStatsForPlayer(player.name) }} Σ
+              </span>
+            </div>
             <div class="player-actions">
               <button class="btn btn-sm btn-outline-danger" *ngIf="showDeleteButtons" (click)="removePlayer(i)" title="Supprimer le joueur">
                 <i class="fas fa-trash"></i>
@@ -1942,19 +1950,28 @@
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title">Buts de {{ selectedPlayerGoalsModal.name }}</h5>
+        <h5 class="modal-title">{{ getSelectedPlayerStatsTitle() }}</h5>
         <button type="button" class="btn-close" aria-label="Fermer" (click)="closePlayerGoalsModal()"></button>
       </div>
       <ng-container *ngIf="selectedPlayerGoalsModal">
         <div class="modal-body">
-          <div *ngFor="let goal of getPlayerGoalsDetails(selectedPlayerGoalsModal!)" class="mb-2">
-            <i class="fas fa-calendar-alt me-1"></i>
-            {{ goal.match.heureDebut | date:'dd/MM/yyyy HH:mm' }}
-            <span class="ms-2"><i class="fas fa-stopwatch"></i> {{ goal.minute }}'</span>
-            <span class="ms-2">vs {{ goal.match.equipe1 === teamToEdit?.name ? goal.match.equipe2 : goal.match.equipe1 }}</span>
-            <span class="ms-2">(score: {{ goal.match.score1 }} - {{ goal.match.score2 }})</span>
+          <div *ngFor="let statGroup of getSelectedPlayerStatsGroups()" class="mb-3 p-2 border rounded">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <i class="fas fa-calendar-alt me-1"></i>
+                {{ statGroup.match.heureDebut | date:'dd/MM/yyyy HH:mm' }}
+                <span class="ms-2">vs {{ statGroup.match.equipe1 === teamToEdit?.name ? statGroup.match.equipe2 : statGroup.match.equipe1 }}</span>
+              </div>
+              <span class="badge bg-dark">{{ statGroup.count }}</span>
+            </div>
+            <div class="small text-muted mt-1">Score: {{ statGroup.match.score1 }} - {{ statGroup.match.score2 }}</div>
+            <div class="small mt-1">
+              {{ statGroup.details.join(' • ') }}
+            </div>
           </div>
-          <div *ngIf="getPlayerGoalsDetails(selectedPlayerGoalsModal!).length === 0" class="small text-muted">Aucun but trouvé.</div>
+          <div *ngIf="getSelectedPlayerStatsGroups().length === 0" class="small text-muted">
+            Aucune statistique trouvée.
+          </div>
         </div>
         <div class="modal-footer">
           <button class="btn btn-secondary" (click)="closePlayerGoalsModal()">Fermer</button>

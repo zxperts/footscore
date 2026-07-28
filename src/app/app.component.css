@@ -1871,6 +1871,13 @@ body {
   font-size: 0.85rem;
 }
 
+.player-stats-badges {
+  display: flex;
+  gap: 0.25rem;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
 .goals-badge:hover {
   transform: scale(1.1);
 }

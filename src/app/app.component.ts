@@ -55,6 +55,14 @@ interface GoalAverageChartData {
   zeroY: number;
 }
 
+type PlayerStatsModalType = 'goals' | 'assists' | 'otherStats';
+
+interface PlayerStatsMatchGroup {
+  match: Match;
+  count: number;
+  details: string[];
+}
+
 @Component({
   selector: 'app-root',
   standalone: true,
@@ -127,6 +135,7 @@ export class AppComponent implements OnInit {
   // newPlayerName déjà présente
   selectedPlayerGoalsIndex: number | null = null;
   selectedPlayerGoalsModal: Player | null = null;
+  selectedPlayerStatsModalType: PlayerStatsModalType = 'goals';
   team1Search: string = '';
   team2Search: string = '';
   filteredTeams1: string[] = [];
@@ -4299,6 +4308,48 @@ export class AppComponent implements OnInit {
     return count;
   }
 
+  getAssistsForPlayer(playerName: string): number {
+    if (!this.teamToEdit) return 0;
+    let count = 0;
+
+    for (const match of this.matches) {
+      if (match.equipe1 !== this.teamToEdit.name && match.equipe2 !== this.teamToEdit.name) {
+        continue;
+      }
+
+      for (const buteur of match.buteurs) {
+        const isTeam1 = match.equipe1 === this.teamToEdit.name && buteur.equipe === 1;
+        const isTeam2 = match.equipe2 === this.teamToEdit.name && buteur.equipe === 2;
+        if ((isTeam1 || isTeam2) && buteur.assist === playerName) {
+          count++;
+        }
+      }
+    }
+
+    return count;
+  }
+
+  getOtherStatsForPlayer(playerName: string): number {
+    if (!this.teamToEdit) return 0;
+    let total = 0;
+
+    for (const match of this.matches) {
+      if (match.equipe1 !== this.teamToEdit.name && match.equipe2 !== this.teamToEdit.name) {
+        continue;
+      }
+
+      total += this.countStatEvents(match.duelsGagnes || [], match, playerName);
+      total += this.countStatEvents(match.dribbles || [], match, playerName);
+      total += this.countStatEvents(match.interceptions || [], match, playerName);
+      total += this.countStatEvents(match.frappes || [], match, playerName);
+      total += this.countStatEvents(match.fautes || [], match, playerName);
+      total += this.countStatEvents(match.contreAttaques || [], match, playerName);
+      total += this.countStatEvents(match.tikiTakas || [], match, playerName);
+    }
+
+    return total;
+  }
+
   cyclePlayerType(player: Player) {
     if (player.type === 'attaquant') player.type = 'milieu';
     else if (player.type === 'milieu') player.type = 'defenseur';
@@ -4325,12 +4376,147 @@ export class AppComponent implements OnInit {
     return details;
   }
 
-  openPlayerGoalsModal(player: Player) {
+  getSelectedPlayerStatsTitle(): string {
+    if (!this.selectedPlayerGoalsModal) {
+      return 'Statistiques du joueur';
+    }
+
+    if (this.selectedPlayerStatsModalType === 'assists') {
+      return `Assists de ${this.selectedPlayerGoalsModal.name}`;
+    }
+
+    if (this.selectedPlayerStatsModalType === 'otherStats') {
+      return `Autres stats de ${this.selectedPlayerGoalsModal.name}`;
+    }
+
+    return `Buts de ${this.selectedPlayerGoalsModal.name}`;
+  }
+
+  getSelectedPlayerStatsGroups(): PlayerStatsMatchGroup[] {
+    if (!this.selectedPlayerGoalsModal || !this.teamToEdit) {
+      return [];
+    }
+
+    const playerName = this.selectedPlayerGoalsModal.name;
+    const groups: PlayerStatsMatchGroup[] = [];
+
+    for (const match of this.matches) {
+      if (match.equipe1 !== this.teamToEdit.name && match.equipe2 !== this.teamToEdit.name) {
+        continue;
+      }
+
+      if (this.selectedPlayerStatsModalType === 'goals') {
+        const goals = match.buteurs.filter(buteur => {
+          if (buteur.nom !== playerName) {
+            return false;
+          }
+
+          const isTeam1 = match.equipe1 === this.teamToEdit?.name && buteur.equipe === 1;
+          const isTeam2 = match.equipe2 === this.teamToEdit?.name && buteur.equipe === 2;
+          return isTeam1 || isTeam2;
+        });
+
+        if (goals.length > 0) {
+          groups.push({
+            match,
+            count: goals.length,
+            details: goals.map(goal => `${goal.minute}'`)
+          });
+        }
+
+        continue;
+      }
+
+      if (this.selectedPlayerStatsModalType === 'assists') {
+        const assists = match.buteurs.filter(buteur => {
+          const isTeam1 = match.equipe1 === this.teamToEdit?.name && buteur.equipe === 1;
+          const isTeam2 = match.equipe2 === this.teamToEdit?.name && buteur.equipe === 2;
+          return (isTeam1 || isTeam2) && buteur.assist === playerName;
+        });
+
+        if (assists.length > 0) {
+          groups.push({
+            match,
+            count: assists.length,
+            details: assists.map(assist => `${assist.nom} (${assist.minute}')`)
+          });
+        }
+
+        continue;
+      }
+
+      const otherDetails: string[] = [];
+      otherDetails.push(...this.getStatLines(match.duelsGagnes || [], match, playerName, 'Duel'));
+      otherDetails.push(...this.getStatLines(match.dribbles || [], match, playerName, 'Dribble'));
+      otherDetails.push(...this.getStatLines(match.interceptions || [], match, playerName, 'Interception'));
+      otherDetails.push(...this.getStatLines(match.frappes || [], match, playerName, 'Frappe'));
+      otherDetails.push(...this.getStatLines(match.fautes || [], match, playerName, 'Faute'));
+      otherDetails.push(...this.getStatLines(match.contreAttaques || [], match, playerName, 'Contre-attaque'));
+      otherDetails.push(...this.getStatLines(match.tikiTakas || [], match, playerName, 'Tiki-taka'));
+
+      if (otherDetails.length > 0) {
+        groups.push({
+          match,
+          count: otherDetails.length,
+          details: otherDetails
+        });
+      }
+    }
+
+    return groups.sort((a, b) => b.match.heureDebut.getTime() - a.match.heureDebut.getTime());
+  }
+
+  openPlayerGoalsModal(player: Player, statsType: PlayerStatsModalType = 'goals') {
     this.selectedPlayerGoalsModal = player;
+    this.selectedPlayerStatsModalType = statsType;
   }
 
   closePlayerGoalsModal() {
     this.selectedPlayerGoalsModal = null;
+    this.selectedPlayerStatsModalType = 'goals';
+  }
+
+  private countStatEvents(
+    items: Array<{ nom: string; equipe: 1 | 2 }>,
+    match: Match,
+    playerName: string
+  ): number {
+    if (!this.teamToEdit) {
+      return 0;
+    }
+
+    return items.filter(item => {
+      if (item.nom !== playerName) {
+        return false;
+      }
+
+      const isTeam1 = match.equipe1 === this.teamToEdit?.name && item.equipe === 1;
+      const isTeam2 = match.equipe2 === this.teamToEdit?.name && item.equipe === 2;
+      return isTeam1 || isTeam2;
+    }).length;
+  }
+
+  private getStatLines(
+    items: Array<{ nom: string; minute: number; equipe: 1 | 2 }>,
+    match: Match,
+    playerName: string,
+    label: string
+  ): string[] {
+    if (!this.teamToEdit) {
+      return [];
+    }
+
+    return items
+      .filter(item => {
+        if (item.nom !== playerName) {
+          return false;
+        }
+
+        const isTeam1 = match.equipe1 === this.teamToEdit?.name && item.equipe === 1;
+        const isTeam2 = match.equipe2 === this.teamToEdit?.name && item.equipe === 2;
+        return isTeam1 || isTeam2;
+      })
+      .map(item => `${label} (${item.minute}')`);
   }
 
   updateFilteredTeams1() {
