@@ -31,7 +31,7 @@
 
     <button *ngIf="!showMatchForm && !showTeamFilterModal && !showCompetitionFilterModal" 
           class="btn mt-2"
-          [ngClass]="selectedTeamFilter ? 'team-filter-color-btn' : 'btn-primary'"
+          [ngClass]="isSelectedTeamFilterColorEnabled() ? 'team-filter-color-btn' : 'btn-primary'"
           [ngStyle]="getSelectedTeamFilterButtonStyle()"
             (click)="showTeamFilterModal = true">
             <i class="fas fa-users text-white"></i>
@@ -406,7 +406,7 @@
           
           <div class="match-score">
             <div class="team-name" style="flex: 1; text-align: center;">
-              <span *ngIf="!match.isDuplicateDisabled && hasTeamColorsConfigured(match.equipe1)" class="team-color-square" [ngStyle]="getTeamColorSquareStyle(match.equipe1)"></span>{{ match.equipe1 }}
+              <span *ngIf="!match.isDuplicateDisabled && hasTeamColorsConfigured(match.equipe1)" class="team-color-square" [ngStyle]="getTeamColorSquareStyle(match.equipe1)"></span><span [ngStyle]="getTeamNameTextStyle(match.equipe1)">{{ match.equipe1 }}</span>
             </div>
 
             <button class="btn" [ngClass]="match.isDuplicateDisabled ? 'btn-score-light' : getScoreColor(match)" (click)="selectMatch(match); $event.stopPropagation()" [disabled]="match.isDuplicateDisabled">
@@ -414,7 +414,7 @@
             </button>
             
             <div class="team-name" style="flex: 1; text-align: center;">
-              <span *ngIf="!match.isDuplicateDisabled && hasTeamColorsConfigured(match.equipe2)" class="team-color-square" [ngStyle]="getTeamColorSquareStyle(match.equipe2)"></span>{{ match.equipe2 }}
+              <span *ngIf="!match.isDuplicateDisabled && hasTeamColorsConfigured(match.equipe2)" class="team-color-square" [ngStyle]="getTeamColorSquareStyle(match.equipe2)"></span><span [ngStyle]="getTeamNameTextStyle(match.equipe2)">{{ match.equipe2 }}</span>
             </div>
           </div>
 
@@ -585,13 +585,13 @@
           
           <div class="match-score">
             <div class="team-name" style="flex: 1; text-align: center;">
-              {{ match.equipe1 }}
+              <span [ngStyle]="getTeamNameTextStyle(match.equipe1)">{{ match.equipe1 }}</span>
             </div>
             <div class="btn btn-score-light" style="cursor: default; opacity: 0.7;">
               {{ match.score1 }} - {{ match.score2 }}
             </div>
             <div class="team-name" style="flex: 1; text-align: center;">
-              {{ match.equipe2 }}
+              <span [ngStyle]="getTeamNameTextStyle(match.equipe2)">{{ match.equipe2 }}</span>
             </div>
           </div>
 
@@ -664,7 +664,7 @@
       <div class="match-score-display mb-4">
         <div class="match-score">
           <div class="team-name" style="flex: 1; text-align: center;">
-            <span *ngIf="hasTeamColorsConfigured(selectedMatch.equipe1)" class="team-color-square" [ngStyle]="getTeamColorSquareStyle(selectedMatch.equipe1)"></span>{{ selectedMatch.equipe1 }}
+            <span *ngIf="hasTeamColorsConfigured(selectedMatch.equipe1)" class="team-color-square" [ngStyle]="getTeamColorSquareStyle(selectedMatch.equipe1)"></span><span [ngStyle]="getTeamNameTextStyle(selectedMatch.equipe1)">{{ selectedMatch.equipe1 }}</span>
           </div>
           <div class="score" [ngClass]="getScoreColor(selectedMatch)" style="text-align: center;" (click)="showScoreForm = true">
             <ng-container *ngIf="!showScoreForm">
@@ -695,7 +695,7 @@
             </ng-container>
           </div>
           <div class="team-name" style="flex: 1; text-align: center;">
-            <span *ngIf="hasTeamColorsConfigured(selectedMatch.equipe2)" class="team-color-square" [ngStyle]="getTeamColorSquareStyle(selectedMatch.equipe2)"></span>{{ selectedMatch.equipe2 }}
+            <span *ngIf="hasTeamColorsConfigured(selectedMatch.equipe2)" class="team-color-square" [ngStyle]="getTeamColorSquareStyle(selectedMatch.equipe2)"></span><span [ngStyle]="getTeamNameTextStyle(selectedMatch.equipe2)">{{ selectedMatch.equipe2 }}</span>
           </div>
         </div>
       </div>
@@ -1787,6 +1787,35 @@
           <div>
             <label class="form-label mb-1 small">Couleur secondaire</label>
             <input type="color" [(ngModel)]="teamToEdit.secondaryColor" class="form-control form-control-color" style="width: 80px; height: 40px;" />
+          </div>
+        </div>
+        <div class="mt-3">
+          <label class="form-label small mb-2">Couleur d'affichage du nom de l'équipe</label>
+          <div class="d-flex gap-2 flex-wrap">
+            <div class="form-check">
+              <input class="form-check-input" type="radio" name="teamNameColorStyle"
+                     id="colorStyle0" [value]="0" [(ngModel)]="teamToEdit.teamNameColorStyle">
+              <label class="form-check-label small" for="colorStyle0">
+                <span>Sans couleur</span>
+              </label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="radio" name="teamNameColorStyle"
+                     id="colorStyle1" [value]="1" [(ngModel)]="teamToEdit.teamNameColorStyle">
+              <label class="form-check-label small" for="colorStyle1">
+                <span [style.color]="teamToEdit.primaryColor" style="font-weight:bold">Texte coloré</span>
+              </label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="radio" name="teamNameColorStyle"
+                     id="colorStyle2" [value]="2" [(ngModel)]="teamToEdit.teamNameColorStyle">
+              <label class="form-check-label small" for="colorStyle2">
+                <span [style.background]="'linear-gradient(135deg,' + teamToEdit.primaryColor + ' 0%,' + teamToEdit.primaryColor + ' 50%,' + teamToEdit.secondaryColor + ' 50%,' + teamToEdit.secondaryColor + ' 100%)'"
+                      style="-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;font-weight:bold">
+                  Dégradé
+                </span>
+              </label>
+            </div>
           </div>
         </div>
       </div>

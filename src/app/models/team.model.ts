@@ -10,6 +10,7 @@ export interface Team {
   players: Player[];
   primaryColor?: string;
   secondaryColor?: string;
+  teamNameColorStyle?: 0 | 1 | 2; // 0 = aucune couleur, 1 = texte coloré (primaire), 2 = fond dégradé
 }
 
 export interface SharedTeam {

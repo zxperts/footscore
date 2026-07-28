@@ -3042,6 +3042,34 @@ export class AppComponent implements OnInit {
     };
   }
 
+  getTeamNameTextStyle(teamName: string): { [key: string]: string } {
+    const team = this.teams.find(t => t.name === teamName);
+    const primary = team?.primaryColor?.trim();
+    const secondary = team?.secondaryColor?.trim();
+    const style = team?.teamNameColorStyle ?? 0;
+
+    if (!primary || !secondary || style === 0) {
+      return {};
+    }
+
+    if (style === 1) {
+      // Option 1 : texte coloré (couleur primaire)
+      return {
+        color: primary,
+        fontWeight: 'bold'
+      };
+    }
+
+    // Option 2 : fond dégradé (comme le bouton TEAMS)
+    return {
+      background: `linear-gradient(135deg, ${primary} 0%, ${primary} 50%, ${secondary} 50%, ${secondary} 100%)`,
+      WebkitBackgroundClip: 'text',
+      WebkitTextFillColor: 'transparent',
+      backgroundClip: 'text',
+      fontWeight: 'bold'
+    };
+  }
+
   getSelectedTeamFilterButtonStyle(): { [key: string]: string } {
     if (!this.selectedTeamFilter) {
       return {};
@@ -3049,6 +3077,14 @@ export class AppComponent implements OnInit {
 
     const team = this.teams.find(t => t.name === this.selectedTeamFilter);
     if (!team) {
+      return {};
+    }
+
+    const hasPrimary = !!team.primaryColor?.trim();
+    const hasSecondary = !!team.secondaryColor?.trim();
+    const style = team.teamNameColorStyle ?? 0;
+
+    if (style === 0 || !hasPrimary || !hasSecondary) {
       return {};
     }
 
@@ -3060,6 +3096,21 @@ export class AppComponent implements OnInit {
       borderColor: secondary,
       color: '#ffffff'
     };
+  }
+
+  isSelectedTeamFilterColorEnabled(): boolean {
+    if (!this.selectedTeamFilter) {
+      return false;
+    }
+
+    const team = this.teams.find(t => t.name === this.selectedTeamFilter);
+    if (!team) {
+      return false;
+    }
+
+    return (team.teamNameColorStyle ?? 0) > 0
+      && !!team.primaryColor?.trim()
+      && !!team.secondaryColor?.trim();
   }
 
   hasTeamColorsConfigured(teamName: string): boolean {
@@ -4038,7 +4089,11 @@ export class AppComponent implements OnInit {
     const found = this.teams.find(t => t.name === teamName);
     if (found) {
       // On clone pour éviter la mutation directe avant validation
-      this.teamToEdit = { ...found, players: [...found.players] };
+      this.teamToEdit = {
+        ...found,
+        players: [...found.players],
+        teamNameColorStyle: found.teamNameColorStyle ?? 0
+      };
       this.showEditPlayersModal = true;
     }
   }
