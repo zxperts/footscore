@@ -1823,13 +1823,15 @@ export class AppComponent implements OnInit {
       
       // Vérifier si les données n'ont pas expiré (3 mois)
       if (expirationDate > new Date()) {
-        this.matches = data.matches.map((match: any) => ({
-          ...match,
-          heureDebut: new Date(match.heureDebut),
-          duelsGagnes: match.duelsGagnes || [], // Initialiser les duels gagnés pour les anciens matchs
-          matchSheetTeam1: (match.matchSheetTeam1 || []).slice(0, this.matchSheetMaxPlayers),
-          matchSheetTeam2: (match.matchSheetTeam2 || []).slice(0, this.matchSheetMaxPlayers)
-        }));
+        this.matches = this.deduplicateMatchesByKey(
+          data.matches.map((match: any) => ({
+            ...match,
+            heureDebut: new Date(match.heureDebut),
+            duelsGagnes: match.duelsGagnes || [], // Initialiser les duels gagnés pour les anciens matchs
+            matchSheetTeam1: (match.matchSheetTeam1 || []).slice(0, this.matchSheetMaxPlayers),
+            matchSheetTeam2: (match.matchSheetTeam2 || []).slice(0, this.matchSheetMaxPlayers)
+          }))
+        );
         if (data.teams) {
           this.teams = data.teams;
           // S'assurer que toutes les équipes de TEAMS sont présentes
@@ -1875,6 +1877,8 @@ export class AppComponent implements OnInit {
     // Calculer la date d'expiration (3 mois à partir de maintenant)
     const expirationDate = new Date();
     expirationDate.setMonth(expirationDate.getMonth() + 3);
+
+    this.matches = this.deduplicateMatchesByKey(this.matches);
 
     const dataToSave = {
       matches: this.matches,
@@ -2466,6 +2470,9 @@ export class AppComponent implements OnInit {
   }
 
   toggleVisibility(match: Match) {
+    if (match.isDuplicateDisabled) {
+      return;
+    }
     match.showElements = !match.showElements; // Inverser la visibilité pour le match concerné
   }
 
@@ -5143,11 +5150,11 @@ export class AppComponent implements OnInit {
     return Number.isNaN(parsedDate.getTime()) ? new Date() : parsedDate;
   }
 
-  private normalizeFirestoreMatch(match: Match, index: number, docId?: string): Match {
+  private normalizeMatchForDisplay(match: Match, index: number, docId?: string): Match {
     return {
       ...match,
-      id: index + 1,
-      firestoreDocId: docId,
+      id: match.id ?? index + 1,
+      firestoreDocId: docId ?? match.firestoreDocId,
       heureDebut: this.toValidDate((match as any).heureDebut),
       updatedAt: this.toValidDate((match as any).updatedAt),
       buteurs: match.buteurs || [],
@@ -5163,8 +5170,47 @@ export class AppComponent implements OnInit {
     };
   }
 
+  private normalizeFirestoreMatch(match: Match, index: number, docId?: string): Match {
+    return this.normalizeMatchForDisplay(match, index, docId);
+  }
+
+  public deduplicateMatchesByKey(matches: Match[]): Match[] {
+    const normalizedMatches = matches.map((match, index) => this.normalizeMatchForDisplay(match, index, match.firestoreDocId));
+
+    const keeperIndexByKey = new Map<string, number>();
+
+    normalizedMatches.forEach((currentMatch, currentIndex) => {
+      const matchKey = this.getMatchDeduplicationKey(currentMatch);
+      const existingKeeperIndex = keeperIndexByKey.get(matchKey);
+
+      if (existingKeeperIndex === undefined) {
+        keeperIndexByKey.set(matchKey, currentIndex);
+        return;
+      }
+
+      const existingKeeper = normalizedMatches[existingKeeperIndex];
+      const existingUpdatedAt = this.toValidDate(existingKeeper.updatedAt).getTime();
+      const currentUpdatedAt = this.toValidDate(currentMatch.updatedAt).getTime();
+      const currentIsNewer = currentUpdatedAt >= existingUpdatedAt;
+
+      if (currentIsNewer) {
+        existingKeeper.isDuplicateDisabled = true;
+        existingKeeper.showElements = false;
+
+        currentMatch.isDuplicateDisabled = false;
+        currentMatch.showElements = true;
+        keeperIndexByKey.set(matchKey, currentIndex);
+      } else {
+        currentMatch.isDuplicateDisabled = true;
+        currentMatch.showElements = false;
+      }
+    });
+
+    return normalizedMatches;
+  }
+
   private getMatchDeduplicationKey(match: Match): string {
-    const kickoffTime = this.toValidDate(match.heureDebut).getTime();
+    const kickoffTime = this.toValidDate(match.heureDebut).getDate();
     const team1 = (match.equipe1 || '').trim().toLowerCase();
     const team2 = (match.equipe2 || '').trim().toLowerCase();
     const location = (match.lieu || '').trim().toLowerCase();
@@ -5181,41 +5227,20 @@ export class AppComponent implements OnInit {
       match: this.normalizeFirestoreMatch(item.match, index, item.docId)
     }));
 
-    const keeperIndexByKey = new Map<string, number>();
+    const deduplicatedMatches = this.deduplicateMatchesByKey(normalizedMatches.map(entry => entry.match));
     const disabledDocIds = new Set<string>();
 
-    normalizedMatches.forEach((currentEntry, currentIndex) => {
-      const matchKey = this.getMatchDeduplicationKey(currentEntry.match);
-      const existingKeeperIndex = keeperIndexByKey.get(matchKey);
-
-      if (existingKeeperIndex === undefined) {
-        keeperIndexByKey.set(matchKey, currentIndex);
-        return;
-      }
-
-      const existingKeeper = normalizedMatches[existingKeeperIndex];
-      const existingUpdatedAt = this.toValidDate(existingKeeper.match.updatedAt).getTime();
-      const currentUpdatedAt = this.toValidDate(currentEntry.match.updatedAt).getTime();
-      const currentIsNewer = currentUpdatedAt >= existingUpdatedAt;
-
-      if (currentIsNewer) {
-        existingKeeper.match.isDuplicateDisabled = true;
-        existingKeeper.match.showElements = false;
-        disabledDocIds.add(existingKeeper.docId);
-
-        currentEntry.match.isDuplicateDisabled = false;
-        keeperIndexByKey.set(matchKey, currentIndex);
-      } else {
-        currentEntry.match.isDuplicateDisabled = true;
-        currentEntry.match.showElements = false;
-        disabledDocIds.add(currentEntry.docId);
+    normalizedMatches.forEach((entry, index) => {
+      const deduplicatedMatch = deduplicatedMatches[index];
+      if (deduplicatedMatch.isDuplicateDisabled && entry.docId) {
+        disabledDocIds.add(entry.docId);
       }
     });
 
-    const disabledCount = normalizedMatches.filter(item => item.match.isDuplicateDisabled).length;
+    const disabledCount = deduplicatedMatches.filter(match => match.isDuplicateDisabled).length;
 
     return {
-      deduplicatedMatches: normalizedMatches.map(item => item.match),
+      deduplicatedMatches,
       disabledCount,
       disabledDocIds: Array.from(disabledDocIds)
     };

@@ -63,7 +63,7 @@ h1 {
 .match-details.disabled-match {
   filter: grayscale(100%);
   opacity: 0.65;
-  pointer-events: none;
+  cursor: default;
 }
 
 .match-details.disabled-match:hover {
