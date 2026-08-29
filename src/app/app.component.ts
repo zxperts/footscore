@@ -1889,7 +1889,19 @@ export class AppComponent implements OnInit {
     const expirationDate = new Date();
     expirationDate.setMonth(expirationDate.getMonth() + 3);
 
+    const selectedMatchId = this.selectedMatch?.id;
+
     this.matches = this.deduplicateMatchesByKey(this.matches);
+
+    // deduplicateMatchesByKey recrée de nouveaux objets Match : on doit donc
+    // repointer selectedMatch vers sa nouvelle instance pour ne pas perdre
+    // les modifications suivantes (ex: score modifié dans la modale).
+    if (selectedMatchId !== undefined) {
+      const refreshedMatch = this.matches.find(m => m.id === selectedMatchId);
+      if (refreshedMatch) {
+        this.selectedMatch = refreshedMatch;
+      }
+    }
 
     const dataToSave = {
       matches: this.matches,
