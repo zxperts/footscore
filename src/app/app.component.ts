@@ -429,13 +429,24 @@ export class AppComponent implements OnInit {
     return;
   }
 
+  private getMatchDayKey(dateValue: Date | string): string {
+    const date = dateValue instanceof Date ? dateValue : new Date(dateValue);
+    const normalizedDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+
+    return [
+      normalizedDate.getFullYear(),
+      String(normalizedDate.getMonth() + 1).padStart(2, '0'),
+      String(normalizedDate.getDate()).padStart(2, '0')
+    ].join('-');
+  }
+
   // Méthode pour charger les données depuis les paramètres URL
   private getMatchIdentity(match: Match): string {
-    const kickoffTime = match.heureDebut instanceof Date
-      ? match.heureDebut.getTime()
-      : new Date(match.heureDebut).getTime();
+    const team1 = (match.equipe1 || '').trim().toLowerCase();
+    const team2 = (match.equipe2 || '').trim().toLowerCase();
+    const dayKey = this.getMatchDayKey(match.heureDebut);
 
-    return `${match.equipe1}__${match.equipe2}__${kickoffTime}`;
+    return `${team1}__${team2}__${dayKey}`;
   }
 
   private mergeSharedMatches(matchesToMerge: Match[]): number {
@@ -5210,13 +5221,13 @@ export class AppComponent implements OnInit {
   }
 
   private getMatchDeduplicationKey(match: Match): string {
-    const kickoffTime = this.toValidDate(match.heureDebut).getDate();
+    const dayKey = this.getMatchDayKey(match.heureDebut);
     const team1 = (match.equipe1 || '').trim().toLowerCase();
     const team2 = (match.equipe2 || '').trim().toLowerCase();
     const location = (match.lieu || '').trim().toLowerCase();
     const competition = (match.competition || '').trim().toLowerCase();
 
-    return [team1, team2, kickoffTime, match.score1, match.score2, location, competition].join('||');
+    return [team1, team2, dayKey, match.score1, match.score2, location, competition].join('||');
   }
 
   private deduplicateAdminMatches(

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Firestore, collection, addDoc, getDocs, doc, getDoc, query, where, updateDoc, deleteDoc } from '@angular/fire/firestore';
+import { Firestore, collection, addDoc, getDocs, doc, getDoc, query, where, updateDoc, deleteDoc, setDoc } from '@angular/fire/firestore';
 import { Match, Buteur, DuelGagne, Dribble, Interception, Frappe, Faute, ContreAttaque, TikiTaka } from './models/match.model';
 import { Competition } from './models/competition.model';
 import { SharedTeam } from './models/team.model';
@@ -54,19 +54,84 @@ export class FirestoreService {
       tikiTakas: data['tikiTakas'] || [],
       commentaire: data['commentaire'] || '',
       competition: data['competition'] || undefined,
+      firestoreDocId: data['firestoreDocId'] || undefined,
       isDuplicateDisabled: data['isDuplicateDisabled'] === true
     };
   }
 
+  private buildMatchDocId(match: Match): string {
+    const date = match.heureDebut instanceof Date ? match.heureDebut : new Date(match.heureDebut);
+    const normalizedDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    const dayCode = [
+      normalizedDate.getFullYear(),
+      String(normalizedDate.getMonth() + 1).padStart(2, '0'),
+      String(normalizedDate.getDate()).padStart(2, '0')
+    ].join('-');
+
+    const team1 = (match.equipe1 || '').trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'equipe-1';
+    const team2 = (match.equipe2 || '').trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'equipe-2';
+
+    return `${team1}__${team2}__${dayCode}`;
+  }
+
+  private sanitizeMatchForStorage(value: Record<string, any> | undefined): Record<string, any> {
+    if (!value || typeof value !== 'object') {
+      return {};
+    }
+
+    return Object.fromEntries(
+      Object.entries(value)
+        .filter(([_, itemValue]) => itemValue !== undefined)
+        .filter(([key]) => key !== 'firestoreDocId')
+    );
+  }
+
   // Enregistrer un match dans Firestore
   async saveMatch(match: Match): Promise<string> {
-    const matchRef = await addDoc(collection(this.firestore, 'matches'), {
+    const matchId = this.buildMatchDocId(match);
+    const matchRef = doc(this.firestore, 'matches', matchId);
+    const currentDoc = await getDoc(matchRef);
+
+    const sanitizedMatch = this.sanitizeMatchForStorage({
       ...match,
+      firestoreDocId: matchId,
       heureDebut: this.toIsoDateString(match.heureDebut),
       updatedAt: new Date()
     });
-    console.log('Match saved:', matchRef.id);
-    return matchRef.id;
+
+    if (currentDoc.exists()) {
+      const currentData = currentDoc.data() ?? {};
+      const previousVersions = Array.isArray(currentData['previousVersions'])
+        ? currentData['previousVersions'] as any[]
+        : [];
+
+      const previousSnapshot = {
+        ...this.sanitizeMatchForStorage(currentData as Record<string, any>),
+        isObsolete: true,
+        obsoleteAt: new Date().toISOString(),
+        firestoreDocId: currentDoc.id
+      };
+
+      await setDoc(matchRef, {
+        ...sanitizedMatch,
+        previousVersions: [...previousVersions, previousSnapshot],
+        isObsolete: false,
+        obsoleteAt: null
+      });
+
+      console.log('Match updated:', matchId);
+      return matchId;
+    }
+
+    await setDoc(matchRef, {
+      ...sanitizedMatch,
+      previousVersions: [],
+      isObsolete: false,
+      obsoleteAt: null
+    });
+
+    console.log('Match saved:', matchId);
+    return matchId;
   }
 
   // Récupérer tous les matchs
@@ -126,7 +191,8 @@ export class FirestoreService {
         frappes: data['frappes'] || [],
         fautes: data['fautes'] || [],
         contreAttaques: data['contreAttaques'] || [],
-        tikiTakas: data['tikiTakas'] || []
+        tikiTakas: data['tikiTakas'] || [],
+        firestoreDocId: data['firestoreDocId'] || matchDoc.id
       };
       return match;
     }
