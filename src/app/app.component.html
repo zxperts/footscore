@@ -894,6 +894,12 @@
                 <!-- - <em [ngClass]="buteur.equipe === 1 ? 'buteur-team1' : 'buteur-team2'">{{ buteur.equipe === 1 ? selectedMatch.equipe1 : selectedMatch.equipe2 }}</em> -->
               </span>
               <div>
+                <button class="btn btn-sm btn-success me-2" 
+                        *ngIf="isGoalDisabled(i)"
+                        (click)="reactiverButeur(matches.indexOf(selectedMatch), i)"
+                        title="Réactiver le but">
+                  <i class="fas fa-undo"></i>
+                </button>
                 <button class="btn btn-sm btn-primary me-2" 
                         (click)="modifierButeur(matches.indexOf(selectedMatch), i)">
                   <i class="fas fa-edit"></i>

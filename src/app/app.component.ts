@@ -899,6 +899,46 @@ export class AppComponent implements OnInit {
     this.saveData();
   }
 
+  // Réactive un but désactivé (barré) et le recompte dans le score
+  reactiverButeur(matchIndex: number, buteurIndex: number) {
+    if (matchIndex < 0 || matchIndex >= this.matches.length) {
+      console.error('Index de match invalide:', matchIndex);
+      return;
+    }
+
+    const match = this.matches[matchIndex];
+    if (!match || !match.buteurs || !Array.isArray(match.buteurs)) {
+      console.error('Match ou propriété buteurs invalide pour le match:', match);
+      return;
+    }
+
+    if (buteurIndex < 0 || buteurIndex >= match.buteurs.length) {
+      console.error('Index de buteur invalide:', buteurIndex, 'pour le match:', match);
+      return;
+    }
+
+    if (!this.isGoalDisabledForMatch(match, buteurIndex)) {
+      return;
+    }
+
+    const buteur = match.buteurs[buteurIndex];
+
+    this.disabledGoals = this.disabledGoals.filter(dg =>
+      !(dg.matchId === match.id && dg.buteurIndex === buteurIndex)
+    );
+
+    if (buteur.equipe === 1) {
+      match.score1++;
+    } else {
+      match.score2++;
+    }
+
+    console.log('But réactivé:', buteur);
+
+    this.maintainScoreConsistency();
+    this.saveData();
+  }
+
   getPlayersList(): Player[] {
     if (this.selectedMatch && this.buteurForm.get('equipe')?.value) {
       const equipeValue = this.buteurForm.get('equipe')?.value;
