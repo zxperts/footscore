@@ -5309,6 +5309,7 @@ export class AppComponent implements OnInit {
   }
 
   updateEditFilteredTeams1() {
+    this.matchEditForm.patchValue({ equipe1: this.editTeam1Search });
     const search = this.editTeam1Search.toLowerCase();
     if (search.length < 3) {
       this.editFilteredTeams1 = [];
@@ -5321,6 +5322,7 @@ export class AppComponent implements OnInit {
   }
 
   updateEditFilteredTeams2() {
+    this.matchEditForm.patchValue({ equipe2: this.editTeam2Search });
     const search = this.editTeam2Search.toLowerCase();
     if (search.length < 3) {
       this.editFilteredTeams2 = [];
