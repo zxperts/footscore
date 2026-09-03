@@ -1390,7 +1390,6 @@ body {
 
 /* Style pour les buts désactivés */
 .disabled-goal {
-  opacity: 0.5;
   background-color: #f8f9fa;
   border-color: #dee2e6 !important;
 }
@@ -1398,10 +1397,11 @@ body {
 .disabled-goal strong {
   text-decoration: line-through;
   color: #6c757d !important;
+  opacity: 0.5;
 }
 
 .disabled-goal .btn {
-  opacity: 0.8;
+  opacity: 1;
 }
 
 /* Style pour les buteurs désactivés dans la liste des matchs */

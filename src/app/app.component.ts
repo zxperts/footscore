@@ -469,6 +469,57 @@ export class AppComponent implements OnInit {
     return addedCount;
   }
 
+  // Charge en tâche de fond tous les matchs de l'équipe "principale" (celle ayant
+  // le plus de joueurs ou ayant joué le plus de matchs localement) d'un match partagé,
+  // sans bloquer l'affichage initial du match (qui est déjà visible à ce stade).
+  private async loadSharedTeamsMatchesInBackground(match: Match): Promise<void> {
+    const teamName = this.getMainTeamName(match.equipe1, match.equipe2);
+    if (!teamName) {
+      return;
+    }
+
+    try {
+      const team = await this.firestoreService.getTeamByName(teamName);
+      if (!team || !team.id) {
+        return;
+      }
+
+      const teamMatches = await this.firestoreService.getMatchesByTeam(team.id);
+      if (teamMatches.length > 0) {
+        const addedCount = this.mergeSharedMatches(teamMatches);
+        console.log(`${addedCount} nouveau(x) match(s) ajouté(s) en arrière-plan pour l'équipe ${teamName}`);
+      }
+    } catch (error) {
+      console.error(`Erreur lors du chargement en arrière-plan des matchs de l'équipe ${teamName}:`, error);
+    }
+  }
+
+  // Détermine, à partir des données locales, l'équipe la plus "significative" entre 2 équipes :
+  // celle ayant le plus de joueurs enregistrés localement, puis, en cas d'égalité,
+  // celle ayant joué le plus de matchs localement.
+  private getMainTeamName(equipe1: string, equipe2: string): string | null {
+    if (!equipe1 && !equipe2) {
+      return null;
+    }
+    if (!equipe1) return equipe2;
+    if (!equipe2) return equipe1;
+
+    const getPlayerCount = (teamName: string): number =>
+      this.teams.find(t => t.name === teamName)?.players.length ?? 0;
+
+    const players1 = getPlayerCount(equipe1);
+    const players2 = getPlayerCount(equipe2);
+
+    if (players1 !== players2) {
+      return players1 > players2 ? equipe1 : equipe2;
+    }
+
+    const matches1 = this.getMatchesPlayedByTeam(equipe1);
+    const matches2 = this.getMatchesPlayedByTeam(equipe2);
+
+    return matches1 >= matches2 ? equipe1 : equipe2;
+  }
+
   async loadMatchFromUrl() {
     const params = new URLSearchParams(window.location.search);
     const teamId = params.get('teamId');
@@ -527,6 +578,10 @@ export class AppComponent implements OnInit {
           if (addedCount > 0) {
             console.log('Match ajouté aux matchs locaux');
           }
+
+          // Récupérer, en arrière-plan et sans bloquer l'affichage initial,
+          // tous les matchs des 2 équipes du match partagé (peut être volumineux)
+          this.loadSharedTeamsMatchesInBackground(match);
         } else {
           console.warn('Match non trouvé avec l\'ID:', matchId);
         }
