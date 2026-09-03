@@ -469,11 +469,13 @@ export class AppComponent implements OnInit {
     return addedCount;
   }
 
-  // Charge en tâche de fond tous les matchs de l'équipe "principale" (celle ayant
-  // le plus de joueurs ou ayant joué le plus de matchs localement) d'un match partagé,
-  // sans bloquer l'affichage initial du match (qui est déjà visible à ce stade).
+  // Charge en tâche de fond tous les matchs de l'équipe la plus "importante" (déterminée
+  // localement par le nombre de matchs joués, puis par le nombre de joueurs) parmi les 2
+  // équipes d'un match partagé, sans bloquer l'affichage initial du match déjà visible.
   private async loadSharedTeamsMatchesInBackground(match: Match): Promise<void> {
-    const teamName = this.getMainTeamName(match.equipe1, match.equipe2);
+    const teamNames = Array.from(new Set([match.equipe1, match.equipe2].filter(Boolean)));
+    const teamName = this.pickMostRelevantLocalTeamName(teamNames);
+
     if (!teamName) {
       return;
     }
@@ -494,30 +496,30 @@ export class AppComponent implements OnInit {
     }
   }
 
-  // Détermine, à partir des données locales, l'équipe la plus "significative" entre 2 équipes :
-  // celle ayant le plus de joueurs enregistrés localement, puis, en cas d'égalité,
-  // celle ayant joué le plus de matchs localement.
-  private getMainTeamName(equipe1: string, equipe2: string): string | null {
-    if (!equipe1 && !equipe2) {
+  // Choisit, parmi une liste de noms d'équipes, celle ayant joué le plus de matchs en local,
+  // puis en cas d'égalité celle ayant le plus de joueurs enregistrés en local.
+  private pickMostRelevantLocalTeamName(teamNames: string[]): string | null {
+    if (teamNames.length === 0) {
       return null;
     }
-    if (!equipe1) return equipe2;
-    if (!equipe2) return equipe1;
 
-    const getPlayerCount = (teamName: string): number =>
-      this.teams.find(t => t.name === teamName)?.players.length ?? 0;
+    return teamNames.reduce((best, current) => {
+      if (!best) {
+        return current;
+      }
 
-    const players1 = getPlayerCount(equipe1);
-    const players2 = getPlayerCount(equipe2);
+      const bestMatchCount = this.getMatchesPlayedByTeam(best);
+      const currentMatchCount = this.getMatchesPlayedByTeam(current);
 
-    if (players1 !== players2) {
-      return players1 > players2 ? equipe1 : equipe2;
-    }
+      if (currentMatchCount !== bestMatchCount) {
+        return currentMatchCount > bestMatchCount ? current : best;
+      }
 
-    const matches1 = this.getMatchesPlayedByTeam(equipe1);
-    const matches2 = this.getMatchesPlayedByTeam(equipe2);
+      const bestPlayerCount = this.teams.find(t => t.name === best)?.players.length || 0;
+      const currentPlayerCount = this.teams.find(t => t.name === current)?.players.length || 0;
 
-    return matches1 >= matches2 ? equipe1 : equipe2;
+      return currentPlayerCount > bestPlayerCount ? current : best;
+    }, teamNames[0]);
   }
 
   async loadMatchFromUrl() {
